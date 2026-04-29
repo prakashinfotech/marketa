@@ -1,0 +1,26 @@
+from pydantic import BaseModel, Field
+from typing import Optional, List
+from decimal import Decimal
+
+
+class AdCreate(BaseModel):
+    title: str = Field(..., max_length=200)
+    description: Optional[str] = None
+    price: Optional[Decimal] = None
+    price_negotiable: Optional[bool] = False
+    condition: Optional[str] = None  # new, like_new, used, refurbished
+    ad_type: str = Field(default="sell", max_length=20)  # sell, buy, rent, service
+    category_id: int
+    city_id: int
+    locality: Optional[str] = None
+
+
+class AdAttributeValueCreate(BaseModel):
+    attribute_id: int
+    value: str
+
+
+class Response(BaseModel):
+    success: bool
+    msg: str
+    data: dict | list | None = None

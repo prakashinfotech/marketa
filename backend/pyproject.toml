@@ -1,0 +1,22 @@
+[project]
+name = "fastapi-template"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.18.4",
+    "bcrypt>=5.0.0",
+    "fastapi>=0.135.1",
+    "psycopg2-binary>=2.9.11",
+    "pydantic-settings>=2.13.1",
+    "pydantic[email]>=2.12.5",
+    "python-jose>=3.5.0",
+    "sqlalchemy>=2.0.48",
+    "uvicorn>=0.41.0",
+    "python-dotenv>=1.0.1",
+    "python-multipart>=0.0.22",
+    "slowapi>=0.1.9",
+    "httpx>=0.28.1",
+    "itsdangerous>=2.2.0",
+]
