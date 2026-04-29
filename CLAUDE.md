@@ -5,11 +5,11 @@ This guide provides essential commands and context for working on the QuikrClone
 ## Build and Development Commands
 
 ### Backend (FastAPI)
-- **Start Server**: `uvicorn main:app --reload --port 8000`
-- **Database Migrations**: `alembic upgrade head`
-- **Create Migration**: `alembic revision --autogenerate -m "description"`
-- **Seed Data**: `python seed.py` or `.venv/bin/python seed.py`
-- **Dependencies**: Uses `pip` or `uv` (managed in `.venv`)
+- **Start Server**: `cd backend && uvicorn main:app --reload --port 8000`
+- **Database Migrations**: `cd backend && alembic upgrade head`
+- **Create Migration**: `cd backend && alembic revision --autogenerate -m "description"`
+- **Seed Data**: `cd backend && python seed.py`
+- **Dependencies**: Uses `uv` (managed in `backend/.venv`)
 
 ### Frontend (React + Vite)
 - **Install Dependencies**: `cd frontend && npm install`
@@ -19,16 +19,28 @@ This guide provides essential commands and context for working on the QuikrClone
 
 ## Project Architecture
 
-### Backend Structure (`app/`)
-- **`core/`**: Security (JWT), config, and constants.
-- **`db/`**: Session management and base models.
-- **`modules/`**: Modular domain logic (Users, Ads, Locations, etc.).
-  - Each module follows the pattern: `model.py`, `schema.py`, `crud.py`, `endpoint.py`.
-
-### Frontend Structure (`frontend/src/`)
-- **`components/`**: Reusable UI components (Navbar, Footer, Login, etc.).
-- **`AuthContext.jsx`**: Global authentication state.
-- **`api.js`**: Axios instance with JWT interceptors.
+```
+quikr_copy/
+├── .env                    # Shared environment variables
+├── backend/                # FastAPI backend
+│   ├── app/
+│   │   ├── core/           # Security (JWT), config, constants
+│   │   ├── db/             # Session management and base models
+│   │   ├── modules/        # Modular domain logic (Users, Ads, etc.)
+│   │   │   └── <module>/   # model.py, schema.py, crud.py, endpoint.py
+│   │   ├── api/            # API router and dependencies
+│   │   └── utils/          # Logging and utilities
+│   ├── alembic/            # Database migrations
+│   ├── main.py             # FastAPI entry point
+│   └── pyproject.toml      # Python dependencies
+└── frontend/               # React + Vite frontend
+    ├── src/
+    │   ├── components/     # Reusable UI components
+    │   ├── AuthContext.jsx  # Global authentication state
+    │   └── api.js          # Axios instance with JWT interceptors
+    ├── package.json
+    └── vite.config.js
+```
 
 ## Code Style Guidelines
 - **Python**: Follow PEP 8. Use type hints for all function signatures. Use standard response format: `{"success": bool, "msg": str, "data": any}`.

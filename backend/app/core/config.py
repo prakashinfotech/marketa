@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     # REDIS_URL: str = "redis://localhost:6379/0"
     # SMTP_HOST: str | None = None
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
 
 settings = Settings()

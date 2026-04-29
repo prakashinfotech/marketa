@@ -261,17 +261,16 @@ uv.lock
 
 # ── Node / Frontend ─────────────────────────────────────────────────────────
 node_modules/
-frontend/node_modules/
 frontend/dist/
 frontend/build/
 .eslintcache
 *.tsbuildinfo
 
 # ── Uploads ──────────────────────────────────────────────────────────────────
-uploads/
+backend/uploads/
 
 # ── Alembic ──────────────────────────────────────────────────────────────────
-alembic/versions/__pycache__/
+backend/alembic/versions/__pycache__/
 
 # ── AI / Editor Tools ────────────────────────────────────────────────────────
 .gemini/

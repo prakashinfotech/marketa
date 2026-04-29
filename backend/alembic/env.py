@@ -10,7 +10,11 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from pathlib import Path
 from dotenv import load_dotenv
+
+# Load .env from project root (one level above backend/)
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 from app.core.config import settings
 from app.db.session import Base
@@ -27,8 +31,6 @@ from app.modules.reports import model as report_model  # noqa: F401
 from app.modules.search_alerts import model as search_alert_model  # noqa: F401
 from app.modules.packages import model as package_model  # noqa: F401
 from app.modules.contact import model as contact_model  # noqa: F401
-
-load_dotenv()
 
 config = context.config
 if config.config_file_name is not None:
