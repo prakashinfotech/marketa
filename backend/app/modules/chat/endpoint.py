@@ -23,12 +23,14 @@ class ConnectionManager:
         self.active_connections: Dict[int, List[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, room_id: int):
+        _logger.info(f"WebSocket connection request for room_id={room_id}")
         await websocket.accept()
         if room_id not in self.active_connections:
             self.active_connections[room_id] = []
         self.active_connections[room_id].append(websocket)
 
     def disconnect(self, websocket: WebSocket, room_id: int):
+        _logger.info(f"WebSocket disconnected from room_id={room_id}")
         if room_id in self.active_connections:
             if websocket in self.active_connections[room_id]:
                 self.active_connections[room_id].remove(websocket)
@@ -36,6 +38,7 @@ class ConnectionManager:
                 del self.active_connections[room_id]
 
     async def broadcast_to_room(self, message: dict, room_id: int):
+        _logger.info(f"Broadcasting message to room_id={room_id}")
         if room_id in self.active_connections:
             for connection in self.active_connections[room_id]:
                 try:
@@ -57,6 +60,7 @@ def create_or_get_room(
     current_user: User = Depends(get_current_user)
 ):
     """Initiates a chat with the seller of an ad."""
+    _logger.info(f"Incoming room create/get request from user_id={current_user.id}")
     try:
         response = crud.chat.get_or_create_room(db=db, buyer_id=current_user.id, ad_id=payload.ad_id)
         return JSONResponse(
@@ -73,6 +77,7 @@ def list_my_rooms(
     current_user: User = Depends(get_current_user)
 ):
     """Gets all chat rooms for the current user."""
+    _logger.info(f"Incoming list rooms request from user_id={current_user.id}")
     try:
         response = crud.chat.get_user_rooms(db=db, user_id=current_user.id)
         return JSONResponse(
@@ -90,6 +95,7 @@ def get_room_messages(
     current_user: User = Depends(get_current_user)
 ):
     """Gets all messages for a specific room."""
+    _logger.info(f"Incoming get messages request for room_id={room_id} from user_id={current_user.id}")
     try:
         response = crud.chat.get_messages(db=db, room_id=room_id, user_id=current_user.id)
         return JSONResponse(
@@ -98,6 +104,34 @@ def get_room_messages(
         )
     except Exception as e:
         _logger.exception("Error fetching messages")
+        return JSONResponse(status_code=500, content={"success": False, "msg": "Internal server error", "data": []})
+
+
+@router.get("/unread-count/")
+def get_unread_count(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns total unread message count for the current user."""
+    count = crud.chat.get_total_unread_count(db=db, user_id=current_user.id)
+    return JSONResponse(status_code=200, content={"success": True, "data": {"unread_count": count}})
+
+
+@router.get("/inquiries/")
+def get_seller_inquiries(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns all chat inquiries grouped by ad for the seller."""
+    _logger.info(f"Incoming seller inquiries request from user_id={current_user.id}")
+    try:
+        response = crud.chat.get_seller_inquiries(db=db, seller_id=current_user.id)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response
+        )
+    except Exception as e:
+        _logger.exception("Error fetching seller inquiries")
         return JSONResponse(status_code=500, content={"success": False, "msg": "Internal server error", "data": []})
 
 

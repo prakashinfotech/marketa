@@ -8,6 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class CategoryCRUD:
     def get_all_categories(self, db: Session):
+        _logger.info("Fetching all categories (tree structure)")
         try:
             # Only top level categories for the tree
             categories = db.query(Category).filter(Category.parent_id == None).order_by(Category.display_order).all()
@@ -29,6 +30,7 @@ class CategoryCRUD:
             return {"success": False, "msg": "Database error.", "data": []}
 
     def get_category_attributes(self, db: Session, category_id: int):
+        _logger.info(f"Fetching attributes for category_id={category_id}")
         try:
             attrs = db.query(CategoryAttribute).filter(CategoryAttribute.category_id == category_id).order_by(CategoryAttribute.display_order).all()
             data = [{
@@ -45,6 +47,7 @@ class CategoryCRUD:
             return {"success": False, "msg": "Database error.", "data": []}
 
     def create_category(self, db: Session, payload: schema.CategoryCreate):
+        _logger.info(f"Creating category: {payload.name}")
         try:
             category = Category(
                 name=payload.name,
@@ -58,6 +61,7 @@ class CategoryCRUD:
             db.add(category)
             db.commit()
             db.refresh(category)
+            _logger.info(f"Category created successfully: id={category.id}, name={category.name}")
             return {"success": True, "msg": "Category created.", "data": {"id": category.id}}
         except SQLAlchemyError as e:
             db.rollback()
@@ -65,6 +69,7 @@ class CategoryCRUD:
             return {"success": False, "msg": "Database error or duplicate.", "data": None}
 
     def create_attribute(self, db: Session, payload: schema.CategoryAttributeCreate):
+        _logger.info(f"Creating attribute '{payload.name}' for category_id={payload.category_id}")
         try:
             attr = CategoryAttribute(
                 category_id=payload.category_id,
@@ -78,6 +83,7 @@ class CategoryCRUD:
             db.add(attr)
             db.commit()
             db.refresh(attr)
+            _logger.info(f"Attribute created successfully: id={attr.id}, name={attr.name}")
             return {"success": True, "msg": "Attribute created.", "data": {"id": attr.id}}
         except SQLAlchemyError as e:
             db.rollback()

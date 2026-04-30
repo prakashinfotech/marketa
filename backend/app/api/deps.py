@@ -49,17 +49,19 @@ class AuthService:
                 if user_id is None:
                     raise credentials_exception
                 user_id = int(user_id)
-            except (JWTError, ValueError):
-                _logger.error("Token decoding failed")
+            except (JWTError, ValueError) as e:
+                _logger.error(f"Token decoding failed: {str(e)}")
                 raise credentials_exception
 
             user = db.query(User).filter(User.id == user_id, User.is_delete.isnot(True)).first()
             if not user or not user.is_active:
+                _logger.warning(f"Auth failed: User ID {user_id} not found or inactive")
                 raise HTTPException(status_code=404, detail="User not found or inactive")
 
             # Validate token version — rejects tokens issued before password reset
             token_version = payload.get("token_version")
             if token_version is not None and token_version != user.token_version:
+                _logger.warning(f"Auth failed: Token version mismatch for user {user.email}. Token: {token_version}, User: {user.token_version}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Session expired. Please log in again.",

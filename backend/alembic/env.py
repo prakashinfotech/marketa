@@ -30,7 +30,9 @@ from app.modules.reviews import model as review_model  # noqa: F401
 from app.modules.reports import model as report_model  # noqa: F401
 from app.modules.search_alerts import model as search_alert_model  # noqa: F401
 from app.modules.packages import model as package_model  # noqa: F401
+from app.modules.notifications import model as notification_model  # Phase 5 # noqa: F401
 from app.modules.contact import model as contact_model  # noqa: F401
+from app.modules.chatbot import model as chatbot_model  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

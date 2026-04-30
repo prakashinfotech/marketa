@@ -8,6 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class LocationCRUD:
     def get_all_states(self, db: Session):
+        _logger.info("Fetching all states")
         try:
             states = db.query(State).all()
             data = [{"id": s.id, "name": s.name, "slug": s.slug} for s in states]
@@ -17,6 +18,7 @@ class LocationCRUD:
             return {"success": False, "msg": "Database error.", "data": []}
 
     def get_cities_by_state(self, db: Session, state_id: int):
+        _logger.info(f"Fetching cities for state_id={state_id}")
         try:
             cities = db.query(City).filter(City.state_id == state_id).all()
             data = [{"id": c.id, "name": c.name, "slug": c.slug, "is_popular": c.is_popular} for c in cities]
@@ -26,6 +28,7 @@ class LocationCRUD:
             return {"success": False, "msg": "Database error.", "data": []}
 
     def get_popular_cities(self, db: Session):
+        _logger.info("Fetching popular cities")
         try:
             cities = db.query(City).filter(City.is_popular == True).all()
             data = [{"id": c.id, "name": c.name, "slug": c.slug, "state_id": c.state_id} for c in cities]
@@ -35,11 +38,13 @@ class LocationCRUD:
             return {"success": False, "msg": "Database error.", "data": []}
 
     def create_state(self, db: Session, payload: schema.StateCreate):
+        _logger.info(f"Creating state: {payload.name}")
         try:
             state = State(name=payload.name, slug=payload.slug)
             db.add(state)
             db.commit()
             db.refresh(state)
+            _logger.info(f"State created successfully: id={state.id}, name={state.name}")
             return {"success": True, "msg": "State created.", "data": {"id": state.id}}
         except SQLAlchemyError as e:
             db.rollback()
@@ -47,6 +52,7 @@ class LocationCRUD:
             return {"success": False, "msg": "Database error or duplicate.", "data": None}
 
     def create_city(self, db: Session, payload: schema.CityCreate):
+        _logger.info(f"Creating city '{payload.name}' for state_id={payload.state_id}")
         try:
             city = City(
                 name=payload.name, 
@@ -57,6 +63,7 @@ class LocationCRUD:
             db.add(city)
             db.commit()
             db.refresh(city)
+            _logger.info(f"City created successfully: id={city.id}, name={city.name}")
             return {"success": True, "msg": "City created.", "data": {"id": city.id}}
         except SQLAlchemyError as e:
             db.rollback()

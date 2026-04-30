@@ -19,6 +19,20 @@ class AdAttributeValueCreate(BaseModel):
     attribute_id: int
     value: str
 
+class AdUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=200)
+    description: Optional[str] = None
+    price: Optional[Decimal] = None
+    price_negotiable: Optional[bool] = None
+    condition: Optional[str] = None
+    ad_type: Optional[str] = None
+    category_id: Optional[int] = None
+    city_id: Optional[int] = None
+    locality: Optional[str] = None
+
+class AdStatusUpdate(BaseModel):
+    status: str = Field(..., description="Must be one of: active, sold, inactive, expired")
+
 
 class Response(BaseModel):
     success: bool

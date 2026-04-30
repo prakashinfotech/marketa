@@ -28,15 +28,21 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # ── Groq LLM ─────────────────────────────────────────────────────────────
+    GROQ_API_KEY: str = ""
+
     # ── App Settings ─────────────────────────────────────────────────────────
     APP_NAME: str = "FastAPI Template"
     DEBUG: bool = False
 
-    # ── Add new settings below this line ─────────────────────────────────────
-    # REDIS_URL: str = "redis://localhost:6379/0"
-    # SMTP_HOST: str | None = None
+    # ── Email Settings ───────────────────────────────────────────────────────
+    SMTP_HOST: str | None = None
+    SMTP_PORT: int = 587
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_FROM_EMAIL: str = "noreply@quikrclone.com"
+    FRONTEND_URL: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
-
 
 settings = Settings()
