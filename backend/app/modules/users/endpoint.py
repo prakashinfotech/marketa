@@ -73,6 +73,7 @@ def refresh_token(
     db: Session = Depends(get_db),
 ):
     """ Validates a refresh token and returns a new access token. """
+    _logger.info("Incoming token refresh request.")
     try:
         response = crud.user.refresh_access_token(db=db, payload=payload)
         return JSONResponse(
@@ -96,6 +97,7 @@ def get_my_profile(
     current_user: User = Depends(get_current_user),
 ):
     """ Returns the currently logged-in user's profile. """
+    _logger.info("Fetching profile for current user: %s", current_user.email)
     return JSONResponse(
         status_code=200,
         content={
@@ -124,6 +126,7 @@ def upload_avatar(
     current_user: User = Depends(get_current_user),
 ):
     """ Uploads a profile picture for the logged-in user. """
+    _logger.info("Incoming avatar upload request for user: %s", current_user.email)
     try:
         response = crud.user.upload_avatar(db=db, user=current_user, file=file)
         return JSONResponse(
@@ -149,6 +152,7 @@ def update_my_profile(
     current_user: User = Depends(get_current_user),
 ):
     """ Allows the logged-in user to update their own profile. """
+    _logger.info("Incoming profile update request for user: %s", current_user.email)
     try:
         response = crud.user.update_my_profile(db=db, user=current_user, payload=payload)
         return JSONResponse(
@@ -174,6 +178,7 @@ def list_users(
     current_user: User = Depends(get_current_user),
 ):
     """ Lists all users with pagination. """
+    _logger.info("Incoming list users request from: %s", current_user.email)
     try:
         response = crud.user.list_users(db=db, payload=payload)
         return JSONResponse(
@@ -238,6 +243,52 @@ def delete_user(
         )
     except Exception as e:
         _logger.exception("Unexpected error during user deletion: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+@router.post("/request-verification/", response_model=schema.Response)
+def request_verification(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Requests an email verification link for the logged-in user. """
+    try:
+        response = crud.user.request_email_verification(db=db, user=current_user)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error requesting verification: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+@router.get("/verify-email/", response_model=schema.Response)
+def verify_email(
+    token: str,
+    db: Session = Depends(get_db),
+):
+    """ Validates the verification token and marks user as verified. """
+    try:
+        response = crud.user.verify_email(db=db, token=token)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error verifying email: %s", str(e))
         return JSONResponse(
             status_code=500,
             content={"success": False, "msg": "Internal server error", "data": {}},

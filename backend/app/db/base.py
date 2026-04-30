@@ -33,7 +33,11 @@ from app.modules.reviews.model import Review  # noqa: F401
 from app.modules.reports.model import AdReport  # noqa: F401
 
 # ── Search Alerts ────────────────────────────────────────────────────────────
-from app.modules.search_alerts.model import SearchAlert  # noqa: F401
+from app.modules.search_alerts.model import SearchAlert
+from app.modules.notifications.model import Notification  # Phase 5  # noqa: F401
 
-# ── Packages ─────────────────────────────────────────────────────────────────
+# ── Packages ─────────────────────────────────────────────────────
 from app.modules.packages.model import AdPackage  # noqa: F401
+
+# ── Chatbot / Knowledge Base ─────────────────────────────────────
+from app.modules.chatbot.model import KnowledgeChunk, FAQ  # noqa: F401

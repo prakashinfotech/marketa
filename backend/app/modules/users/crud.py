@@ -32,13 +32,16 @@ class UserCRUD:
         """
         Creates a new user.
         """
+        _logger.info("Attempting to create user: username=%s, email=%s", payload.username, payload.email)
         try:
             # Check for duplicate email
             if db.query(User).filter(User.email == payload.email, User.is_delete.isnot(True)).first():
+                _logger.warning("User creation failed: Email %s already exists.", payload.email)
                 return {"success": False, "msg": "Email already exists.", "data": {}}
 
             # Check for duplicate username
             if db.query(User).filter(User.username == payload.username, User.is_delete.isnot(True)).first():
+                _logger.warning("User creation failed: Username %s already taken.", payload.username)
                 return {"success": False, "msg": "Username already taken.", "data": {}}
 
             new_user = User(
@@ -82,6 +85,7 @@ class UserCRUD:
         """
         Authenticates a user and generates a JWT.
         """
+        _logger.info("Authentication attempt for email: %s", payload.email)
         try:
             user = db.query(User).filter(User.email == payload.email, User.is_delete.isnot(True)).first()
             if not user or not user.is_active:
@@ -121,6 +125,7 @@ class UserCRUD:
         """
         Validates a refresh token and generates a new access token.
         """
+        _logger.info("Attempting to refresh access token.")
         try:
             # Decode and validate refresh token
             decoded = jwt.decode(payload.refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -166,6 +171,7 @@ class UserCRUD:
         """
         Handles avatar file upload and updates user profile.
         """
+        _logger.info("Uploading avatar for user: %s (filename: %s)", user.email, file.filename)
         try:
             # Create directory if not exists
             upload_dir = "uploads/avatars"
@@ -195,6 +201,7 @@ class UserCRUD:
             user.avatar = file_path
             db.commit()
             db.refresh(user)
+            _logger.info("Avatar updated successfully for user: %s, path: %s", user.email, file_path)
 
             return {
                 "success": True,
@@ -210,6 +217,7 @@ class UserCRUD:
         """
         Updates the logged-in user's own profile.
         """
+        _logger.info("Attempting to update profile for user: %s", user.email)
         try:
             if payload.name is not None:
                 user.name = payload.name
@@ -271,6 +279,7 @@ class UserCRUD:
         """
         Lists all active users with pagination.
         """
+        _logger.info("Listing users: skip=%d, limit=%d", payload.skip, payload.limit)
         try:
             query = db.query(User).filter(User.is_delete.isnot(True))
             total = query.count()
@@ -306,6 +315,7 @@ class UserCRUD:
         """
         Updates a user's details by UUID.
         """
+        _logger.info("Admin attempt to update user by UUID: %s", payload.user_uuid)
         try:
             user = db.query(User).filter(
                 User.uuid == payload.user_uuid,
@@ -370,6 +380,7 @@ class UserCRUD:
         """
         Soft-deletes a user by UUID.
         """
+        _logger.info("Admin attempt to delete user by UUID: %s", payload.user_uuid)
         try:
             user = db.query(User).filter(
                 User.uuid == payload.user_uuid,
@@ -393,6 +404,71 @@ class UserCRUD:
             db.rollback()
             _logger.exception("Error deleting user: %s", str(e))
             return {"success": False, "msg": "Internal server error while deleting user.", "data": {}}
+
+    def request_email_verification(self, db: Session, user: User) -> dict:
+        """
+        Generates a verification token and sends an email.
+        """
+        _logger.info("Requesting email verification for user: %s", user.email)
+        try:
+            if user.is_verified:
+                return {"success": False, "msg": "Account is already verified.", "data": {}}
+
+            # Generate token (expires in 24 hours)
+            from datetime import timedelta
+            token_data = {"sub": str(user.id), "type": "verify_email"}
+            expire = datetime.utcnow() + timedelta(hours=24)
+            to_encode = token_data.copy()
+            to_encode.update({"exp": expire})
+            token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+
+            # Send email
+            from app.utils.email import send_verification_email
+            email_sent = send_verification_email(user.email, token, user.name or user.username)
+
+            if email_sent:
+                return {"success": True, "msg": "Verification email sent.", "data": {}}
+            else:
+                return {"success": False, "msg": "Failed to send email. Please try again later.", "data": {}}
+        except Exception as e:
+            _logger.exception("Error requesting email verification: %s", str(e))
+            return {"success": False, "msg": "Internal server error.", "data": {}}
+
+    def verify_email(self, db: Session, token: str) -> dict:
+        """
+        Validates the verification token and marks the user as verified.
+        """
+        _logger.info("Attempting to verify email with token.")
+        try:
+            decoded = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
+            
+            if decoded.get("type") != "verify_email":
+                return {"success": False, "msg": "Invalid token type.", "data": {}}
+                
+            user_id = decoded.get("sub")
+            if not user_id:
+                return {"success": False, "msg": "Invalid token payload.", "data": {}}
+                
+            user = db.query(User).filter(User.id == int(user_id), User.is_delete.isnot(True)).first()
+            if not user:
+                return {"success": False, "msg": "User not found.", "data": {}}
+                
+            if user.is_verified:
+                return {"success": True, "msg": "Account is already verified.", "data": {}}
+
+            user.is_verified = True
+            db.commit()
+            db.refresh(user)
+
+            _logger.info("User %s verified successfully.", user.email)
+            return {"success": True, "msg": "Account verified successfully.", "data": {}}
+            
+        except JWTError:
+            return {"success": False, "msg": "Invalid or expired verification link.", "data": {}}
+        except Exception as e:
+            db.rollback()
+            _logger.exception("Error verifying email: %s", str(e))
+            return {"success": False, "msg": "Internal server error.", "data": {}}
 
 
 # Global instance for easy use in endpoints

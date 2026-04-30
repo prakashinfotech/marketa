@@ -15,6 +15,10 @@ from app.modules.locations import endpoint as locations
 from app.modules.categories import endpoint as categories
 from app.modules.ads import endpoint as ads
 from app.modules.chat import endpoint as chat
+from app.modules.chatbot import endpoint as chatbot
+from app.modules.search_alerts import endpoint as search_alerts
+from app.modules.notifications import endpoint as notifications
+from app.modules.reports import endpoint as reports
 
 api_router = APIRouter()
 
@@ -25,3 +29,7 @@ api_router.include_router(locations.router, prefix="/locations", tags=["Location
 api_router.include_router(categories.router, prefix="/categories", tags=["Categories"])
 api_router.include_router(ads.router, prefix="/ads", tags=["Ads"])
 api_router.include_router(chat.router, prefix="/chat", tags=["Chat"])
+api_router.include_router(chatbot.router, prefix="/chatbot", tags=["Chatbot"])
+api_router.include_router(search_alerts.router, prefix="/alerts", tags=["Search Alerts"])
+api_router.include_router(notifications.router, tags=["Notifications"])
+api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
