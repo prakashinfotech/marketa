@@ -7,16 +7,22 @@ import {
   Save, AlertCircle, CheckCircle, Loader2, Camera, Eye, X, Smile
 } from 'lucide-react';
 
-// Predefined Cartoon Avatars
+// Predefined Cartoon Avatars with specific styles
 const DEFAULT_AVATARS = [
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Max',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Toby',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna',
+  // Standard
+  ...['Felix', 'Aneka', 'Max', 'Sofia', 'Jack', 'Milo', 'Toby', 'Luna'].map(seed => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`),
+  
+  // Comedy / Funny
+  ...['Bozo', 'Giggles', 'Chuckles', 'Jester', 'Silly', 'Wacky', 'Goofy', 'Zany', 'Bonkers', 'Bananas'].map(seed => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&mouth=tongue,twinkle&eyes=surprised,eyeRoll,squint`),
+  
+  // Serious / Professional
+  ...['Boss', 'Director', 'Agent', 'Judge', 'Officer', 'Mayor', 'Chief', 'Executive', 'Admin', 'Pro'].map(seed => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&mouth=serious,default&clothing=blazerAndShirt,blazerAndSweater&eyes=default`),
+  
+  // Senior / Older
+  ...['Gramps', 'Granny', 'Elder', 'Wisdom', 'Pop', 'Nana', 'Senior', 'Veteran', 'Pops', 'Grammy'].map(seed => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&hairColor=silverGray,platinum&accessories=prescription01,prescription02&facialHair=beardMagestic,beardLight`),
+
+  // Additional variety
+  ...['Leo', 'Zoe', 'Oliver', 'Chloe', 'Charlie', 'Bella', 'Sam', 'Lucy', 'Oscar', 'Daisy'].map(seed => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`),
 ];
 
 export default function Profile() {
@@ -90,7 +96,7 @@ export default function Profile() {
         setSuccess('Profile updated successfully!');
         const updatedData = res.data.data;
         setProfile({ ...profile, ...updatedData });
-        login(localStorage.getItem('token'), localStorage.getItem('refreshToken'), {
+        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
           ...user,
           ...updatedData
         });
@@ -120,7 +126,7 @@ export default function Profile() {
       if (res.data.success) {
         const newAvatar = res.data.data.avatar_url;
         setProfile({ ...profile, avatar: newAvatar });
-        login(localStorage.getItem('token'), localStorage.getItem('refreshToken'), {
+        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
           ...user,
           avatar: newAvatar
         });
@@ -142,7 +148,7 @@ export default function Profile() {
       const res = await api.put('/users/me/update/', { avatar: url });
       if (res.data.success) {
         setProfile({ ...profile, avatar: url });
-        login(localStorage.getItem('token'), localStorage.getItem('refreshToken'), {
+        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
           ...user,
           avatar: url
         });
@@ -152,6 +158,24 @@ export default function Profile() {
       }
     } catch (err) {
       setError('Failed to update avatar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleVerifyRequest = async () => {
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await api.post('/users/request-verification/');
+      if (res.data.success) {
+        setSuccess('Verification email sent! Please check your inbox.');
+      } else {
+        setError(res.data.msg);
+      }
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Failed to send verification email.');
     } finally {
       setSaving(false);
     }
@@ -174,6 +198,27 @@ export default function Profile() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
+      {/* Verification Banner */}
+      {!profile?.is_verified && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-fade-in">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-amber-900">Your account is not verified</h3>
+              <p className="text-xs text-amber-700 mt-0.5">Please verify your email address to unlock all features and build trust with buyers/sellers.</p>
+            </div>
+          </div>
+          <button 
+            onClick={handleVerifyRequest}
+            disabled={saving}
+            className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+            {saving ? 'Sending...' : 'Verify Account'}
+          </button>
+        </div>
+      )}
+
       {/* Header Card */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 mb-8 text-white flex items-center gap-5 relative">
         <div className="relative shrink-0">
@@ -225,7 +270,9 @@ export default function Profile() {
         
         <div>
           <h1 className="text-xl font-bold">{profile?.name || 'User'}</h1>
-          <p className="text-primary-200 text-sm">@{profile?.username}</p>
+          <p className="text-primary-200 text-sm">
+            @{profile?.username} • {profile?.role_id === 1 ? 'Super Admin' : profile?.role_id === 2 ? 'Admin' : 'Verified Member'}
+          </p>
           <div className="flex items-center gap-4 mt-2 text-xs text-primary-200">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -314,8 +361,8 @@ export default function Profile() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-8">
-              <div className="grid grid-cols-4 gap-6">
+            <div className="p-8 max-h-[60vh] overflow-y-auto">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-4">
                 {DEFAULT_AVATARS.map((url, i) => (
                   <button
                     key={i}

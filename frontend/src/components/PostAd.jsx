@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 import { 
   ImagePlus, MapPin, Tag, Type, Loader2, AlertCircle, 
-  CheckCircle, IndianRupee, Layers, FileText
+  CheckCircle, IndianRupee, Layers, FileText, X, Trash2
 } from 'lucide-react';
 
 export default function PostAd() {
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams(); // if present, we are in Edit mode
+  const isEditMode = Boolean(id);
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -31,20 +34,62 @@ export default function PostAd() {
   const [priceNegotiable, setPriceNegotiable] = useState(false);
   const [condition, setCondition] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [stateId, setStateId] = useState('');
+  const [stateId, setStateId] = useState(''); // Need state ID to fetch cities
   const [cityId, setCityId] = useState('');
   const [locality, setLocality] = useState('');
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);   // images from server during edit
+  const [removedImageIds, setRemovedImageIds] = useState([]); // IDs of images to delete
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/login');
       return;
     }
-    fetchCategories();
-    fetchStates();
-  }, [isLoggedIn, navigate]);
+    const loadData = async () => {
+      await fetchCategories();
+      await fetchStates();
+      if (isEditMode) {
+        await fetchAdDetails(id);
+      }
+    };
+    loadData();
+  }, [isLoggedIn, navigate, id, isEditMode]);
+
+  const fetchAdDetails = async (adId) => {
+    try {
+      const res = await api.get(`/ads/${adId}/`);
+      if (res.data.success) {
+        const ad = res.data.data;
+        setTitle(ad.title || '');
+        setDescription(ad.description || '');
+        setPrice(ad.price || '');
+        setPriceNegotiable(ad.price_negotiable || false);
+        setCondition(ad.condition || '');
+        setLocality(ad.locality || '');
+        
+        if (ad.category_id) setCategoryId(ad.category_id);
+        if (ad.state_id) {
+          setStateId(ad.state_id);
+          await fetchCities(ad.state_id); // load cities for the state
+        }
+        if (ad.city_id) setCityId(ad.city_id);
+
+        // Load existing images for edit
+        if (ad.images?.length) {
+          setExistingImages(ad.images.map((img, idx) => ({ ...img, id: img.id || idx })));
+        }
+
+      } else {
+        setError('Failed to load ad details.');
+      }
+    } catch (err) {
+      setError('An error occurred loading ad details.');
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -110,15 +155,26 @@ export default function PostAd() {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      setError('You can upload a maximum of 5 images.');
+    const totalImages = (existingImages.length - removedImageIds.length) + images.length + files.length;
+    if (totalImages > 5) {
+      setError('You can have a maximum of 5 images total.');
       return;
     }
-    setImages(files);
+    setImages(prev => [...prev, ...files]);
     
-    // Generate previews
+    // Generate previews for new files
     const previews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews(previews);
+    setImagePreviews(prev => [...prev, ...previews]);
+  };
+
+  const handleRemoveExistingImage = (imgId) => {
+    setRemovedImageIds(prev => [...prev, imgId]);
+    setExistingImages(prev => prev.filter(img => img.id !== imgId));
+  };
+
+  const handleRemoveNewImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -126,63 +182,107 @@ export default function PostAd() {
     setError('');
     setSuccess('');
 
-    if (!categoryId || !cityId || !title) {
+    // In edit mode, category and city are optional if not changed
+    if (!isEditMode && (!categoryId || !cityId || !title)) {
       setError('Please fill in all required fields.');
       return;
+    }
+    if (isEditMode && !title) {
+        setError('Title is required.');
+        return;
     }
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('category_id', categoryId);
-    formData.append('city_id', cityId);
-    if (description) formData.append('description', description);
-    if (price) formData.append('price', price);
-    formData.append('price_negotiable', priceNegotiable);
-    if (condition) formData.append('condition', condition);
-    if (locality) formData.append('locality', locality);
-    formData.append('ad_type', 'sell');
-
-    // Format attributes as JSON array of objects
-    const attrArray = Object.keys(attributeValues).map(attrId => ({
-      attribute_id: parseInt(attrId),
-      value: attributeValues[attrId].toString()
-    })).filter(a => a.value.trim() !== '');
-
-    if (attrArray.length > 0) {
-      formData.append('attribute_values', JSON.stringify(attrArray));
-    }
-
-    images.forEach(img => {
-      formData.append('images', img);
-    });
-
     try {
-      const res = await api.post('/ads/create/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      if (res.data.success) {
-        setSuccess('Your ad has been posted successfully!');
-        window.scrollTo(0, 0);
-        setTimeout(() => {
-          navigate('/profile'); // Redirect to profile or ad details
-        }, 2000);
-      } else {
-        setError(res.data.msg);
-      }
+        if (isEditMode) {
+            // Edit mode now sends FormData (supports images)
+            const formData = new FormData();
+            formData.append('title', title);
+            if (description) formData.append('description', description);
+            if (price) formData.append('price', price);
+            formData.append('price_negotiable', priceNegotiable);
+            if (condition) formData.append('condition', condition);
+            if (locality) formData.append('locality', locality);
+            if (categoryId) formData.append('category_id', parseInt(categoryId));
+            if (cityId) formData.append('city_id', parseInt(cityId));
+
+            // Append new images
+            images.forEach(img => formData.append('images', img));
+
+            // Append removed image IDs
+            if (removedImageIds.length > 0) {
+                formData.append('removed_image_ids', JSON.stringify(removedImageIds));
+            }
+
+            const res = await api.put(`/ads/${id}/update/`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (res.data.success) {
+                setSuccess('Your ad has been updated successfully!');
+                window.scrollTo(0, 0);
+                setTimeout(() => navigate('/my-ads'), 1500);
+            } else {
+                setError(res.data.msg);
+            }
+        } else {
+            // Create mode sends FormData with images
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category_id', categoryId);
+            formData.append('city_id', cityId);
+            if (description) formData.append('description', description);
+            if (price) formData.append('price', price);
+            formData.append('price_negotiable', priceNegotiable);
+            if (condition) formData.append('condition', condition);
+            if (locality) formData.append('locality', locality);
+            formData.append('ad_type', 'sell');
+
+            // Format attributes as JSON array of objects
+            const attrArray = Object.keys(attributeValues).map(attrId => ({
+            attribute_id: parseInt(attrId),
+            value: attributeValues[attrId].toString()
+            })).filter(a => a.value.trim() !== '');
+
+            if (attrArray.length > 0) {
+            formData.append('attribute_values', JSON.stringify(attrArray));
+            }
+
+            images.forEach(img => {
+            formData.append('images', img);
+            });
+
+            const res = await api.post('/ads/create/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (res.data.success) {
+                setSuccess('Your ad has been posted successfully!');
+                window.scrollTo(0, 0);
+                setTimeout(() => navigate('/my-ads'), 1500);
+            } else {
+                setError(res.data.msg);
+            }
+        }
     } catch (err) {
-      setError(err.response?.data?.msg || 'An error occurred while posting your ad.');
+      setError(err.response?.data?.msg || 'An error occurred while saving your ad.');
     } finally {
       setLoading(false);
     }
   };
 
+  if (initialLoading) {
+      return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary-600 animate-spin" /></div>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Post a Free Ad</h1>
-        <p className="text-gray-500">Fill in the details below to publish your listing.</p>
+        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
+            {isEditMode ? 'Edit Ad' : 'Post a Free Ad'}
+        </h1>
+        <p className="text-gray-500">
+            {isEditMode ? 'Update your listing details below.' : 'Fill in the details below to publish your listing.'}
+        </p>
       </div>
 
       {error && <div className="toast-error mb-6"><AlertCircle className="w-5 h-5 shrink-0" /> {error}</div>}
@@ -236,7 +336,7 @@ export default function PostAd() {
         </div>
 
         {/* Dynamic Attributes */}
-        {categoryAttributes.length > 0 && (
+        {!isEditMode && categoryAttributes.length > 0 && (
           <div className="card p-6 md:p-8 animate-fade-in">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <Tag className="w-5 h-5 text-indigo-500" /> Category Details
@@ -347,6 +447,30 @@ export default function PostAd() {
           <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <ImagePlus className="w-5 h-5 text-pink-500" /> Photos
           </h2>
+
+          {/* Existing Images (edit mode) */}
+          {isEditMode && existingImages.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-semibold text-gray-600 mb-3">Current Photos</p>
+              <div className="flex flex-wrap gap-4">
+                {existingImages.map((img, i) => (
+                  <div key={img.id || i} className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm group">
+                    <img src={img.url.startsWith('http') ? img.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}${img.url}`} alt="existing" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExistingImage(img.id)}
+                      className="absolute top-1 right-1 p-1 bg-red-500/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    {img.is_primary && (
+                      <div className="absolute bottom-0 inset-x-0 bg-indigo-600/90 text-white text-[10px] font-bold text-center py-0.5">COVER</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           <div className="mb-4">
             <label className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 hover:bg-gray-50 hover:border-indigo-400 transition-colors cursor-pointer group">
@@ -359,17 +483,27 @@ export default function PostAd() {
             </label>
           </div>
 
-          {/* Image Previews */}
+          {/* New Image Previews */}
           {imagePreviews.length > 0 && (
-            <div className="flex flex-wrap gap-4 mt-4">
-              {imagePreviews.map((src, i) => (
-                <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                  <img src={src} alt="preview" className="w-full h-full object-cover" />
-                  {i === 0 && (
-                    <div className="absolute bottom-0 inset-x-0 bg-indigo-600/90 text-white text-[10px] font-bold text-center py-0.5">COVER</div>
-                  )}
-                </div>
-              ))}
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-gray-600 mb-3">{isEditMode ? 'New Photos to Add' : 'Selected Photos'}</p>
+              <div className="flex flex-wrap gap-4">
+                {imagePreviews.map((src, i) => (
+                  <div key={i} className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm group">
+                    <img src={src} alt="preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveNewImage(i)}
+                      className="absolute top-1 right-1 p-1 bg-red-500/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    {!isEditMode && i === 0 && existingImages.length === 0 && (
+                      <div className="absolute bottom-0 inset-x-0 bg-indigo-600/90 text-white text-[10px] font-bold text-center py-0.5">COVER</div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -378,7 +512,7 @@ export default function PostAd() {
         <div className="pt-4">
           <button type="submit" disabled={loading} className="btn-primary w-full md:w-auto md:px-12 py-3.5 text-base flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mx-auto">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-            {loading ? 'Publishing Ad...' : 'Publish Your Ad Now'}
+            {loading ? (isEditMode ? 'Updating Ad...' : 'Publishing Ad...') : (isEditMode ? 'Update Ad' : 'Publish Your Ad Now')}
           </button>
         </div>
 

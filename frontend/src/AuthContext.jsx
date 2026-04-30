@@ -3,24 +3,30 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(() => sessionStorage.getItem('token'));
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = sessionStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
   const login = (accessToken, refreshToken, userData) => {
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', accessToken);
+    sessionStorage.setItem('refreshToken', refreshToken);
+    sessionStorage.setItem('user', JSON.stringify(userData));
     setToken(accessToken);
     setUser(userData);
   };
 
   const logout = () => {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('user');
+    
+    // Cleanup any old localStorage tokens from previous version
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+
     setToken(null);
     setUser(null);
   };

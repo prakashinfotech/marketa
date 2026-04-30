@@ -85,7 +85,7 @@ class AuthService:
 authentication = AuthService()
 
 # Pre-built dependency shortcuts — add more as needed
-get_current_admin_user = authentication.get_super_user([RoleConstants.SUPER_ADMIN])
+get_current_admin_user = authentication.get_super_user([RoleConstants.SUPER_ADMIN, RoleConstants.ADMIN])
 get_current_user = authentication.get_super_user([RoleConstants.SUPER_ADMIN, RoleConstants.ADMIN, RoleConstants.USER])
 
 def get_current_user_optional(

@@ -21,6 +21,26 @@ body {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+/* ─── Premium Sidebar Scrollbar ─────────────────────── */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c7d2fe transparent;
+}
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, transparent 0%, #eef2ff 50%, transparent 100%);
+  border-radius: 99px;
+  margin: 8px 0;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #a5b4fc, #818cf8);
+  border-radius: 99px;
+  transition: background 0.3s ease;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #818cf8, #6366f1);
+}
+
 /* ─── Global transitions ────────────────────────────── */
 a, button, input, select, textarea {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -153,6 +173,18 @@ input:focus, select:focus, textarea:focus {
 .animate-fade-in { animation: fadeIn 0.4s ease-out; }
 .animate-scale-in { animation: scaleIn 0.3s ease-out; }
 .animate-slide-in { animation: slideIn 0.3s ease-out; }
+
+/* ─── Infinite scroll animation ─────────────────────── */
+@keyframes scrollX {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll-x {
+  animation: scrollX 40s linear infinite;
+}
+.animate-scroll-x:hover {
+  animation-play-state: paused;
+}
 
 /* ─── Gradient text helper ───────────────────────────── */
 .text-gradient {

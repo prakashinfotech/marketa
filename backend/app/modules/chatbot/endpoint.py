@@ -171,9 +171,15 @@ def delete_document(
 
     deleted = crud.delete_document(db, doc_id)
     if deleted:
+        # Also remove the physical file from knowledge_docs/
+        for ext in ['.md', '.txt', '.pdf']:
+            file_path = os.path.join(KNOWLEDGE_DOCS_DIR, f"{doc_id}{ext}")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                _logger.info("Deleted physical file: %s", file_path)
         return JSONResponse(
             status_code=200,
-            content={"success": True, "msg": f"Document '{doc_id}' deleted successfully.", "data": {}}
+            content={"success": True, "msg": f"Document '{doc_id}' and all its vectors deleted successfully.", "data": {}}
         )
     return JSONResponse(
         status_code=404,

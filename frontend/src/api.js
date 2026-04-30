@@ -7,7 +7,7 @@ const api = axios.create({
 
 // Attach JWT access token to every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -24,7 +24,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = sessionStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
           // Attempt to get new tokens
@@ -36,8 +36,8 @@ api.interceptors.response.use(
             const { access_token, refresh_token } = res.data.data;
             
             // Store new tokens
-            localStorage.setItem('token', access_token);
-            localStorage.setItem('refreshToken', refresh_token);
+            sessionStorage.setItem('token', access_token);
+            sessionStorage.setItem('refreshToken', refresh_token);
 
             // Update header and retry original request
             originalRequest.headers.Authorization = `Bearer ${access_token}`;
@@ -45,9 +45,9 @@ api.interceptors.response.use(
           }
         } catch (refreshError) {
           // If refresh fails, clear storage and redirect (or let components handle it)
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('user');
           window.location.href = '/login';
         }
       }

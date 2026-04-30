@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 import {
   Search, MapPin, Smartphone, Car, Laptop, Home as HomeIcon,
-  ArrowRight, TrendingUp, Shield, MessageCircle, Sparkles, IndianRupee, Heart, ChevronRight
+  ArrowRight, TrendingUp, Shield, MessageCircle, Sparkles, IndianRupee, Heart, ChevronRight,
+  Clock, Eye
 } from 'lucide-react';
 
 const CATEGORY_ICONS = {
@@ -29,12 +30,136 @@ const CATEGORY_BG = {
   'Real Estate': 'bg-orange-50 group-hover:bg-orange-100',
 };
 
+// ── Testimonials Data ────────────────────────────────────────────────────────
+const TESTIMONIALS = [
+  {
+    name: 'Priya Sharma',
+    avatar: 'P',
+    city: 'Mumbai',
+    rating: 5,
+    text: 'Sold my old laptop within 2 days! The chat feature made it super easy to connect with buyers. Highly recommend!',
+    color: 'from-pink-500 to-rose-400',
+  },
+  {
+    name: 'Rahul Verma',
+    avatar: 'R',
+    city: 'Delhi',
+    rating: 5,
+    text: 'Found an amazing deal on a second-hand bike. The seller was verified and the whole process was smooth.',
+    color: 'from-blue-500 to-cyan-400',
+  },
+  {
+    name: 'Ananya Patel',
+    avatar: 'A',
+    city: 'Ahmedabad',
+    rating: 4,
+    text: 'Great platform for finding tenants. Posted my flat listing and got 10+ inquiries in the first day!',
+    color: 'from-emerald-500 to-teal-400',
+  },
+  {
+    name: 'Vikram Singh',
+    avatar: 'V',
+    city: 'Bangalore',
+    rating: 5,
+    text: 'Best classifieds platform I\'ve used. Clean interface, fast responses, and no spam. Love it!',
+    color: 'from-violet-500 to-purple-400',
+  },
+  {
+    name: 'Sneha Reddy',
+    avatar: 'S',
+    city: 'Hyderabad',
+    rating: 5,
+    text: 'The AI chatbot helped me understand how to post my first ad. Very user-friendly for beginners!',
+    color: 'from-amber-500 to-orange-400',
+  },
+  {
+    name: 'Arjun Nair',
+    avatar: 'A',
+    city: 'Chennai',
+    rating: 4,
+    text: 'Bought a used iPhone at half the market price. The photos and descriptions were accurate. Will use again!',
+    color: 'from-indigo-500 to-blue-400',
+  },
+  {
+    name: 'Meera Joshi',
+    avatar: 'M',
+    city: 'Pune',
+    rating: 5,
+    text: 'Moved cities and furnished my entire house through QuikrClone. Saved lakhs compared to buying new!',
+    color: 'from-rose-500 to-pink-400',
+  },
+  {
+    name: 'Karan Mehta',
+    avatar: 'K',
+    city: 'Jaipur',
+    rating: 5,
+    text: 'The safety tips and verified profiles give me confidence while dealing with strangers. Excellent service!',
+    color: 'from-teal-500 to-emerald-400',
+  },
+];
+
+function TestimonialSlider() {
+  const scrollRef = useRef(null);
+
+  // Duplicate for seamless infinite scroll
+  const items = [...TESTIMONIALS, ...TESTIMONIALS];
+
+  return (
+    <div className="relative">
+      {/* Gradient fade edges */}
+      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+      <div
+        ref={scrollRef}
+        className="flex gap-5 animate-scroll-x"
+        style={{
+          width: 'max-content',
+        }}
+      >
+        {items.map((t, idx) => (
+          <div
+            key={idx}
+            className="w-[320px] shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:shadow-indigo-100/50 hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col"
+          >
+            {/* Stars */}
+            <div className="flex gap-0.5 mb-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg key={i} className={`w-4 h-4 ${i < t.rating ? 'text-amber-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+
+            {/* Review Text */}
+            <p className="text-sm text-gray-600 leading-relaxed flex-1 mb-4">
+              "{t.text}"
+            </p>
+
+            {/* User Info */}
+            <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+                {t.avatar}
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">{t.name}</p>
+                <p className="text-xs text-gray-400">{t.city}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
   const [recentAds, setRecentAds] = useState([]);
+  const [recentlyViewedAds, setRecentlyViewedAds] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
 
   // Search State
@@ -59,7 +184,19 @@ export default function HomePage() {
           setFavorites(favSet);
         }
       }).catch(() => {});
+    } else {
+      setFavorites(new Set());
     }
+
+    // Fetch recently viewed ads from localStorage
+    try {
+      const viewedIds = JSON.parse(localStorage.getItem('recently_viewed_ads') || '[]');
+      if (viewedIds.length > 0) {
+        api.post('/ads/by-ids/', { ids: viewedIds.slice(0, 10) }).then(res => {
+          if (res.data.success) setRecentlyViewedAds(res.data.data || []);
+        }).catch(() => {});
+      }
+    } catch (e) { /* ignore */ }
   }, [isLoggedIn]);
 
   const toggleFavorite = async (adUuid) => {
@@ -252,6 +389,7 @@ export default function HomePage() {
                   <button 
                     onClick={(e) => { 
                       e.preventDefault(); 
+                      e.stopPropagation();
                       toggleFavorite(ad.uuid);
                     }} 
                     className={`absolute top-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all z-10 ${
@@ -313,6 +451,86 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* ─── Recently Viewed ──────────────────────────── */}
+      {recentlyViewedAds.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-20">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">Recently Viewed</h2>
+              </div>
+              <p className="text-gray-500 mt-1 ml-10">Pick up where you left off</p>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('recently_viewed_ads');
+                setRecentlyViewedAds([]);
+              }}
+              className="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+            >
+              Clear History
+            </button>
+          </div>
+
+          <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar">
+            {recentlyViewedAds.map((ad) => (
+              <Link
+                key={ad.id}
+                to={`/ad/${ad.id}`}
+                className="w-[260px] shrink-0 card overflow-hidden group flex flex-col hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 border-gray-100"
+              >
+                <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+                  {ad.image ? (
+                    <img src={ad.image} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">No Image</div>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleFavorite(ad.uuid);
+                    }}
+                    className={`absolute top-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all z-10 ${
+                      favorites.has(ad.uuid)
+                        ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                        : 'bg-white/90 text-gray-400 hover:text-red-500 hover:bg-white'
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 ${favorites.has(ad.uuid) ? 'fill-current' : ''}`} />
+                  </button>
+                </div>
+
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight group-hover:text-amber-600 transition-colors mb-2">
+                    {ad.title}
+                  </h3>
+                  <div className="mb-3">
+                    {ad.price ? (
+                      <span className="text-lg font-black text-gray-900 flex items-center">
+                        <IndianRupee className="w-4 h-4 -mr-0.5" />
+                        {parseFloat(ad.price).toLocaleString('en-IN')}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        Contact for price
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-auto pt-3 border-t border-gray-100 flex items-center gap-1.5 text-xs text-gray-500">
+                    <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                    <span className="truncate">{ad.locality ? `${ad.locality}, ` : ''}{ad.city}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ─── How it Works ─────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-20">
         <div className="text-center mb-12">
@@ -341,6 +559,16 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ─── Happy Customers ───────────────────────────── */}
+      <section className="mt-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">Happy Customers ❤️</h2>
+          <p className="text-gray-500 mt-2 max-w-md mx-auto">See what our users are saying about QuikrClone</p>
+        </div>
+
+        <TestimonialSlider />
       </section>
 
       {/* ─── CTA Section ──────────────────────────────── */}

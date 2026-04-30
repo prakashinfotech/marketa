@@ -3,7 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { 
   MessageSquare, LayoutDashboard, LogOut, MapPin, Layers, 
-  ChevronRight, Home, ExternalLink
+  ChevronRight, Home, ExternalLink, ShieldAlert, HelpCircle, BookOpen
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -20,6 +20,9 @@ export default function AdminLayout() {
     { name: 'Inquiries', path: '/admin/inquiries', icon: MessageSquare, badge: null },
     { name: 'Locations', path: '/admin/locations', icon: MapPin, badge: null },
     { name: 'Categories', path: '/admin/categories', icon: Layers, badge: null },
+    { name: 'Reports', path: '/admin/reports', icon: ShieldAlert, badge: null },
+    { name: 'FAQs', path: '/admin/faqs', icon: HelpCircle, badge: null },
+    { name: 'Knowledge Base', path: '/admin/knowledge-base', icon: BookOpen, badge: null },
   ];
 
   return (

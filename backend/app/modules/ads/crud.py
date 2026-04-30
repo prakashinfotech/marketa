@@ -7,6 +7,7 @@ from typing import List, Optional
 from fastapi import UploadFile
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
 
 from app.modules.ads.model import Ad, AdImage, AdAttributeValue
 from app.modules.ads import schema
@@ -104,6 +105,95 @@ class AdCRUD:
             db.rollback()
             _logger.exception("Error creating ad: %s", str(e))
             return {"success": False, "msg": "Internal server error.", "data": {}}
+
+    def get_similar_ads(self, db: Session, ad_id: int, limit: int = 6) -> dict:
+        """Returns similar ads based on same category and similar price range."""
+        _logger.info("Fetching similar ads for ad_id=%d", ad_id)
+        try:
+            ad = db.query(Ad).filter(Ad.id == ad_id, Ad.is_delete.isnot(True)).first()
+            if not ad:
+                return {"success": True, "msg": "Ad not found.", "data": []}
+
+            query = db.query(Ad).filter(
+                Ad.id != ad_id,
+                Ad.is_delete.isnot(True),
+                Ad.status == "active",
+                Ad.category_id == ad.category_id,
+            )
+
+            # Similar price range: ±50% of the ad's price
+            if ad.price and ad.price > 0:
+                from decimal import Decimal
+                low = ad.price * Decimal("0.5")
+                high = ad.price * Decimal("1.5")
+                query = query.filter(Ad.price.between(low, high))
+
+            ads = (
+                query
+                .options(joinedload(Ad.images), joinedload(Ad.category), joinedload(Ad.city), joinedload(Ad.user))
+                .order_by(func.random())
+                .limit(limit)
+                .all()
+            )
+
+            data = []
+            for a in ads:
+                primary_img = next((img for img in a.images if img.is_primary), None)
+                data.append({
+                    "id": a.id,
+                    "uuid": a.uuid,
+                    "title": a.title,
+                    "price": str(a.price) if a.price else None,
+                    "condition": a.condition,
+                    "category": a.category.name if a.category else None,
+                    "city": a.city.name if a.city else None,
+                    "locality": a.locality,
+                    "image": primary_img.image_url if primary_img else None,
+                    "user_name": a.user.name if a.user else None,
+                    "user_avatar": a.user.avatar if a.user else None,
+                    "created_at": str(a.created_at) if a.created_at else None,
+                })
+            return {"success": True, "msg": "Similar ads fetched.", "data": data}
+        except SQLAlchemyError as e:
+            _logger.error("Database error fetching similar ads: %s", str(e))
+            return {"success": False, "msg": "Database error.", "data": []}
+
+    def get_ads_by_ids(self, db: Session, ad_ids: list) -> dict:
+        """Returns ads matching the given IDs, preserving the order of IDs."""
+        _logger.info("Fetching ads by IDs: %s", ad_ids[:10])
+        try:
+            if not ad_ids:
+                return {"success": True, "msg": "No IDs provided.", "data": []}
+            ads = (
+                db.query(Ad)
+                .filter(Ad.id.in_(ad_ids), Ad.is_delete.isnot(True), Ad.status == "active")
+                .options(joinedload(Ad.images), joinedload(Ad.category), joinedload(Ad.city), joinedload(Ad.user))
+                .all()
+            )
+            # Build a map and return in the same order as requested
+            ad_map = {}
+            for a in ads:
+                primary_img = next((img for img in a.images if img.is_primary), None)
+                ad_map[a.id] = {
+                    "id": a.id,
+                    "uuid": a.uuid,
+                    "title": a.title,
+                    "price": str(a.price) if a.price else None,
+                    "condition": a.condition,
+                    "category": a.category.name if a.category else None,
+                    "city": a.city.name if a.city else None,
+                    "locality": a.locality,
+                    "image": primary_img.image_url if primary_img else None,
+                    "user_name": a.user.name if a.user else None,
+                    "user_avatar": a.user.avatar if a.user else None,
+                    "created_at": str(a.created_at) if a.created_at else None,
+                }
+            # Preserve requested order
+            data = [ad_map[aid] for aid in ad_ids if aid in ad_map]
+            return {"success": True, "msg": "Ads fetched.", "data": data}
+        except SQLAlchemyError as e:
+            _logger.error("Database error fetching ads by IDs: %s", str(e))
+            return {"success": False, "msg": "Database error.", "data": []}
 
     def get_my_ads(self, db: Session, user_id: int, status: str = None) -> dict:
         """Returns all ads posted by the current user, optionally filtered by status."""

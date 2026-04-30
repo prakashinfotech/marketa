@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { 
-  Search, Menu, X, PlusCircle, User, LogOut, ChevronDown, 
-  MessageSquare, MessageCircle, Heart, Bell, Settings, LayoutDashboard 
+import {
+  Search, Menu, X, PlusCircle, User, LogOut, ChevronDown,
+  MessageSquare, MessageCircle, Heart, Bell, Settings, LayoutDashboard,
+  ShieldAlert, HelpCircle, Inbox
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -11,8 +12,18 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setMobileOpen(false);
+    }
+  };
 
   const isAdmin = user?.role_id === 1 || user?.role_id === 2;
 
@@ -33,6 +44,31 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      import('../api').then(({ default: api }) => {
+        api.get('/notifications/me/unread-count/')
+          .then(res => {
+            if (res.data.success) {
+              setUnreadCount(res.data.data.unread_count);
+            }
+          })
+          .catch(() => { });
+        api.get('/chat/unread-count/')
+          .then(res => {
+            if (res.data.success) {
+              setUnreadMsgCount(res.data.data.unread_count);
+            }
+          })
+          .catch(() => { });
+      });
+    } else {
+      setUnreadCount(0);
+      setUnreadMsgCount(0);
+    }
+  }, [isLoggedIn, window.location.pathname]); // Refresh count on navigation
+
+
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
@@ -40,11 +76,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm' 
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
+        ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm'
         : 'bg-white border-b border-gray-100'
-    }`}>
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -65,20 +100,43 @@ export default function Navbar() {
                 type="text"
                 placeholder="Search for mobiles, cars, jobs and more..."
                 className="input-field pl-10 !py-2.5 !rounded-xl !bg-gray-50/80 !border-gray-200/80 hover:!border-gray-300 placeholder-gray-400"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
               />
             </div>
           </div>
 
           {/* Right Side */}
           <div className="hidden md:flex items-center gap-2">
+            <Link to="/services" className="relative px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-indigo-600 transition-colors text-sm font-semibold mr-2">
+              Services
+              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full leading-none shadow-sm">
+                SOON
+              </span>
+            </Link>
             {isLoggedIn ? (
               <>
-                <Link to="/chat" className="p-2.5 rounded-xl hover:bg-gray-50 text-gray-500 hover:text-indigo-600 transition-colors" title="Messages">
+                <Link to="/chat" className="relative p-2.5 rounded-xl hover:bg-gray-50 text-gray-500 hover:text-indigo-600 transition-colors" title="Messages">
                   <MessageCircle className="w-5 h-5" />
+                  {unreadMsgCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                      {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                    </span>
+                  )}
                 </Link>
 
                 <Link to="/favorites" className="p-2.5 rounded-xl hover:bg-gray-50 text-gray-500 hover:text-red-500 transition-colors" title="Favorites">
                   <Heart className="w-5 h-5" />
+                </Link>
+
+                <Link to="/notifications" className="relative p-2.5 rounded-xl hover:bg-gray-50 text-gray-500 hover:text-indigo-600 transition-colors" title="Notifications">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
 
                 <Link
@@ -93,19 +151,22 @@ export default function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-sm transition-all ${
-                      dropdownOpen ? 'bg-gray-100' : 'hover:bg-gray-50'
-                    }`}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-sm transition-all ${dropdownOpen ? 'bg-gray-100' : 'hover:bg-gray-50'
+                      }`}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 text-white rounded-full flex items-center justify-center font-bold text-xs shadow-sm">
-                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 text-white rounded-full flex items-center justify-center font-bold text-xs shadow-sm overflow-hidden shrink-0">
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user?.name?.charAt(0)?.toUpperCase() || 'U'
+                      )}
                     </div>
                     <span className="font-semibold text-gray-700 max-w-[100px] truncate hidden lg:inline">
                       {user?.name || 'User'}
                     </span>
                     <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
-                  
+
                   {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl shadow-gray-200/50 border border-gray-100 py-2 z-50 animate-scale-in">
                       {/* User info header */}
@@ -118,14 +179,35 @@ export default function Navbar() {
                         <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <User className="w-4 h-4 text-gray-400" /> My Profile
                         </Link>
+                        <Link to="/my-ads" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <LayoutDashboard className="w-4 h-4 text-gray-400" /> My Ads
+                        </Link>
+                        <Link to="/alerts" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Bell className="w-4 h-4 text-gray-400" /> Search Alerts
+                        </Link>
+                        <Link to="/chat" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <MessageCircle className="w-4 h-4 text-gray-400" /> Messages
+                        </Link>
+                        <Link to="/inquiries" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Inbox className="w-4 h-4 text-gray-400" /> Inquiries Hub
+                        </Link>
                         <Link to="/favorites" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <Heart className="w-4 h-4 text-gray-400" /> My Favorites
                         </Link>
                         {isAdmin && (
-                          <Link to="/admin/inquiries" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <LayoutDashboard className="w-4 h-4 text-gray-400" /> Admin Panel
-                          </Link>
+                          <>
+                            <Link to="/admin/inquiries" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <LayoutDashboard className="w-4 h-4 text-gray-400" /> Admin Inquiries
+                            </Link>
+                            <Link to="/admin/reports" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <ShieldAlert className="w-4 h-4 text-gray-400" /> Admin Reports
+                            </Link>
+                            <Link to="/admin/faqs" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <HelpCircle className="w-4 h-4 text-gray-400" /> FAQ Manager
+                            </Link>
+                          </>
                         )}
+
                       </div>
 
                       <div className="border-t border-gray-100 pt-1">
@@ -161,24 +243,39 @@ export default function Navbar() {
         <div className="md:hidden border-t border-gray-100 bg-white px-4 pb-5 pt-3 space-y-2 animate-slide-in">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input type="text" placeholder="Search..." className="input-field pl-10" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="input-field pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+            />
           </div>
           {isLoggedIn ? (
             <>
+              <Link to="/services" onClick={() => setMobileOpen(false)} className="block w-full text-center bg-gray-50 text-gray-700 border border-gray-200 py-2.5 rounded-xl text-sm font-bold mb-2">View All Services</Link>
               <Link to="/post-ad" onClick={() => setMobileOpen(false)} className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2.5 rounded-xl text-sm font-bold">Post Free Ad</Link>
               <Link to="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><User className="w-4 h-4 text-gray-400" />My Profile</Link>
+              <Link to="/chat" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><MessageCircle className="w-4 h-4 text-gray-400" />Messages</Link>
               <Link to="/favorites" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><Heart className="w-4 h-4 text-gray-400" />My Favorites</Link>
               {isAdmin && (
-                <Link to="/admin/inquiries" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><LayoutDashboard className="w-4 h-4 text-gray-400" />Admin Panel</Link>
+                <>
+                  <Link to="/admin/inquiries" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><LayoutDashboard className="w-4 h-4 text-gray-400" />Admin Inquiries</Link>
+                  <Link to="/admin/reports" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50"><ShieldAlert className="w-4 h-4 text-gray-400" />Admin Reports</Link>
+                </>
               )}
               <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 rounded-lg hover:bg-red-50">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </>
           ) : (
-            <div className="flex gap-2 pt-1">
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">Log In</Link>
-              <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex-1 text-center btn-primary !py-2.5">Sign Up</Link>
+            <div className="flex flex-col gap-2 pt-1">
+              <Link to="/services" onClick={() => setMobileOpen(false)} className="w-full text-center py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700">All Services</Link>
+              <div className="flex gap-2">
+                <Link to="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2.5 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">Log In</Link>
+                <Link to="/signup" onClick={() => setMobileOpen(false)} className="flex-1 text-center btn-primary !py-2.5">Sign Up</Link>
+              </div>
             </div>
           )}
         </div>

@@ -295,13 +295,28 @@ def _find_static_answer(message: str) -> Optional[str]:
 def _find_db_faq(db: Session, message: str) -> Optional[str]:
     """
     Checks active FAQs from the database.
-    Matches if any keyword (comma-separated) is found in the message.
+    Matches if:
+      1. The FAQ question is found in the message (or vice versa), OR
+      2. Any keyword (comma-separated, or space-separated fallback) is found in the message.
     """
-    msg_lower = message.lower()
+    msg_lower = message.lower().strip()
     try:
         faqs = db.query(FAQ).filter(FAQ.is_active == True, FAQ.is_delete.isnot(True)).all()
         for faq in faqs:
-            keywords = [kw.strip().lower() for kw in faq.keywords.split(",") if kw.strip()]
+            q_lower = faq.question.lower().strip()
+
+            # Match 1: Question substring match (bidirectional)
+            if q_lower in msg_lower or msg_lower in q_lower:
+                return faq.answer
+
+            # Match 2: Keyword match (comma-separated)
+            raw_keywords = faq.keywords or ""
+            if "," in raw_keywords:
+                keywords = [kw.strip().lower() for kw in raw_keywords.split(",") if kw.strip()]
+            else:
+                # Fallback: treat space-separated words as individual keywords
+                keywords = [kw.strip().lower() for kw in raw_keywords.split() if kw.strip()]
+
             for kw in keywords:
                 if kw in msg_lower:
                     return faq.answer
