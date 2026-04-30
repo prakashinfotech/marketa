@@ -2,11 +2,27 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { Heart, ExternalLink } from 'lucide-react';
+import api from '../api';
 
 export default function Footer() {
   const { user, isLoggedIn, logout } = useAuth();
   const isAdmin = user?.role_id === 1 || user?.role_id === 2;
   const year = new Date().getFullYear();
+  const [categories, setCategories] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories/');
+        if (res.data.success) {
+          setCategories(res.data.data.slice(0, 6));
+        }
+      } catch (err) {
+        console.error("Footer categories fetch failed", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <footer className="bg-gray-950 text-gray-400 mt-20">
@@ -29,10 +45,20 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-[0.15em]">Categories</h4>
             <ul className="space-y-2.5 text-sm">
-              <li><Link to="/" className="text-gray-500 hover:text-white transition-colors">Mobiles</Link></li>
-              <li><Link to="/" className="text-gray-500 hover:text-white transition-colors">Cars & Bikes</Link></li>
-              <li><Link to="/" className="text-gray-500 hover:text-white transition-colors">Electronics</Link></li>
-              <li><Link to="/" className="text-gray-500 hover:text-white transition-colors">Real Estate</Link></li>
+              {categories.length > 0 ? (
+                categories.map(cat => (
+                  <li key={cat.id}>
+                    <Link to={`/search?category_id=${cat.id}`} className="text-gray-500 hover:text-white transition-colors">
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                // Skeleton loading state
+                [1, 2, 3, 4].map(i => (
+                  <li key={i} className="h-4 w-24 bg-gray-800/50 animate-pulse rounded-md"></li>
+                ))
+              )}
             </ul>
           </div>
 
@@ -64,8 +90,8 @@ export default function Footer() {
               {!isAdmin && (
                 <li><Link to="/contact" className="text-gray-500 hover:text-white transition-colors">Contact Us</Link></li>
               )}
-              <li><span className="text-gray-500 hover:text-white transition-colors cursor-pointer">Terms of Use</span></li>
-              <li><span className="text-gray-500 hover:text-white transition-colors cursor-pointer">Privacy Policy</span></li>
+              <li><Link to="/terms" className="text-gray-500 hover:text-white transition-colors">Terms of Use</Link></li>
+              <li><Link to="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { 
-  MessageCircle, Send, ArrowLeft, Loader2, Check, CheckCheck, User
+  MessageCircle, Send, ArrowLeft, Loader2, Check, CheckCheck, User, Package, CheckCircle
 } from 'lucide-react';
 
 export default function Chat() {
@@ -22,6 +22,8 @@ export default function Chat() {
   
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
+  const prevMsgCount = useRef(0);
+  const [markingSold, setMarkingSold] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -44,16 +46,23 @@ export default function Chat() {
   }, [activeRoomId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only auto-scroll when new messages arrive (count increases)
+    if (messages.length > prevMsgCount.current) {
+      scrollToBottom();
+    }
+    prevMsgCount.current = messages.length;
+  }, [messages.length]);
 
   const fetchRooms = async () => {
     try {
       const res = await api.get('/chat/rooms/');
       if (res.data.success) {
-        setRooms(res.data.data);
-        if (!activeRoomId && res.data.data.length > 0 && !initialRoomId) {
-          setActiveRoomId(res.data.data[0].id);
+        const sorted = [...res.data.data].sort((a, b) => 
+          new Date(b.last_message_at || 0) - new Date(a.last_message_at || 0)
+        );
+        setRooms(sorted);
+        if (!activeRoomId && sorted.length > 0 && !initialRoomId) {
+          setActiveRoomId(sorted[0].id);
         }
       }
     } catch (err) {
@@ -120,6 +129,27 @@ export default function Chat() {
   };
 
   const activeRoom = rooms.find(r => r.id === activeRoomId);
+  const isSellerInChat = activeRoom && activeRoom.seller_id === user?.id;
+
+  const markAsSold = async () => {
+    if (!activeRoom || !window.confirm(`Mark "${activeRoom.ad_title}" as Sold?`)) return;
+    setMarkingSold(true);
+    try {
+      const res = await api.put(`/ads/${activeRoom.ad_id}/status/`, { status: 'sold' });
+      if (res.data.success) {
+        // Update the room locally to reflect the change
+        setRooms(prev => prev.map(r => 
+          r.ad_id === activeRoom.ad_id ? { ...r, ad_status: 'sold' } : r
+        ));
+      } else {
+        alert(res.data.msg || 'Failed to update ad status.');
+      }
+    } catch (err) {
+      alert('Failed to mark ad as sold.');
+    } finally {
+      setMarkingSold(false);
+    }
+  };
 
   if (!isLoggedIn) return null;
 
@@ -146,8 +176,8 @@ export default function Chat() {
                 <p>No messages yet.</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-50">
-                {rooms.map(room => (
+              <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                {[...rooms].sort((a, b) => new Date(b.last_message_at || 0) - new Date(a.last_message_at || 0)).map((room) => (
                   <button
                     key={room.id}
                     onClick={() => setActiveRoomId(room.id)}
@@ -222,14 +252,35 @@ export default function Chat() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 truncate">{activeRoom.other_user_name}</h3>
-                    <p className="text-xs text-gray-500 truncate flex items-center gap-1.5">
+                    <Link 
+                      to={`/ad/${activeRoom.ad_id}`}
+                      className="text-xs text-indigo-600 hover:text-indigo-700 font-medium truncate flex items-center gap-1.5 transition-colors"
+                    >
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                       Regarding: {activeRoom.ad_title}
-                    </p>
+                    </Link>
                   </div>
                 </div>
                 {activeRoom.ad_image && (
-                  <img src={activeRoom.ad_image} alt="Ad" className="w-12 h-12 rounded-lg object-cover border border-gray-200 hidden sm:block" />
+                  <Link to={`/ad/${activeRoom.ad_id}`} className="shrink-0">
+                    <img src={activeRoom.ad_image} alt="Ad" className="w-12 h-12 rounded-lg object-cover border border-gray-200 hidden sm:block hover:opacity-80 transition-opacity" />
+                  </Link>
+                )}
+                {isSellerInChat && activeRoom.ad_status !== 'sold' && (
+                  <button
+                    onClick={markAsSold}
+                    disabled={markingSold}
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors shrink-0 disabled:opacity-50"
+                    title="Mark this ad as sold"
+                  >
+                    {markingSold ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                    Mark Sold
+                  </button>
+                )}
+                {isSellerInChat && activeRoom.ad_status === 'sold' && (
+                  <span className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-xl shrink-0">
+                    <Package className="w-3.5 h-3.5" /> Sold
+                  </span>
                 )}
               </div>
 
@@ -270,20 +321,20 @@ export default function Chat() {
 
               {/* Message Input */}
               <div className="p-4 bg-white border-t border-gray-100">
-                <form onSubmit={sendMessage} className="flex items-center gap-2">
+                <form onSubmit={sendMessage} className="flex items-center gap-2 bg-gray-50 p-1 rounded-2xl border border-gray-200 focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-all">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 rounded-xl px-4 py-3 text-sm transition-all"
+                    className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 text-sm placeholder-gray-400"
                   />
                   <button 
                     type="submit"
                     disabled={!newMessage.trim()}
-                    className="w-12 h-12 flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-xl transition-colors shadow-md"
+                    className="w-11 h-11 flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-xl transition-all shadow-md active:scale-95"
                   >
-                    <Send className="w-5 h-5 -ml-1" />
+                    <Send className="w-4 h-4" />
                   </button>
                 </form>
               </div>

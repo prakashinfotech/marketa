@@ -49,6 +49,10 @@ frontend/build/
 # ── Uploads ──────────────────────────────────────────────────────────────────
 backend/uploads/
 
+# ── ChromaDB ─────────────────────────────────────────────────────────────────
+chroma_store/
+backend/chroma_store/
+
 # ── Alembic ──────────────────────────────────────────────────────────────────
 backend/alembic/versions/__pycache__/
 

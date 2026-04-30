@@ -34,6 +34,9 @@ class AdStatusUpdate(BaseModel):
     status: str = Field(..., description="Must be one of: active, sold, inactive, expired")
 
 
+class AdsByIdsRequest(BaseModel):
+    ids: List[int] = Field(..., max_length=20)
+
 class Response(BaseModel):
     success: bool
     msg: str

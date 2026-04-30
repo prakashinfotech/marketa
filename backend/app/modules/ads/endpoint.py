@@ -182,6 +182,27 @@ def list_ads(
         )
 
 
+@router.post("/by-ids/", response_model=schema.Response)
+def get_ads_by_ids(
+    payload: schema.AdsByIdsRequest,
+    db: Session = Depends(get_db),
+):
+    """Returns ads matching a list of IDs, preserving the order of IDs provided."""
+    try:
+        _logger.info("Fetching ads by IDs: %s", payload.ids[:10])
+        response = crud.ad.get_ads_by_ids(db=db, ad_ids=payload.ids)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Error fetching ads by IDs: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": []},
+        )
+
+
 @router.get("/{ad_id}/", response_model=schema.Response)
 def get_ad_detail(
     ad_id: int,
@@ -204,6 +225,24 @@ def get_ad_detail(
         return JSONResponse(
             status_code=500,
             content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.get("/{ad_id}/similar/", response_model=schema.Response)
+def get_similar_ads(
+    ad_id: int,
+    db: Session = Depends(get_db),
+):
+    """Returns similar ads based on same category and similar price range."""
+    try:
+        _logger.info("Fetching similar ads for ad_id: %s", ad_id)
+        response = crud.ad.get_similar_ads(db=db, ad_id=ad_id)
+        return JSONResponse(status_code=200, content=response)
+    except Exception as e:
+        _logger.exception("Error fetching similar ads: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": []},
         )
 
 

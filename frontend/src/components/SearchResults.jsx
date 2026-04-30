@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api';
-import { Search, MapPin, SlidersHorizontal, Loader2, IndianRupee, Heart, X, ArrowUpDown, Package, Tag, RotateCcw } from 'lucide-react';
+import { Search, MapPin, SlidersHorizontal, Loader2, IndianRupee, Heart, X, ArrowUpDown, Package, Tag, RotateCcw, Filter } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
 export default function SearchResults() {
@@ -24,6 +24,11 @@ export default function SearchResults() {
   const [cities, setCities] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
 
+  // Category-specific dynamic attributes
+  const [categoryAttributes, setCategoryAttributes] = useState([]);
+  const [attrFilters, setAttrFilters] = useState({});
+  const [loadingAttrs, setLoadingAttrs] = useState(false);
+
   // Local price inputs (not committed to URL until user clicks Apply)
   const [localMinPrice, setLocalMinPrice] = useState(minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice);
@@ -31,6 +36,26 @@ export default function SearchResults() {
   useEffect(() => {
     fetchFilters();
   }, []);
+
+  // Fetch category attributes when category changes
+  useEffect(() => {
+    if (categoryId) {
+      setLoadingAttrs(true);
+      api.get(`/categories/${categoryId}/attributes/`)
+        .then(res => {
+          if (res.data.success) {
+            setCategoryAttributes(res.data.data);
+          } else {
+            setCategoryAttributes([]);
+          }
+        })
+        .catch(() => setCategoryAttributes([]))
+        .finally(() => setLoadingAttrs(false));
+    } else {
+      setCategoryAttributes([]);
+      setAttrFilters({});
+    }
+  }, [categoryId]);
 
   useEffect(() => {
     fetchAds();
@@ -77,6 +102,14 @@ export default function SearchResults() {
       if (adType) url += `&ad_type=${adType}`;
       if (sortBy) url += `&sort_by=${sortBy}`;
 
+      // Append category-specific attribute filters
+      const activeAttrFilters = Object.fromEntries(
+        Object.entries(attrFilters).filter(([_, v]) => v !== '' && v !== undefined)
+      );
+      if (Object.keys(activeAttrFilters).length > 0) {
+        url += `&attribute_filters=${encodeURIComponent(JSON.stringify(activeAttrFilters))}`;
+      }
+
       const res = await api.get(url);
       if (res.data.success) {
         setAds(res.data.data.ads);
@@ -97,6 +130,8 @@ export default function SearchResults() {
           setFavorites(favSet);
         }
       } catch (err) {}
+    } else {
+      setFavorites(new Set());
     }
   };
 
@@ -144,9 +179,19 @@ export default function SearchResults() {
     setSearchParams(new URLSearchParams());
     setLocalMinPrice('');
     setLocalMaxPrice('');
+    setAttrFilters({});
   };
 
-  const activeFilterCount = [categoryId, cityId, minPrice, maxPrice, condition, adType, sortBy].filter(Boolean).length;
+  const handleAttrFilterChange = (attrId, value) => {
+    setAttrFilters(prev => ({ ...prev, [attrId]: value }));
+  };
+
+  const applyAttrFilters = () => {
+    fetchAds();
+  };
+
+  const attrFilterCount = Object.values(attrFilters).filter(v => v !== '' && v !== undefined).length;
+  const activeFilterCount = [categoryId, cityId, minPrice, maxPrice, condition, adType, sortBy].filter(Boolean).length + attrFilterCount;
 
   return (
     <div className="bg-gray-50 min-h-screen py-8 animate-fade-in">
@@ -185,10 +230,10 @@ export default function SearchResults() {
           
           {/* ─── Sidebar Filters ─────────────────────────── */}
           <div className="w-full md:w-72 shrink-0">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-24 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-24 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 7rem)' }}>
               
-              {/* Header */}
-              <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+              {/* Header — stays pinned */}
+              <div className="p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-5 h-5 text-indigo-500" />
                   <h2 className="font-bold text-gray-900">Filters</h2>
@@ -208,7 +253,7 @@ export default function SearchResults() {
                 )}
               </div>
 
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-50 overflow-y-auto custom-scrollbar flex-1">
                 
                 {/* Sort By */}
                 <div className="p-5">
@@ -368,6 +413,95 @@ export default function SearchResults() {
                   </div>
                 </div>
 
+                {/* ── Dynamic Category-Specific Filters ──────────── */}
+                {categoryId && categoryAttributes.length > 0 && (
+                  <div className="p-5 border-t-2 border-indigo-100">
+                    <label className="flex items-center gap-2 text-xs font-bold text-indigo-600 uppercase tracking-wider mb-4">
+                      <Filter className="w-3.5 h-3.5" />
+                      {categories.find(c => String(c.id) === String(categoryId))?.displayName || 'Category'} Filters
+                    </label>
+                    
+                    {loadingAttrs ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {categoryAttributes.map(attr => (
+                          <div key={attr.id}>
+                            <label className="text-xs font-semibold text-gray-600 mb-1.5 block">{attr.name}</label>
+                            
+                            {attr.field_type === 'select' && attr.options?.length ? (
+                              <select
+                                className="input-field text-sm !py-2 cursor-pointer"
+                                value={attrFilters[attr.id] || ''}
+                                onChange={e => handleAttrFilterChange(attr.id, e.target.value)}
+                              >
+                                <option value="">All {attr.name}</option>
+                                {attr.options.map(opt => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            ) : attr.field_type === 'boolean' ? (
+                              <div className="flex gap-2">
+                                {[
+                                  { value: '', label: 'Any' },
+                                  { value: 'true', label: 'Yes' },
+                                  { value: 'false', label: 'No' },
+                                ].map(opt => (
+                                  <button
+                                    key={opt.value}
+                                    onClick={() => handleAttrFilterChange(attr.id, opt.value)}
+                                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold text-center transition-all ${
+                                      (attrFilters[attr.id] || '') === opt.value
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : attr.field_type === 'number' ? (
+                              <input
+                                type="number"
+                                placeholder={`Enter ${attr.name}`}
+                                className="input-field text-sm !py-2"
+                                value={attrFilters[attr.id] || ''}
+                                onChange={e => handleAttrFilterChange(attr.id, e.target.value)}
+                              />
+                            ) : (
+                              <input
+                                type="text"
+                                placeholder={`Enter ${attr.name}`}
+                                className="input-field text-sm !py-2"
+                                value={attrFilters[attr.id] || ''}
+                                onChange={e => handleAttrFilterChange(attr.id, e.target.value)}
+                              />
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Apply button */}
+                        <button
+                          onClick={applyAttrFilters}
+                          className="w-full py-2.5 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm mt-2"
+                        >
+                          Apply {categories.find(c => String(c.id) === String(categoryId))?.displayName || ''} Filters
+                        </button>
+                        {attrFilterCount > 0 && (
+                          <button
+                            onClick={() => { setAttrFilters({}); setTimeout(() => fetchAds(), 100); }}
+                            className="w-full py-2 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            Clear {attrFilterCount} filter{attrFilterCount > 1 ? 's' : ''}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
               </div>
             </div>
           </div>
@@ -417,6 +551,22 @@ export default function SearchResults() {
                       </button>
                     </span>
                   )}
+                  {Object.entries(attrFilters).filter(([_, v]) => v !== '' && v !== undefined).map(([attrId, val]) => {
+                    const attr = categoryAttributes.find(a => String(a.id) === String(attrId));
+                    return (
+                      <span key={attrId} className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        {attr?.name}: {val}
+                        <button onClick={() => {
+                          const newFilters = { ...attrFilters };
+                          delete newFilters[attrId];
+                          setAttrFilters(newFilters);
+                          setTimeout(() => fetchAds(), 100);
+                        }} className="hover:text-red-500">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -461,6 +611,7 @@ export default function SearchResults() {
                       <button 
                         onClick={(e) => { 
                           e.preventDefault(); 
+                          e.stopPropagation();
                           toggleFavorite(ad.uuid);
                         }}
                         className={`absolute top-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-all z-10 ${
@@ -501,6 +652,17 @@ export default function SearchResults() {
                           </span>
                         )}
                       </div>
+
+                      {/* Attribute Specs */}
+                      {ad.attribute_specs && ad.attribute_specs.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {ad.attribute_specs.slice(0, 4).map((spec, i) => (
+                            <span key={i} className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                              {spec.value}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center gap-1.5 truncate max-w-[60%]">

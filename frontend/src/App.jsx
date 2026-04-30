@@ -14,10 +14,23 @@ import PostAd from './components/PostAd';
 import SearchResults from './components/SearchResults';
 import AdDetails from './components/AdDetails';
 import Chat from './components/Chat';
+import SellerInquiries from './components/SellerInquiries';
 import AdminInquiries from './components/AdminInquiries';
 import AdminLocations from './components/AdminLocations';
 import AdminCategories from './components/AdminCategories';
+import AdminReports from './components/AdminReports';
+import AdminFAQs from './components/AdminFAQs';
+import AdminKnowledgeBase from './components/AdminKnowledgeBase';
 import AdminLayout from './components/AdminLayout';
+import ChatBot from './components/ChatBot';
+import TermsOfUse from './components/TermsOfUse';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import ServicesPage from './components/ServicesPage';
+import VerifyEmail from './components/VerifyEmail';
+import MyAds from './components/MyAds';
+import SearchAlerts from './components/SearchAlerts';
+import Notifications from './components/Notifications';
+import ScrollToTop from './components/ScrollToTop';
 
 function PublicLayout({ children }) {
   const { user } = useAuth();
@@ -36,6 +49,7 @@ function PublicLayout({ children }) {
         {children}
       </main>
       <Footer />
+      <ChatBot />
     </div>
   );
 }
@@ -44,6 +58,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Admin Routes with Dedicated Layout */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -51,6 +66,9 @@ function App() {
             <Route path="inquiries" element={<AdminInquiries />} />
             <Route path="locations" element={<AdminLocations />} />
             <Route path="categories" element={<AdminCategories />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="faqs" element={<AdminFAQs />} />
+            <Route path="knowledge-base" element={<AdminKnowledgeBase />} />
           </Route>
 
           {/* Public Routes with Navbar & Footer */}
@@ -65,6 +83,15 @@ function App() {
           <Route path="/search" element={<PublicLayout><SearchResults /></PublicLayout>} />
           <Route path="/ad/:id" element={<PublicLayout><AdDetails /></PublicLayout>} />
           <Route path="/chat" element={<PublicLayout><Chat /></PublicLayout>} />
+          <Route path="/inquiries" element={<PublicLayout><SellerInquiries /></PublicLayout>} />
+          <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+          <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
+          <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
+          <Route path="/verify" element={<PublicLayout><VerifyEmail /></PublicLayout>} />
+          <Route path="/my-ads" element={<PublicLayout><MyAds /></PublicLayout>} />
+          <Route path="/edit-ad/:id" element={<PublicLayout><PostAd /></PublicLayout>} />
+          <Route path="/alerts" element={<PublicLayout><SearchAlerts /></PublicLayout>} />
+          <Route path="/notifications" element={<PublicLayout><Notifications /></PublicLayout>} />
         </Routes>
       </Router>
     </AuthProvider>
