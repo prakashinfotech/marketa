@@ -1,9 +1,9 @@
 # Quikr.com — Complete Platform Analysis & Documentation
 
-> **Source:** https://www.quikr.com/  
-> **Tagline:** "Free Classified Ads in India, Post Ads Online"  
-> **Founded:** 2008, Bangalore  
-> **Coverage:** 1000+ cities across India  
+> **Source:** https://www.quikr.com/
+> **Tagline:** "Free Classified Ads in India, Post Ads Online"
+> **Founded:** 2008, Bangalore
+> **Coverage:** 1000+ cities across India
 
 ---
 
@@ -12,20 +12,20 @@
 1. [Platform Overview](#1-platform-overview)
 2. [Main Categories / Verticals](#2-main-categories--verticals)
 3. [Sub-Platforms (Dedicated Microsites)](#3-sub-platforms-dedicated-microsites)
-4. [User Account & Dashboard Features](#4-user-account--dashboard-features)
-5. [Search & Discovery System](#5-search--discovery-system)
+4. [User Account &amp; Dashboard Features](#4-user-account--dashboard-features)
+5. [Search &amp; Discovery System](#5-search--discovery-system)
 6. [Ad Posting System](#6-ad-posting-system)
 7. [Communication Features](#7-communication-features)
-8. [Monetization & Premium Features](#8-monetization--premium-features)
+8. [Monetization &amp; Premium Features](#8-monetization--premium-features)
 9. [Services Marketplace (QuikrEasy)](#9-services-marketplace-quikreasy)
 10. [Financial Services Integration](#10-financial-services-integration)
 11. [Location System](#11-location-system)
-12. [UI Components & Page Structure](#12-ui-components--page-structure)
-13. [Footer & Static Pages](#13-footer--static-pages)
-14. [Mobile App & Cross-Platform](#14-mobile-app--cross-platform)
+12. [UI Components &amp; Page Structure](#12-ui-components--page-structure)
+13. [Footer &amp; Static Pages](#13-footer--static-pages)
+14. [Mobile App &amp; Cross-Platform](#14-mobile-app--cross-platform)
 15. [Business / B2B Features](#15-business--b2b-features)
-16. [Trust & Safety](#16-trust--safety)
-17. [SEO & Content Features](#17-seo--content-features)
+16. [Trust &amp; Safety](#16-trust--safety)
+17. [SEO &amp; Content Features](#17-seo--content-features)
 18. [Social Media Presence](#18-social-media-presence)
 
 ---
@@ -33,6 +33,7 @@
 ## 1. Platform Overview
 
 Quikr is India's #1 online classifieds platform. It enables individuals and businesses to:
+
 - **Buy** — Browse and purchase used/new goods
 - **Sell** — Post free classified ads for items
 - **Rent** — List or find rental properties, vehicles, equipment
@@ -40,15 +41,17 @@ Quikr is India's #1 online classifieds platform. It enables individuals and busi
 - **Book Services** — Connect with verified service professionals
 
 ### Key Stats (From Site)
-| Metric | Value |
-|--------|-------|
-| Services Offered | 300+ |
-| Happy Customers | 10 Lakhs+ |
-| Verified Experts | 80,000+ |
-| Cities Covered | 1000+ |
-| Funding Raised | $350 Million (7 rounds) |
+
+| Metric           | Value                   |
+| ---------------- | ----------------------- |
+| Services Offered | 300+                    |
+| Happy Customers  | 10 Lakhs+               |
+| Verified Experts | 80,000+                 |
+| Cities Covered   | 1000+                   |
+| Funding Raised   | $350 Million (7 rounds) |
 
 ### Key Investors
+
 Tiger Global, Kinnevik, Matrix Partners India, Omidyar Network, Norwest Venture Partners, Nokia Growth Partners, Warburg Pincus, eBay Inc.
 
 ---
@@ -57,24 +60,26 @@ Tiger Global, Kinnevik, Matrix Partners India, Omidyar Network, Norwest Venture 
 
 Quikr organizes all listings into **13 main categories**:
 
-| # | Category | Description |
-|---|----------|-------------|
-| 1 | **Cars & Bikes** | Used cars, bikes, scooters, commercial vehicles |
-| 2 | **Mobiles & Tablets** | New/used phones, tablets, accessories |
-| 3 | **Electronics & Appliances** | TVs, ACs, fridges, washing machines, laptops |
-| 4 | **Real Estate** | Residential & commercial properties (sale/rent) |
-| 5 | **Services** | 300+ professional services (QuikrEasy) |
-| 6 | **Jobs** | Blue collar, white collar, WFH, freelance (QuikrJobs) |
-| 7 | **Home & Lifestyle** | Furniture, decor, kitchen items, gardening |
-| 8 | **Education & Training** | Colleges, courses, study abroad, distance learning |
-| 9 | **Pets & Pet Care** | Dogs, cats, birds, fish, pet accessories, pet services |
-| 10 | **Entertainment** | Musical instruments, books, sports, hobbies |
-| 11 | **Community** | Community notices, groups, announcements |
-| 12 | **Events** | Event organizing, DJ services, venues |
-| 13 | **Matrimonial** | Marriage profiles, matchmaking |
+| #  | Category                           | Description                                            |
+| -- | ---------------------------------- | ------------------------------------------------------ |
+| 1  | **Cars & Bikes**             | Used cars, bikes, scooters, commercial vehicles        |
+| 2  | **Mobiles & Tablets**        | New/used phones, tablets, accessories                  |
+| 3  | **Electronics & Appliances** | TVs, ACs, fridges, washing machines, laptops           |
+| 4  | **Real Estate**              | Residential & commercial properties (sale/rent)        |
+| 5  | **Services**                 | 300+ professional services (QuikrEasy)                 |
+| 6  | **Jobs**                     | Blue collar, white collar, WFH, freelance (QuikrJobs)  |
+| 7  | **Home & Lifestyle**         | Furniture, decor, kitchen items, gardening             |
+| 8  | **Education & Training**     | Colleges, courses, study abroad, distance learning     |
+| 9  | **Pets & Pet Care**          | Dogs, cats, birds, fish, pet accessories, pet services |
+| 10 | **Entertainment**            | Musical instruments, books, sports, hobbies            |
+| 11 | **Community**                | Community notices, groups, announcements               |
+| 12 | **Events**                   | Event organizing, DJ services, venues                  |
+| 13 | **Matrimonial**              | Marriage profiles, matchmaking                         |
 
 ### Sidebar Categories (Homepage Quick Access)
+
 Additional quick-access categories visible on the homepage sidebar:
+
 - Furniture & Decor
 - Appliances, ACs
 - Sports, Hobbies, Fashion
@@ -91,6 +96,7 @@ Additional quick-access categories visible on the homepage sidebar:
 Quikr operates **several branded sub-platforms**, each with its own dedicated UI, navigation, and functionality:
 
 ### 3.1 QuikrBazaar (E-Commerce / Buy-Sell)
+
 - **URL:** `/Escrow/bazaar`
 - **Purpose:** Buy & sell used goods with escrow protection
 - **Features:**
@@ -102,6 +108,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Quikr Guaranteed™ — Verified product quality
 
 ### 3.2 QuikrCars
+
 - **URL:** `/cars/used-cars/all-india`
 - **Features:**
   - Used Cars listing & search
@@ -110,6 +117,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Auto services booking
 
 ### 3.3 QuikrBikes
+
 - **URL:** `/bikes-scooters/all-india`
 - **Features:**
   - Used Bikes & Scooters
@@ -117,6 +125,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Sell Your Bike
 
 ### 3.4 QuikrHomes (Real Estate)
+
 - **URL:** `/homes`
 - **Description:** "Search your dream residential, commercial & agricultural properties"
 - **Stats:** 6 Lakh+ properties for sale, 3.5 Lakh+ for rent, 1.4 Lakh+ new projects
@@ -130,6 +139,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - New Projects (Builder listings)
 
 ### 3.5 QuikrJobs
+
 - **URL:** `/jobs`
 - **Tagline:** "Jobs in India, Blue Collar Jobs"
 - **Features:**
@@ -144,12 +154,14 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - **Profile Creation** for job seekers
 
 ### 3.6 QuikrEasy (Services)
+
 - **URL:** `/services/services-India-all`
 - **Description:** "Connect with experts for 300+ Services"
 - **Featured Services:** Interior Design, Packers & Movers, B2B Suppliers
 - *(Detailed breakdown in Section 9 below)*
 
 ### 3.7 QuikrLearner (Education)
+
 - **URL:** `/education-training`
 - **Tagline:** "Explore your chances of landing a seat in your dream college"
 - **Sub-categories:**
@@ -161,6 +173,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Skill Training
 
 ### 3.8 QuikrPets
+
 - **URL:** `/pets/all-India`
 - **Features:** Pet buying/selling, pet care services, pet accessories
 
@@ -169,28 +182,31 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
 ## 4. User Account & Dashboard Features
 
 ### 4.1 Authentication
+
 - Login / Register (single flow)
 - **Mobile Number Verification:** Missed call verification to `1800 200 4141` (toll-free)
 - Phone-based authentication (OTP implied)
 
 ### 4.2 My Account Dashboard (`/MyQuikr`)
 
-| Feature | Path | Description |
-|---------|------|-------------|
-| **My Account** | `/MyQuikr` | Main dashboard overview |
-| **Chats** | `/MyQuikr?action=mychats` | All buyer-seller conversations |
-| **Alerts** | `/MyQuikr?action=alertsdetails` | Saved search alerts & notifications |
-| **My Ads** | `/MyQuikr?action=activeads` | Manage active/inactive ads |
-| **My Leads** | `/MyQuikr?action=lead` | Track inquiries on your ads |
-| **Get Instant Leads** | `/instant-leads` | Premium lead generation tool |
-| **My Cart** | `/QuikrX/Cart` | Shopping cart (Bazaar) |
-| **My Doorstep Offers** | `/Escrow/MyOffers/getBuyersOfferForm` | Manage buy/sell offers |
-| **My Orders** | `/QuikrX/myorders` | Track placed/received orders |
-| **Recommended for Me** | via alerts | AI-based matching ads |
-| **Log Out** | — | Session termination |
+| Feature                      | Path                                    | Description                         |
+| ---------------------------- | --------------------------------------- | ----------------------------------- |
+| **My Account**         | `/MyQuikr`                            | Main dashboard overview             |
+| **Chats**              | `/MyQuikr?action=mychats`             | All buyer-seller conversations      |
+| **Alerts**             | `/MyQuikr?action=alertsdetails`       | Saved search alerts & notifications |
+| **My Ads**             | `/MyQuikr?action=activeads`           | Manage active/inactive ads          |
+| **My Leads**           | `/MyQuikr?action=lead`                | Track inquiries on your ads         |
+| **Get Instant Leads**  | `/instant-leads`                      | Premium lead generation tool        |
+| **My Cart**            | `/QuikrX/Cart`                        | Shopping cart (Bazaar)              |
+| **My Doorstep Offers** | `/Escrow/MyOffers/getBuyersOfferForm` | Manage buy/sell offers              |
+| **My Orders**          | `/QuikrX/myorders`                    | Track placed/received orders        |
+| **Recommended for Me** | via alerts                              | AI-based matching ads               |
+| **Log Out**            | —                                      | Session termination                 |
 
 ### 4.3 Alert System
+
 Users can create customized alerts by selecting:
+
 - Category
 - Sub-category
 - City
@@ -202,11 +218,13 @@ Users can create customized alerts by selecting:
 ## 5. Search & Discovery System
 
 ### 5.1 Search Bar
+
 - Unified search across all categories
 - Placeholder: "Find Cars, Mobiles, and more..."
 - Located in the top navigation, persistent across all pages
 
 ### 5.2 Filters
+
 - **Location Filter:** State → City → Locality (3-level hierarchy)
 - **Category Filter:** Main Category → Sub Category
 - **Price Range**
@@ -214,6 +232,7 @@ Users can create customized alerts by selecting:
 - **Ad Type:** Free / Premium / Featured
 
 ### 5.3 Location System
+
 - City Selector popup with:
   - Popular Cities (quick access to 17 top cities)
   - State-wise City browsing (all Indian states + International)
@@ -226,6 +245,7 @@ Users can create customized alerts by selecting:
 ## 6. Ad Posting System
 
 ### 6.1 Post Free Ad
+
 - **URL:** `/post-classifieds-ads/select-category/`
 - **Three posting modes:**
   1. **Sell Your Products** — For individuals
@@ -234,28 +254,32 @@ Users can create customized alerts by selecting:
 - Category selection → Sub-category → Details form → Image upload → Publish
 
 ### 6.2 Ad Types
-| Type | Description |
-|------|-------------|
-| **Free Ad** | Basic listing, standard visibility |
-| **Premium Ad** | Enhanced visibility, highlighted in results |
-| **Spotlight Ad** | Top positioning, maximum visibility |
-| **Featured Ad** | Special badge, promoted in category pages |
+
+| Type                   | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| **Free Ad**      | Basic listing, standard visibility          |
+| **Premium Ad**   | Enhanced visibility, highlighted in results |
+| **Spotlight Ad** | Top positioning, maximum visibility         |
+| **Featured Ad**  | Special badge, promoted in category pages   |
 
 ---
 
 ## 7. Communication Features
 
 ### 7.1 Chat System
+
 - **In-app messaging** between buyers and sellers
 - Chat count badge in navigation
 - Accessible via `/MyQuikr?action=mychats`
 
 ### 7.2 QuikrNXT
+
 - Privacy-first communication
 - Users can buy/sell **without revealing phone numbers**
 - Messages through the platform
 
 ### 7.3 Offers System
+
 - **My Offers** — Make price offers on listings
 - Counter-offer functionality
 - Offer tracking dashboard
@@ -265,22 +289,24 @@ Users can create customized alerts by selecting:
 ## 8. Monetization & Premium Features
 
 ### 8.1 Premium Ads / Ad Credits
+
 - **URL:** `/purchase-ad-credits`
 - "Get up to 80% discounts on Premium Ads"
 - **Quikr Pack Credits** — Bulk purchase of ad credits
 - Convert existing free ads to Spotlight ads at a discount
 
 ### 8.2 Revenue Streams
-| Stream | Description |
-|--------|-------------|
-| Premium Ad Listings | Boosted visibility for sellers |
-| Spotlight Ads | Top-of-page placement |
-| Ad Credits Packs | Bulk credit purchases |
-| Business Listings | For professional service providers |
-| QuikrJobs Pro | Employer recruitment tools |
-| Quikr Guaranteed™ | Verified/refurbished product sales |
-| Partner Services | Revenue share with service providers |
-| Advertising | Third-party ad placements on site |
+
+| Stream              | Description                          |
+| ------------------- | ------------------------------------ |
+| Premium Ad Listings | Boosted visibility for sellers       |
+| Spotlight Ads       | Top-of-page placement                |
+| Ad Credits Packs    | Bulk credit purchases                |
+| Business Listings   | For professional service providers   |
+| QuikrJobs Pro       | Employer recruitment tools           |
+| Quikr Guaranteed™  | Verified/refurbished product sales   |
+| Partner Services    | Revenue share with service providers |
+| Advertising         | Third-party ad placements on site    |
 
 ---
 
@@ -289,6 +315,7 @@ Users can create customized alerts by selecting:
 QuikrEasy is Quikr's services arm, connecting users with 300+ types of professionals.
 
 ### 9.1 Top Services (Sidebar Menu)
+
 - Home Services
 - Beauty & Wellness
 - Business Opportunities
@@ -296,6 +323,7 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - Event Services
 
 ### 9.2 More Services
+
 - Travel Services
 - Security, Legal & Agent Services
 - Astrology, Vaastu & Devotional Services
@@ -307,19 +335,21 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - B2B Suppliers
 
 ### 9.3 Day to Day Services
-| Service | Category |
-|---------|----------|
-| Carpenter | Home |
-| Electrician | Home |
-| Plumber | Home |
-| Maid | Domestic |
-| Cook | Domestic |
-| Baby Sitter | Domestic |
-| Driver | Transport |
-| Tiffin Services | Food |
-| Laundry - Dry Cleaning | Home |
+
+| Service                | Category  |
+| ---------------------- | --------- |
+| Carpenter              | Home      |
+| Electrician            | Home      |
+| Plumber                | Home      |
+| Maid                   | Domestic  |
+| Cook                   | Domestic  |
+| Baby Sitter            | Domestic  |
+| Driver                 | Transport |
+| Tiffin Services        | Food      |
+| Laundry - Dry Cleaning | Home      |
 
 ### 9.4 Trending Services
+
 - Pest Control
 - Packers & Movers
 - Interior Design
@@ -328,6 +358,7 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - Tour Packages
 
 ### 9.5 Business Services
+
 - Website & App Development
 - Advertisement Solutions
 - Business Opportunities
@@ -336,12 +367,14 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - Insurance (Car, Bike, Health)
 
 ### 9.6 Repair & Servicing
+
 - Water Motor Repair (Electric Motor, Stepper Motor, Alternator)
 - Home Appliance Repair (AC, TV, Fridge, Washing Machine)
 - Mobile/Tablet Repair (Apple, Samsung, Motorola, Xiaomi)
 - Kitchen Appliances Repair (Microwave, Water Purifier, Chimney)
 
 ### 9.7 Moving Out Services
+
 - Packers & Movers
 - DTH & Set-Top Boxes
 - Internet Broadband
@@ -350,6 +383,7 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - Invertor & Batteries
 
 ### 9.8 Event Arrangement Services
+
 - Florists & Decorators
 - Bar Counter
 - Generator Rental
@@ -360,10 +394,12 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 - Catering Services
 
 ### 9.9 Partner Services
+
 - Self Drive Car Rentals (via SaiVeer)
 - Car Rentals (via Altius)
 
 ### 9.10 Booking Models
+
 - **Book Now** — Instant confirmed booking (for daily services like Laundry, Electrician, Plumber, Yoga Trainer)
 - **Evaluate & Choose** — Compare multiple service providers before selecting
 - **Third-party Partners** — Forex, Bus Tickets, Product Rentals via partner integrations
@@ -374,26 +410,28 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 
 Quikr has a dedicated financial services section on the homepage:
 
-| Service | Description |
-|---------|-------------|
-| **Personal Loan** | `/promo/personal-loan` |
-| **CA Services** | Tax filing, audits |
-| **Insurance** | Car, bike, health insurance |
-| **Credit Cards** | Credit card applications |
-| **Business Loans** | Business financing |
-| **Bank Accounts** | New account opening |
+| Service                  | Description                 |
+| ------------------------ | --------------------------- |
+| **Personal Loan**  | `/promo/personal-loan`    |
+| **CA Services**    | Tax filing, audits          |
+| **Insurance**      | Car, bike, health insurance |
+| **Credit Cards**   | Credit card applications    |
+| **Business Loans** | Business financing          |
+| **Bank Accounts**  | New account opening         |
 
 ---
 
 ## 11. Location System
 
 ### 11.1 Coverage
+
 - **All India** — Nationwide search
 - **35 States/UTs** — Complete state coverage
 - **17+ Popular Cities** — Ahmedabad, Bangalore, Chandigarh, Chennai, Coimbatore, Delhi, Gurgaon, Hyderabad, Jaipur, Kochi, Kolkata, Lucknow, Mumbai, Navi Mumbai, Noida, Pune, Trivandrum
 - **International (Jobs):** Qatar, Saudi Arabia, Abu Dhabi, Dubai, Sharjah, USA, Hong Kong, Australia, Singapore, Malaysia, Indonesia, Canada
 
 ### 11.2 Location Features
+
 - City-specific subdomains (e.g., `ahmedabad.quikr.com`, `bangalore.quikr.com`)
 - Locality-level filtering within cities
 - Auto-detect location
@@ -404,22 +442,24 @@ Quikr has a dedicated financial services section on the homepage:
 ## 12. UI Components & Page Structure
 
 ### 12.1 Navigation Bar (Top)
-| Element | Description |
-|---------|-------------|
-| Logo | "Quikr" brand logo |
-| City Selector | Dropdown with popular cities + state browse |
-| Category Dropdown | "All Categories" with 13 items |
-| Search Bar | Unified full-text search |
-| For Businesses | B2B landing page link |
-| Download App | Mobile app promotion |
-| Ad Credits | "₹ Discounts on Premium Ads" promo banner |
-| Chat Badge | Unread message count |
-| My Offers Badge | Pending offer count |
-| Login/Register | Auth button (toggles to user dropdown) |
-| Post Free Ad | Primary CTA button (3 posting modes) |
-| User Dropdown | My Account, Chats, Alerts, My Ads, My Leads, etc. |
+
+| Element           | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| Logo              | "Quikr" brand logo                                |
+| City Selector     | Dropdown with popular cities + state browse       |
+| Category Dropdown | "All Categories" with 13 items                    |
+| Search Bar        | Unified full-text search                          |
+| For Businesses    | B2B landing page link                             |
+| Download App      | Mobile app promotion                              |
+| Ad Credits        | "₹ Discounts on Premium Ads" promo banner        |
+| Chat Badge        | Unread message count                              |
+| My Offers Badge   | Pending offer count                               |
+| Login/Register    | Auth button (toggles to user dropdown)            |
+| Post Free Ad      | Primary CTA button (3 posting modes)              |
+| User Dropdown     | My Account, Chats, Alerts, My Ads, My Leads, etc. |
 
 ### 12.2 Homepage Sections
+
 1. **Hero Banner** — City selector + search + main CTA
 2. **Category Sidebar** — 20+ quick-access categories with flyout menus
 3. **Quikr Bazaar Block** — Featured buy-sell categories
@@ -437,13 +477,17 @@ Quikr has a dedicated financial services section on the homepage:
 15. **Ad Credits CTA** — Purchase premium ad credits
 
 ### 12.3 Category Flyout Menus
+
 Each sidebar category has a "See All" flyout that includes:
+
 - 3–4 popular sub-categories
 - "View All Categories" link
 - Brief description of the vertical
 
 ### 12.4 Ad Listing Cards
+
 Each ad card typically contains:
+
 - Image thumbnail (with gallery)
 - Title
 - Price (₹ formatted)
@@ -455,6 +499,7 @@ Each ad card typically contains:
 - Chat/Contact button
 
 ### 12.5 Common Page Layouts
+
 - **Listing Page:** Filter sidebar + Ad cards grid/list + Pagination
 - **Detail Page:** Image gallery + Title + Price + Description + Seller info + Chat/Call CTA + Similar ads
 - **Dashboard Pages:** Sidebar navigation + Content area + Action buttons
@@ -466,6 +511,7 @@ Each ad card typically contains:
 ### 13.1 Footer Structure
 
 **Column 1 — Company:**
+
 - About Us
 - Contact Us
 - Careers
@@ -473,6 +519,7 @@ Each ad card typically contains:
 - Advertise With Us
 
 **Column 2 — Resources:**
+
 - Blog
 - Help / Help Center
 - Premium Ads guide
@@ -480,6 +527,7 @@ Each ad card typically contains:
 - Popular Searches
 
 **Column 3 — Legal/Policies:**
+
 - Listing Policy
 - Terms of Use
 - Privacy Policy
@@ -487,6 +535,7 @@ Each ad card typically contains:
 - Quikr Brand Guidelines
 
 **Column 4 — Partner Brands:**
+
 - Commonfloor (Real Estate)
 - Hiree (Jobs)
 - India Property
@@ -497,25 +546,26 @@ Each ad card typically contains:
 All 17 popular cities + "All Cities"
 
 **Bottom Bar:**
+
 - Follow Us: Facebook, LinkedIn, Twitter, YouTube
 - Download App: Apple App Store, Google Play Store
 - Trust Partners logos
 
 ### 13.2 Static Pages
 
-| Page | URL |
-|------|-----|
-| About Us | `/html/about.php` |
-| Contact Us | `/html/contact.php` |
-| Policies | `/html/policies.php` |
-| Terms & Conditions | `/html/termsandconditions.php` |
-| Privacy Policy | `/html/policies.php#privacy-policy` |
-| Quikr Mobiles Policy | `/html/policies.php#quikrX-policy` |
-| Brand Guidelines | `/html/brand_guidelines.php` |
-| Help Center | `/help/` |
-| Careers | `/html/jobs.php` |
-| Sitemap | `/www-sitemap.php` |
-| Premium Ads | `/html/premium_ads.php` |
+| Page                 | URL                                   |
+| -------------------- | ------------------------------------- |
+| About Us             | `/html/about.php`                   |
+| Contact Us           | `/html/contact.php`                 |
+| Policies             | `/html/policies.php`                |
+| Terms & Conditions   | `/html/termsandconditions.php`      |
+| Privacy Policy       | `/html/policies.php#privacy-policy` |
+| Quikr Mobiles Policy | `/html/policies.php#quikrX-policy`  |
+| Brand Guidelines     | `/html/brand_guidelines.php`        |
+| Help Center          | `/help/`                            |
+| Careers              | `/html/jobs.php`                    |
+| Sitemap              | `/www-sitemap.php`                  |
+| Premium Ads          | `/html/premium_ads.php`             |
 
 ---
 
@@ -532,21 +582,25 @@ All 17 popular cities + "All Cities"
 ## 15. Business / B2B Features
 
 ### 15.1 For Businesses Page
+
 - **URL:** `/Business?action=businessPage`
 - "List Your Business" CTA
 - Business lead generation
 - B2B Suppliers marketplace
 
 ### 15.2 Advertising
+
 - **Advertise With Us:** `/adsales`
 - Display advertising on the platform
 - Sponsored listings
 
 ### 15.3 Lead Generation
+
 - **My Leads:** Track inquiries on business listings
 - **Get Instant Leads:** Premium feature for immediate lead access
 
 ### 15.4 Recruiter Tools
+
 - Post Free Job
 - QuikrJobs Pro (premium employer tools)
 - Hire Candidates flow
@@ -555,85 +609,89 @@ All 17 popular cities + "All Cities"
 
 ## 16. Trust & Safety
 
-| Feature | Description |
-|---------|-------------|
-| **Phone Verification** | Missed call verification (toll-free) |
-| **Quikr Guaranteed™** | Verified product quality for mobile phones |
-| **QuikrNXT** | Privacy-protected communication |
-| **Escrow System** | Secure payment for Bazaar transactions |
-| **Scam Warnings** | "Beware of Scammers!" banners on jobs pages |
-| **Support Contact** | Phone: `080-67364545` (Mon-Sat 9AM-9PM), Email: `support@quikr.com` |
-| **Jobs Safety** | Dedicated line: `080-66095795`, Email: `jobsupport@quikr.com` |
-| **Verified Experts** | 80,000+ verified service professionals |
+| Feature                      | Description                                                            |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| **Phone Verification** | Missed call verification (toll-free)                                   |
+| **Quikr Guaranteed™** | Verified product quality for mobile phones                             |
+| **QuikrNXT**           | Privacy-protected communication                                        |
+| **Escrow System**      | Secure payment for Bazaar transactions                                 |
+| **Scam Warnings**      | "Beware of Scammers!" banners on jobs pages                            |
+| **Support Contact**    | Phone:`080-67364545` (Mon-Sat 9AM-9PM), Email: `support@quikr.com` |
+| **Jobs Safety**        | Dedicated line:`080-66095795`, Email: `jobsupport@quikr.com`       |
+| **Verified Experts**   | 80,000+ verified service professionals                                 |
 
 ---
 
 ## 17. SEO & Content Features
 
-| Feature | Description |
-|---------|-------------|
-| **City Subdomains** | `ahmedabad.quikr.com`, etc. for local SEO |
-| **Sitemap** | Auto-generated sitemaps per vertical |
-| **Popular Searches** | Curated keyword pages |
-| **A-Z Service Directory** | Alphabetical listing of all services |
-| **Industry Landing Pages** | Dedicated pages per job industry |
-| **Blog** | `blog.quikr.com` for content marketing |
-| **News Portal** | `news.quikr.com` |
+| Feature                          | Description                                 |
+| -------------------------------- | ------------------------------------------- |
+| **City Subdomains**        | `ahmedabad.quikr.com`, etc. for local SEO |
+| **Sitemap**                | Auto-generated sitemaps per vertical        |
+| **Popular Searches**       | Curated keyword pages                       |
+| **A-Z Service Directory**  | Alphabetical listing of all services        |
+| **Industry Landing Pages** | Dedicated pages per job industry            |
+| **Blog**                   | `blog.quikr.com` for content marketing    |
+| **News Portal**            | `news.quikr.com`                          |
 
 ---
 
 ## 18. Social Media Presence
 
-| Platform | Link |
-|----------|------|
-| Facebook | `/QuikrFans` |
+| Platform | Link                |
+| -------- | ------------------- |
+| Facebook | `/QuikrFans`      |
 | LinkedIn | `/company/673276` |
-| Twitter | `@quikr` |
-| YouTube | Quikr channel |
+| Twitter  | `@quikr`          |
+| YouTube  | Quikr channel       |
 
 ---
 
 ## Summary: Complete Feature List
 
 ### For Buyers/Users
-- [x] Free account creation
-- [x] Browse by category/city/locality
-- [x] Full-text search with filters
-- [x] Save favorites
-- [x] Chat with sellers
-- [x] Make offers (negotiate prices)
-- [x] Shopping cart (Bazaar)
-- [x] Order tracking
-- [x] InterCity doorstep delivery
-- [x] Set alerts for matching ads
-- [x] Recommended listings (AI-based)
-- [x] Financial services (loans, insurance, credit cards)
-- [x] Book professional services
-- [x] Apply to jobs
-- [x] Find rental properties
-- [x] Find pets & pet services
-- [x] Education & training portal
+
+- [X] Free account creation
+- [X] Browse by category/city/locality
+- [X] Full-text search with filters
+- [X] Save favorites
+- [X] Chat with sellers
+- [X] Make offers (negotiate prices)
+- [X] Shopping cart (Bazaar)
+- [X] Order tracking
+- [X] InterCity doorstep delivery
+- [X] Set alerts for matching ads
+- [X] Recommended listings (AI-based)
+- [X] Financial services (loans, insurance, credit cards)
+- [X] Book professional services
+- [X] Apply to jobs
+- [X] Find rental properties
+- [X] Find pets & pet services
+- [X] Education & training portal
 
 ### For Sellers/Businesses
-- [x] Post free classified ads
-- [x] Premium/Spotlight ad upgrades
-- [x] Ad credit system (bulk discounts up to 80%)
-- [x] Lead management dashboard
-- [x] Instant leads (premium)
-- [x] Business listing
-- [x] Chat with buyers
-- [x] Offer management
-- [x] Analytics (My Ads performance)
+
+- [X] Post free classified ads
+- [X] Premium/Spotlight ad upgrades
+- [X] Ad credit system (bulk discounts up to 80%)
+- [X] Lead management dashboard
+- [X] Instant leads (premium)
+- [X] Business listing
+- [X] Chat with buyers
+- [X] Offer management
+- [X] Analytics (My Ads performance)
 
 ### For Employers
-- [x] Post free job listings
-- [x] QuikrJobs Pro (premium tools)
-- [x] Hire candidates
-- [x] Filter by role/industry/city/type
-- [x] A-Z company directory
+
+- [X] Post free job listings
+- [X] QuikrJobs Pro (premium tools)
+- [X] Hire candidates
+- [X] Filter by role/industry/city/type
+- [X] A-Z company directory
 
 ### For Service Providers
-- [x] List services on QuikrEasy
-- [x] Receive bookings
-- [x] Verified expert badge
-- [x] Partner integration (for fleet/rental services)
+
+- [X] List services on QuikrEasy
+- [X] Receive bookings
+- [X] Verified expert badge
+- [X] Partner integration (for fleet/rental services)
