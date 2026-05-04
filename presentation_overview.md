@@ -7,13 +7,13 @@
 
 ## 🏠 1. Home Page & Discovery
 
-The landing page features a hero search bar, browsable category cards, a "Fresh Recommendations" grid of latest ads, a horizontally scrollable "Recently Viewed" section (localStorage-powered), a "Happy Customers" testimonial slider, and a step-by-step "How It Works" guide. Responsive design with premium micro-animations throughout.
+The landing page features a hero search bar, browsable category cards, a "Fresh Recommendations" grid of latest ads, a horizontally scrollable "Recently Viewed" section (**server-synced via PostgreSQL** for logged-in users, ensuring cross-device persistence), a "Happy Customers" testimonial slider, and a step-by-step "How It Works" guide. Responsive design with premium micro-animations throughout.
 
 ---
 
 ## 🔐 2. Authentication & User Management
 
-Complete auth flow with Sign Up, Login, Email Verification (token-based), and session management via JWT. Role-based access control (RBAC) with three roles: Super Admin, System Admin, and Regular User. Profile management includes name, phone, avatar upload, and cartoon avatar selection.
+Complete auth flow with Sign Up, Login, **Forgot Password**, **Reset Password**, Email Verification (token-based), and session management via JWT. Role-based access control (RBAC) with three roles: Super Admin, System Admin, and Regular User. Profile management includes name, phone, avatar upload, cartoon avatar selection, and **Change Password** functionality. All authentication emails are sent via **Gmail SMTP** with branded HTML templates.
 
 ---
 
@@ -62,7 +62,7 @@ Toggle-favorite any ad from search results, home page, or ad details with a hear
 
 ## 🔔 9. Notifications System
 
-Real-time notification feed for events like: new chat messages, ad status changes, price drops on favorited ads, and system announcements. Unread count badge in the navbar with bell icon.
+Real-time notification feed for events like: new chat messages, ad status changes, **price drops/hikes on favorited ads**, **any content update on wishlist items** (title, description, images, category changes), and system announcements. Notifications differentiate between price changes (specific old/new price) and general updates (lists exact changed fields). Unread count badge in the navbar with bell icon.
 
 ---
 
@@ -116,13 +116,23 @@ Drag-and-drop document upload interface for superadmins. Supports `.md`, `.txt`,
 
 ## 👤 18. User Profile Management
 
-Edit profile with name, username, email, phone number, and avatar. Supports both file upload and cartoon avatar selection. Profile data persists across sessions.
+Edit profile with name, username, email, phone number, and avatar. Supports both file upload and cartoon avatar selection. **Change Password** section with old password verification, minimum length validation, and auto-send of confirmation email. Profile data persists across sessions.
 
 ---
 
-## 📧 19. Email Verification
+## 📧 19. Email System (Full Lifecycle)
 
-Token-based email verification flow. Users receive a verification link after signup. The `/verify` page validates the token and activates the account.
+Comprehensive email system powered by **Gmail SMTP** (STARTTLS on port 587) with branded HTML templates:
+
+| Email Type | Trigger | Expiry |
+|---|---|---|
+| **Welcome Email** | Auto-sent on signup | N/A |
+| **Verification Email** | Auto-sent on signup + manual trigger from Profile | 24 hours |
+| **Forgot Password** | User enters email on `/forgot-password` | 1 hour |
+| **Password Reset Confirmation** | After successful password reset | N/A |
+| **Password Changed Confirmation** | After changing password from Profile | N/A |
+
+Security features: email enumeration prevention (forgot-password always returns success), token versioning (single-use reset links), and minimum password requirements.
 
 ---
 
@@ -158,4 +168,5 @@ Token-based email verification flow. Users receive a verification link after sig
 | AI/LLM | Groq (Llama 3.3 70B) + sentence-transformers |
 | Real-time | WebSocket (FastAPI native) |
 | Auth | JWT + bcrypt + RBAC |
+| Email | Gmail SMTP (STARTTLS) + smtplib |
 | PDF Parsing | pdfminer.six |

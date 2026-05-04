@@ -13,10 +13,18 @@
 | Buyer-Seller Chat (WebSocket)                    | ✅ ChatRoom + Message                  | ✅ Chat.jsx                         |
 | Favorites / Wishlist                             | ✅ Favorite model + toggle             | ✅ Favorites.jsx                    |
 | Chatbot (RAG)                                    | ✅ ChromaDB + Groq                     | ✅ ChatBot.jsx                      |
-| Reports model                                    | ✅ AdReport model (no CRUD/endpoint)   | ❌                                  |
+| Reports                                          | ✅ AdReport CRUD + endpoint            | ✅ AdminReports.jsx                 |
 | Reviews model                                    | ✅ Review model (no CRUD/endpoint)     | ❌                                  |
 | Packages model                                   | ✅ AdPackage model (no CRUD/endpoint)  | ❌                                  |
-| SearchAlert model                                | ✅ model exists (no CRUD/endpoint)     | ❌                                  |
+| SearchAlerts                                     | ✅ Full CRUD + endpoint                | ✅ SearchAlerts.jsx                  |
+| Notifications                                    | ✅ Full CRUD + endpoint                | ✅ Notifications.jsx + Navbar badge |
+| **Recently Viewed (Server-Synced)**              | ✅ DB model + CRUD + endpoint          | ✅ Homepage section (backend data)  |
+| **Email Verification**                           | ✅ request-verify + verify-email       | ✅ VerifyEmail.jsx + Profile banner |
+| **Welcome Email (on Signup)**                    | ✅ Auto-sent in create_user            | N/A (backend-only)                  |
+| **Forgot Password**                              | ✅ forgot-password endpoint            | ✅ ForgotPassword.jsx               |
+| **Reset Password**                               | ✅ reset-password endpoint             | ✅ ResetPassword.jsx                |
+| **Change Password**                              | ✅ change-password endpoint            | ✅ Profile.jsx (Change Password)    |
+| **Wishlist Change Notifications**                | ✅ Triggers on any ad update           | ✅ Notification feed                |
 
 ### What Needs To Be Built 🔨
 
@@ -64,40 +72,44 @@
 
 ---
 
-## Phase 2: Email Verification System
+## Phase 2: Email System (COMPLETED ✅)
 
-**Goal:** Unverified users can click "Verify Account" → receive an email with a verification link → clicking it marks them as verified.
+**Goal:** Full email lifecycle — welcome, verification, forgot/reset password, change password.
 
-### Backend Changes
+### What Was Built
 
-#### [MODIFY] [config.py](file:///home/parth-prajapati/projects/quikr_copy/backend/app/core/config.py)
+#### Environment & Config
+- `.env` — SMTP credentials (Gmail App Password) + `FRONTEND_URL`
+- `config.py` — `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_NAME`, `FRONTEND_URL`
 
-- Add SMTP settings: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`
+#### Backend: `app/utils/email.py` (Complete Rewrite)
+- `_email_wrapper()` — Branded HTML template with QuikrClone header/footer
+- `_send_html_email()` — Core SMTP sender (Gmail STARTTLS)
+- `send_verification_email()` — 24hr token link
+- `send_welcome_email()` — Post-signup welcome with feature highlights
+- `send_forgot_password_email()` — 1hr reset link (red CTA button)
+- `send_password_changed_email()` — Confirmation with timestamp
 
-#### [NEW] `backend/app/utils/email.py`
+#### Backend: Users Module
+- `create_user()` — Modified to auto-send welcome + verification emails
+- `forgot_password()` — Generates 1hr reset token, always returns success (prevents email enumeration)
+- `reset_password()` — Validates token + `token_version`, sets new password, increments version
+- `change_password()` — Verifies old password, prevents reuse, sends confirmation email
+- Schemas: `ForgotPasswordRequest`, `ResetPasswordRequest`, `ChangePasswordRequest`
+- Endpoints: `POST /users/forgot-password/`, `POST /users/reset-password/`, `POST /users/change-password/`
 
-- `send_verification_email(email, token)` — Sends an HTML email with a verification link
-- Uses `smtplib` + `email.mime` (standard library, no extra deps)
-- Link format: `{FRONTEND_URL}/verify?token={jwt_token}`
+#### Frontend
+- `ForgotPassword.jsx` — Email form with success state
+- `ResetPassword.jsx` — Token validation + new password form + auto-redirect
+- `Login.jsx` — Added "Forgot Password?" link
+- `Profile.jsx` — Added "Change Password" section with expandable form
+- `App.jsx` — Routes: `/forgot-password`, `/reset-password`
 
-#### [MODIFY] [endpoint.py](file:///home/parth-prajapati/projects/quikr_copy/backend/app/modules/users/endpoint.py)
-
-- `POST /users/request-verification/` — Generates a time-limited JWT (24h) containing user_id, sends verification email
-- `GET /users/verify-email/?token=...` — Decodes the JWT, sets `user.is_verified = True`
-
-### Frontend Changes
-
-#### [MODIFY] [Profile.jsx](file:///home/parth-prajapati/projects/quikr_copy/frontend/src/components/Profile.jsx)
-
-- If `user.is_verified === false`, show a prominent "Verify Your Account" banner with a button
-- On click, call `POST /users/request-verification/`
-- Show success toast: "Verification email sent! Check your inbox."
-
-#### [NEW] `frontend/src/components/VerifyEmail.jsx`
-
-- Route: `/verify?token=...`
-- On mount, calls `GET /users/verify-email/?token=...`
-- Shows success ("Account verified!") or error ("Link expired") state
+#### Security
+- Email enumeration prevention (forgot-password always returns success)
+- Token versioning (reset tokens bound to `token_version`, single-use)
+- Password validation (min 6 chars, can't reuse current)
+- Token expiry: Verification = 24hrs, Reset = 1hr
 
 ---
 
@@ -175,51 +187,49 @@ class SearchAlertCreate(BaseModel):
 
 ---
 
-## Phase 5: Wishlist Change Tracking & Notifications
+## Phase 5: Wishlist Change Tracking & Notifications (COMPLETED ✅)
 
 **Goal:** If any item in user's wishlist has a price change, status change, or any update — show a notification.
 
-### Backend Changes
+### What Was Built
 
-#### [NEW] `backend/app/modules/notifications/model.py`
+#### Backend: `ads/crud.py` — `update_ad()` Enhancement
+- Tracks all modified fields during ad update (price, title, description, images, category, etc.)
+- Queries all users who have the ad in their favorites
+- Creates a `Notification` for each interested user with specific messages:
+  - **Price only changed:** "📉 Price Dropped!" or "📈 Price Changed!"
+  - **Other fields changed:** "🔔 Wishlist Item Updated!" with list of changed fields
+- Notifications include the ad title and exact fields that changed
 
-```python
-class Notification(Base, CommonModelMixin):
-    __tablename__ = "notifications"
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    type = Column(String(30))  # price_change, status_change, new_message, alert_match
-    title = Column(String(200))
-    message = Column(Text)
-    ad_id = Column(Integer, ForeignKey("ads.id"), nullable=True)
-    is_read = Column(Boolean, default=False)
-    data = Column(JSON, nullable=True)  # {"old_price": 5000, "new_price": 4500}
-```
-
-#### [MODIFY] Ad update CRUD
-
-- When an ad is updated (price change, status change), query all users who have this ad in their favorites
-- Create a `Notification` record for each of those users
-- Example: "Price dropped! iPhone 15 is now ₹45,000 (was ₹50,000)"
-
-#### [NEW] `backend/app/modules/notifications/endpoint.py`
-
+#### Backend: Notifications Module (Already Built)
 - `GET /notifications/me/` — List user's notifications (paginated)
 - `PUT /notifications/{id}/read/` — Mark as read
 - `PUT /notifications/read-all/` — Mark all as read
 - `GET /notifications/me/unread-count/` — Get unread count (for badge)
 
-### Frontend Changes
+#### Frontend
+- Navbar bell icon with unread count badge
+- `/notifications` page with full notification history
+- Click notification to navigate to relevant ad
 
-#### [MODIFY] [Navbar.jsx](file:///home/parth-prajapati/projects/quikr_copy/frontend/src/components/Navbar.jsx)
+---
 
-- Add a bell icon (🔔) with unread notification count badge
-- Clicking opens a dropdown panel showing recent notifications
+## Phase 5B: Recently Viewed Ads (COMPLETED ✅)
 
-#### [NEW] `frontend/src/components/Notifications.jsx`
+**Goal:** Persist browsing history in the database for cross-device access.
 
-- Route: `/notifications`
-- Full-page view of all notifications grouped by date
-- Click a notification to navigate to the relevant ad
+### What Was Built
+
+#### Backend: `recently_viewed` Module
+- `RecentlyViewed` model (user_id, ad_id, viewed_at)
+- CRUD: record view (upsert), get history (20-ad cap)
+- Endpoints: `POST /recently-viewed/` and `GET /recently-viewed/me/`
+- Registered in `base.py`, `alembic/env.py`, and `api.py`
+
+#### Frontend
+- `AdDetails.jsx` — Syncs each view to backend on page load
+- `HomePage.jsx` — Fetches from backend API (for logged-in users)
+- Removed legacy localStorage fallback for consistency
 
 ---
 
@@ -371,16 +381,17 @@ class OrderItem(Base, CommonModelMixin):
 
 ## Execution Priority (Recommended Order)
 
-| Priority | Phase                              | Effort | Impact                                   |
-| -------- | ---------------------------------- | ------ | ---------------------------------------- |
-| 🔴 P0    | Phase 1: Category-Specific Filters | Medium | High — Core UX improvement              |
-| 🔴 P0    | Phase 3: Ad Management             | Medium | High — Users can't manage ads currently |
-| 🟡 P1    | Phase 2: Email Verification        | Low    | Medium — Security improvement           |
-| 🟡 P1    | Phase 7: Inquiries Dashboard       | Low    | Medium — Seller experience              |
-| 🟡 P1    | Phase 5: Notifications             | Medium | High — Engagement boost                 |
-| 🟢 P2    | Phase 4: Search Alerts             | Medium | Medium — Power user feature             |
-| 🟢 P2    | Phase 6: Cart & Orders             | High   | High — E-commerce capability            |
-| 🟢 P2    | Phase 8: Admin Enhancements        | Medium | Medium — Platform management            |
+| Priority | Phase                              | Effort | Impact                                   | Status |
+| -------- | ---------------------------------- | ------ | ---------------------------------------- | ------ |
+| 🔴 P0    | Phase 1: Category-Specific Filters | Medium | High — Core UX improvement              | ✅ Done |
+| 🔴 P0    | Phase 3: Ad Management             | Medium | High — Users can't manage ads currently | ✅ Done |
+| 🟡 P1    | Phase 2: Email System              | Medium | High — Full auth + password lifecycle   | ✅ Done |
+| 🟡 P1    | Phase 7: Inquiries Dashboard       | Low    | Medium — Seller experience              | ✅ Done |
+| 🟡 P1    | Phase 5: Notifications             | Medium | High — Engagement boost                 | ✅ Done |
+| 🟡 P1    | Phase 5B: Recently Viewed          | Low    | Medium — Cross-device browsing history  | ✅ Done |
+| 🟢 P2    | Phase 4: Search Alerts             | Medium | Medium — Power user feature             | ✅ Done |
+| ⚪ P3    | Phase 6: Cart & Orders             | High   | High — E-commerce capability            | ❌ Removed (classifieds focus) |
+| 🟢 P2    | Phase 8: Admin Enhancements        | Medium | Medium — Platform management            | Pending |
 
 ---
 
@@ -394,11 +405,11 @@ alembic revision --autogenerate -m "add notifications and orders tables"
 alembic upgrade head
 ```
 
-## Open Questions
+## Open Questions (Resolved)
 
-> [!IMPORTANT]
+> [!NOTE]
 >
-> 1. **Email Provider:** Which SMTP provider should I use? Gmail (App Password), SendGrid, or Mailgun? Gmail is simplest for development.
-> 2. **Cart & Orders:** Since this is a classifieds platform (not e-commerce), should the "Cart" be more of an "Interest List" where placing an order means "I want to buy this, notify the seller"? Or do you want actual payment integration (Razorpay/Stripe)?
-> 3. **Notifications:** Should notifications be real-time (WebSocket push) or poll-based (check every 30 seconds)? WebSocket is better UX but more complex.
-> 4. **Which phase do you want me to start with first?**
+> 1. **Email Provider:** ✅ Resolved — Gmail SMTP with App Password (`parthmagic123@gmail.com`)
+> 2. **Cart & Orders:** ✅ Resolved — Removed. Platform focuses on direct buyer-seller communication (Chat + Phone).
+> 3. **Notifications:** ✅ Resolved — Poll-based via API (unread count badge in navbar).
+> 4. **Recently Viewed:** ✅ Resolved — Server-synced via PostgreSQL `recently_viewed_ads` table (replaced localStorage).

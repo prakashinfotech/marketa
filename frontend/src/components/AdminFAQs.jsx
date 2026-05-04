@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import {
   HelpCircle, Plus, Edit3, Trash2, X, Check, Loader2,
-  ToggleLeft, ToggleRight, Search, MessageSquare
+  ToggleLeft, ToggleRight, Search, MessageSquare, AlertCircle
 } from 'lucide-react';
 
 export default function AdminFAQs() {
@@ -12,6 +12,8 @@ export default function AdminFAQs() {
   const [editingFaq, setEditingFaq] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleteModalFaq, setDeleteModalFaq] = useState(null);
+
 
   const [form, setForm] = useState({
     question: '',
@@ -80,10 +82,16 @@ export default function AdminFAQs() {
     }
   };
 
-  const handleDelete = async (faq) => {
-    if (!window.confirm(`Delete FAQ "${faq.question}"?`)) return;
+  const handleDelete = (faq) => {
+    setDeleteModalFaq(faq);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModalFaq) return;
+    const faqId = deleteModalFaq.id;
+    setDeleteModalFaq(null);
     try {
-      await api.delete(`/chatbot/faqs/${faq.id}/`);
+      await api.delete(`/chatbot/faqs/${faqId}/`);
       fetchFAQs();
     } catch (err) {
       console.error('Failed to delete FAQ', err);
@@ -307,6 +315,35 @@ export default function AdminFAQs() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete FAQ Confirmation Modal */}
+      {deleteModalFaq && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in p-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete FAQ?</h3>
+            <p className="text-center text-gray-600 mb-6">
+              Are you sure you want to delete the FAQ <strong>"{deleteModalFaq.question}"</strong>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModalFaq(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeDelete}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+              >
+                Yes, Delete FAQ
+              </button>
+            </div>
           </div>
         </div>
       )}

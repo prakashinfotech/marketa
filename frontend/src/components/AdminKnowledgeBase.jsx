@@ -41,6 +41,11 @@ export default function AdminKnowledgeBase() {
       return;
     }
 
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadResult({ type: 'error', msg: 'File exceeds the 5MB size limit.' });
+      return;
+    }
+
     setUploading(true);
     setUploadResult(null);
 

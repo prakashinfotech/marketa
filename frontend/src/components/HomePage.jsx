@@ -188,15 +188,14 @@ export default function HomePage() {
       setFavorites(new Set());
     }
 
-    // Fetch recently viewed ads from localStorage
-    try {
-      const viewedIds = JSON.parse(localStorage.getItem('recently_viewed_ads') || '[]');
-      if (viewedIds.length > 0) {
-        api.post('/ads/by-ids/', { ids: viewedIds.slice(0, 10) }).then(res => {
-          if (res.data.success) setRecentlyViewedAds(res.data.data || []);
-        }).catch(() => {});
-      }
-    } catch (e) { /* ignore */ }
+    // Fetch recently viewed ads
+    if (isLoggedIn) {
+      api.get('/recently-viewed/me/').then(res => {
+        if (res.data.success) setRecentlyViewedAds(res.data.data || []);
+      }).catch(() => {});
+    } else {
+      setRecentlyViewedAds([]);
+    }
   }, [isLoggedIn]);
 
   const toggleFavorite = async (adUuid) => {
@@ -466,8 +465,11 @@ export default function HomePage() {
             </div>
             <button
               onClick={() => {
-                localStorage.removeItem('recently_viewed_ads');
-                setRecentlyViewedAds([]);
+                if (isLoggedIn) {
+                  api.delete('/recently-viewed/').then(() => {
+                    setRecentlyViewedAds([]);
+                  });
+                }
               }}
               className="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
             >

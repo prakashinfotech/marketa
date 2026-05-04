@@ -24,6 +24,8 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
   const prevMsgCount = useRef(0);
   const [markingSold, setMarkingSold] = useState(false);
+  const [showSoldModal, setShowSoldModal] = useState(false);
+
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -131,8 +133,14 @@ export default function Chat() {
   const activeRoom = rooms.find(r => r.id === activeRoomId);
   const isSellerInChat = activeRoom && activeRoom.seller_id === user?.id;
 
-  const markAsSold = async () => {
-    if (!activeRoom || !window.confirm(`Mark "${activeRoom.ad_title}" as Sold?`)) return;
+  const markAsSold = () => {
+    if (!activeRoom) return;
+    setShowSoldModal(true);
+  };
+
+  const executeMarkAsSold = async () => {
+    if (!activeRoom) return;
+    setShowSoldModal(false);
     setMarkingSold(true);
     try {
       const res = await api.put(`/ads/${activeRoom.ad_id}/status/`, { status: 'sold' });
@@ -348,6 +356,38 @@ export default function Chat() {
         </div>
 
       </div>
+
+      {/* Mark as Sold Confirmation Modal */}
+      {showSoldModal && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 mx-auto mb-4">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Mark as Sold?</h3>
+              <p className="text-center text-gray-600 mb-6">
+                Are you sure you want to mark <strong>"{activeRoom?.ad_title}"</strong> as sold? This will hide it from search results.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowSoldModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeMarkAsSold}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"
+                >
+                  Yes, Mark Sold
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

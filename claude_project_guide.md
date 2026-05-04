@@ -129,6 +129,8 @@ QuikrClone is a classifieds platform (Quikr.com clone) built with:
 2. Every API returns: `{"success": bool, "msg": str, "data": any}`
 3. Frontend uses functional components + hooks only
 4. All models inherit `CommonModelMixin` (id, uuid, timestamps, soft-delete)
+5. Email sending uses `app/utils/email.py` with Gmail SMTP (STARTTLS)
+6. All email templates use a common branded HTML wrapper
 
 ## Skills
 - Read `skills/frontend_rules.md` when working on frontend code
@@ -373,7 +375,7 @@ A classifieds platform inspired by Quikr.com where users can:
 4. Admin login → Manage categories/locations/FAQs/reports
 
 ## Modules Built
-- Users (auth, profile, email verification)
+- Users (auth, profile, email verification, password reset, change password)
 - Ads (CRUD, images, similar ads)
 - Categories (with dynamic attributes)
 - Locations (hierarchical)
@@ -381,6 +383,9 @@ A classifieds platform inspired by Quikr.com where users can:
 - Chatbot (FAQ + RAG knowledge base)
 - Favorites, Notifications, Search Alerts
 - Reports, Reviews, Contact, Packages
+- Recently Viewed (server-synced via DB)
+- Email Flows (welcome, verify, forgot/reset password, change password)
+- Wishlist Notifications (any ad update triggers notification)
 ```
 
 #### File: `docs/modules_specification.md`
@@ -427,12 +432,23 @@ A classifieds platform inspired by Quikr.com where users can:
 
 ## 7. Supporting Modules
 - **Favorites:** Save/unsave ads, list favorites
-- **Notifications:** System notifications for users
+- **Notifications:** System notifications for users (wishlist updates, price changes, general ad edits)
 - **Search Alerts:** Save search criteria, alert on new matches
 - **Reports:** Report inappropriate ads
 - **Reviews:** Rate sellers
 - **Contact:** Contact form submissions
 - **Packages:** Premium ad packages/pricing
+- **Recently Viewed:** Server-synced browsing history (PostgreSQL), 20-ad cap
+
+## 8. Email System
+- SMTP via Gmail (STARTTLS on port 587)
+- **Welcome Email:** Auto-sent after signup
+- **Email Verification:** Token-based (24hr expiry), auto-sent on signup + manual trigger from Profile
+- **Forgot Password:** Generates 1hr reset token, emails reset link (prevents email enumeration)
+- **Reset Password:** Validates token + token_version, sets new password, invalidates old tokens
+- **Change Password:** Authenticated flow, verifies old password, sends confirmation email
+- **Wishlist Notifications:** When any favorited ad is updated, all interested users get notified
+- All emails use branded HTML templates with consistent QuikrClone branding
 ```
 
 ---
@@ -555,12 +571,15 @@ Phase 4: Advanced Features
   22. Notifications + Search Alerts
   23. Admin Panel
   24. Reports + Reviews
+  25. Recently Viewed (server-synced)
+  26. Wishlist Change Notifications
+  27. Email Flows (welcome, verify, forgot/reset/change password)
 
 Phase 5: Polish
-  25. Responsive design
-  26. Error handling
-  27. Performance optimization
-  28. Testing
+  28. Responsive design
+  29. Error handling
+  30. Performance optimization
+  31. Testing
 ```
 
 ### 4.5 Claude Code CLI Commands to Know

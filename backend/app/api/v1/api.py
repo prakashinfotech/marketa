@@ -19,6 +19,7 @@ from app.modules.chatbot import endpoint as chatbot
 from app.modules.search_alerts import endpoint as search_alerts
 from app.modules.notifications import endpoint as notifications
 from app.modules.reports import endpoint as reports
+from app.modules.recently_viewed import endpoint as recently_viewed
 
 api_router = APIRouter()
 
@@ -33,3 +34,4 @@ api_router.include_router(chatbot.router, prefix="/chatbot", tags=["Chatbot"])
 api_router.include_router(search_alerts.router, prefix="/alerts", tags=["Search Alerts"])
 api_router.include_router(notifications.router, tags=["Notifications"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Reports"])
+api_router.include_router(recently_viewed.router, prefix="/recently-viewed", tags=["Recently Viewed"])

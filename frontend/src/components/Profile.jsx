@@ -4,7 +4,7 @@ import { useAuth } from '../AuthContext';
 import api from '../api';
 import {
   User, Mail, AtSign, Phone, Calendar, Shield,
-  Save, AlertCircle, CheckCircle, Loader2, Camera, Eye, X, Smile
+  Save, AlertCircle, CheckCircle, Loader2, Camera, Eye, EyeOff, X, Smile, Lock
 } from 'lucide-react';
 
 // Predefined Cartoon Avatars with specific styles
@@ -46,6 +46,21 @@ export default function Profile() {
   const [viewingPhoto, setViewingPhoto] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Change Password state
+  const [pwForm, setPwForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [showPwFields, setShowPwFields] = useState(false);
+
+  // Account Deletion state
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteCode, setDeleteCode] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -114,6 +129,11 @@ export default function Profile() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Avatar image must be smaller than 5MB.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     setSaving(true);
@@ -180,6 +200,87 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess('');
+
+    if (pwForm.new_password.length < 6) {
+      setPwError('New password must be at least 6 characters.');
+      return;
+    }
+    if (pwForm.new_password !== pwForm.confirm_password) {
+      setPwError('New passwords do not match.');
+      return;
+    }
+
+    setPwSaving(true);
+    try {
+      const res = await api.post('/users/change-password/', {
+        old_password: pwForm.old_password,
+        new_password: pwForm.new_password,
+      });
+      if (res.data.success) {
+        setPwSuccess('Password changed successfully! A confirmation email has been sent.');
+        setPwForm({ old_password: '', new_password: '', confirm_password: '' });
+        setShowPwFields(false);
+      } else {
+        setPwError(res.data.msg || 'Failed to change password.');
+      }
+    } catch (err) {
+      setPwError(err.response?.data?.msg || 'Something went wrong.');
+    } finally {
+      setPwSaving(false);
+    }
+  };
+
+  const handleRequestDelete = async () => {
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      const res = await api.post('/users/request-delete-account/');
+      if (res.data.success) {
+        setDeleteMode('confirm');
+      } else {
+        setDeleteError(res.data.msg || 'Failed to request account deletion.');
+      }
+    } catch (err) {
+      setDeleteError(err.response?.data?.msg || 'Something went wrong.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteCode) {
+      setDeleteError('Please enter the confirmation code.');
+      return;
+    }
+    
+    // Show custom modal instead of window.confirm
+    setShowDeleteConfirmModal(true);
+  };
+
+  const executeAccountDeletion = async () => {
+    setDeleteLoading(true);
+    setDeleteError('');
+    setShowDeleteConfirmModal(false);
+    try {
+      const res = await api.post('/users/confirm-delete-account/', { code: deleteCode });
+      if (res.data.success) {
+        logout(); // Automatically redirects to login
+      } else {
+        setDeleteError(res.data.msg || 'Invalid code. Deletion failed.');
+      }
+    } catch (err) {
+      setDeleteError(err.response?.data?.msg || 'Something went wrong.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+
 
   if (loading) {
     return (
@@ -338,6 +439,175 @@ export default function Profile() {
         </form>
       </div>
 
+      {/* Change Password */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Change Password</h2>
+          {!showPwFields && (
+            <button
+              onClick={() => setShowPwFields(true)}
+              className="text-primary-600 text-sm font-semibold hover:underline flex items-center gap-1.5"
+            >
+              <Lock className="w-4 h-4" /> Change
+            </button>
+          )}
+        </div>
+
+        {pwError && (
+          <div className="flex items-start gap-2 bg-red-50 text-red-700 p-3 rounded-lg mb-5 text-sm">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>{pwError}</span>
+          </div>
+        )}
+        {pwSuccess && (
+          <div className="flex items-start gap-2 bg-green-50 text-green-700 p-3 rounded-lg mb-5 text-sm">
+            <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>{pwSuccess}</span>
+          </div>
+        )}
+
+        {showPwFields && (
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  required
+                  value={pwForm.old_password}
+                  onChange={(e) => setPwForm({ ...pwForm, old_password: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm"
+                  placeholder="Enter your current password"
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={pwForm.new_password}
+                    onChange={(e) => setPwForm({ ...pwForm, new_password: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm"
+                    placeholder="Min 6 characters"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={pwForm.confirm_password}
+                    onChange={(e) => setPwForm({ ...pwForm, confirm_password: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm"
+                    placeholder="Re-enter new password"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => { setShowPwFields(false); setPwError(''); setPwForm({ old_password: '', new_password: '', confirm_password: '' }); }}
+                className="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={pwSaving}
+                className="flex items-center gap-2 bg-primary-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
+              >
+                {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                {pwSaving ? 'Changing...' : 'Change Password'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {!showPwFields && !pwSuccess && (
+          <p className="text-sm text-gray-400">Click "Change" to update your password. You'll need your current password to confirm.</p>
+        )}
+      </div>
+
+      {/* Danger Zone (Account Deletion) */}
+      <div className="bg-red-50 rounded-xl shadow-sm border border-red-200 p-6 md:p-8 mt-8">
+        <h2 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h2>
+        <p className="text-sm text-red-700 mb-6">Permanently delete your account and all associated data. This action cannot be undone.</p>
+        
+        {deleteError && (
+          <div className="flex items-start gap-2 bg-red-100 text-red-800 p-3 rounded-lg mb-5 text-sm border border-red-200">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>{deleteError}</span>
+          </div>
+        )}
+
+        {!deleteMode ? (
+          <button
+            onClick={() => setDeleteMode('request')}
+            className="btn-primary bg-red-600 hover:bg-red-700 focus:ring-red-500 border-none px-6 py-2"
+          >
+            Delete Account
+          </button>
+        ) : deleteMode === 'request' ? (
+          <div className="bg-white p-5 rounded-lg border border-red-100 shadow-sm">
+            <p className="text-sm text-gray-800 mb-4 font-medium">Are you sure? A confirmation code will be sent to your email.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteMode(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRequestDelete}
+                disabled={deleteLoading}
+                className="btn-primary bg-red-600 hover:bg-red-700 border-none flex items-center gap-2"
+              >
+                {deleteLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Send Confirmation Code
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white p-5 rounded-lg border border-red-100 shadow-sm animate-fade-in">
+            <p className="text-sm text-gray-800 mb-4">We've sent a code to your email. Enter it below to confirm deletion.</p>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={deleteCode}
+                onChange={(e) => setDeleteCode(e.target.value)}
+                placeholder="Enter confirmation code"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 uppercase tracking-wide"
+              />
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleteLoading || !deleteCode}
+                className="btn-primary bg-red-600 hover:bg-red-700 border-none shrink-0 flex items-center gap-2"
+              >
+                {deleteLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Confirm Deletion
+              </button>
+            </div>
+            <button
+              onClick={() => { setDeleteMode(false); setDeleteCode(''); setDeleteError(''); }}
+              className="text-gray-500 text-xs hover:text-gray-700 mt-3 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Full Screen Photo Viewer */}
       {viewingPhoto && profile?.avatar && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
@@ -374,6 +644,38 @@ export default function Profile() {
                     </div>
                   </button>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Account Deletion Confirmation Modal */}
+      {showDeleteConfirmModal && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Account?</h3>
+              <p className="text-center text-gray-600 mb-6">
+                Are you absolutely sure you want to permanently delete your account? This action cannot be undone and you will lose all your ads, favorites, and profile data.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirmModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeAccountDeletion}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                >
+                  Yes, Delete My Account
+                </button>
               </div>
             </div>
           </div>

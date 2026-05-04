@@ -47,7 +47,8 @@ fastapi-template/
 │   │       └── endpoint.py      # FastAPI router endpoints
 │   │
 │   └── utils/                   # Shared utilities
-│       └── logger.py            # Centralized logging setup
+│       ├── logger.py            # Centralized logging setup
+│       └── email.py             # Email sending (SMTP, branded templates)
 │
 └── README.md                    # This file
 ```
@@ -89,6 +90,12 @@ nano .env
 | `PG_DBNAME`      | Database name             | `my_project_db`               |
 | `PG_HOSTNAME`    | Database host             | `localhost`                   |
 | `JWT_SECRET_KEY` | Secret key for JWT tokens | (generate a long random string) |
+| `SMTP_HOST`      | SMTP server hostname      | `smtp.gmail.com`              |
+| `SMTP_PORT`      | SMTP server port          | `587`                         |
+| `SMTP_USER`      | SMTP login email          | `you@gmail.com`               |
+| `SMTP_PASSWORD`  | SMTP app password         | (Gmail App Password)            |
+| `SMTP_FROM_NAME` | Sender display name       | `QuikrClone`                  |
+| `FRONTEND_URL`   | Frontend base URL         | `http://localhost:3000`       |
 
 ### 3. Create Virtual Environment & Install Dependencies
 

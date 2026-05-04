@@ -41,7 +41,8 @@ class Settings(BaseSettings):
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
     SMTP_FROM_EMAIL: str = "noreply@quikrclone.com"
-    FRONTEND_URL: str = "http://localhost:5173"
+    SMTP_FROM_NAME: str = "QuikrClone"
+    FRONTEND_URL: str = "http://localhost:3000"
 
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
