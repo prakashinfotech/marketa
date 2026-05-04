@@ -293,3 +293,127 @@ def verify_email(
             status_code=500,
             content={"success": False, "msg": "Internal server error", "data": {}},
         )
+
+
+@router.post("/forgot-password/", response_model=schema.Response)
+def forgot_password(
+    payload: schema.ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """ Sends a password reset link to the user's email. """
+    try:
+        _logger.info("Forgot password request for: %s", payload.email)
+        response = crud.user.forgot_password(db=db, payload=payload)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error in forgot-password: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.post("/reset-password/", response_model=schema.Response)
+def reset_password(
+    payload: schema.ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """ Resets a user's password using a valid reset token. """
+    try:
+        _logger.info("Reset password attempt.")
+        response = crud.user.reset_password(db=db, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error in reset-password: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.post("/change-password/", response_model=schema.Response)
+def change_password(
+    payload: schema.ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Changes the current user's password (requires old password). """
+    try:
+        _logger.info("Change password request from: %s", current_user.email)
+        response = crud.user.change_password(db=db, user_obj=current_user, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error in change-password: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+@router.post("/request-delete-account/", response_model=schema.Response)
+def request_delete_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Requests account deletion by sending a confirmation code to email. """
+    try:
+        response = crud.user.request_account_deletion(db=db, user=current_user)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error requesting account deletion: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+@router.post("/confirm-delete-account/", response_model=schema.Response)
+def confirm_delete_account(
+    payload: schema.ConfirmDeleteAccountRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """ Confirms account deletion with the static code and performs soft delete. """
+    try:
+        response = crud.user.confirm_account_deletion(db=db, user=current_user, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error confirming account deletion: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+

@@ -1,0 +1,3 @@
+"""
+Recently Viewed Ads module.
+"""

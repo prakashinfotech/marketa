@@ -52,20 +52,18 @@ export default function AdDetails() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showShareMenu]);
 
-  // Separate effect for view count — runs only once even in StrictMode
+  // Separate effect for view count — runs only once even in StrictMode and prevents refresh inflation
   useEffect(() => {
     if (!viewCounted.current && id) {
       viewCounted.current = true;
-      api.post(`/ads/${id}/view/`).catch(() => {});
-
-      // Store in localStorage for "Recently Viewed" (max 20, most recent first)
-      try {
-        const KEY = 'recently_viewed_ads';
-        const stored = JSON.parse(localStorage.getItem(KEY) || '[]');
-        const filtered = stored.filter(aid => String(aid) !== String(id));
-        filtered.unshift(Number(id));
-        localStorage.setItem(KEY, JSON.stringify(filtered.slice(0, 20)));
-      } catch (e) { /* ignore localStorage errors */ }
+      
+      // Check session storage to prevent increment on page refresh
+      const viewedAds = JSON.parse(sessionStorage.getItem('viewedAds') || '[]');
+      if (!viewedAds.includes(id)) {
+        api.post(`/ads/${id}/view/`).catch(() => {});
+        viewedAds.push(id);
+        sessionStorage.setItem('viewedAds', JSON.stringify(viewedAds));
+      }
     }
   }, [id]);
 
@@ -75,6 +73,12 @@ export default function AdDetails() {
       const res = await api.get(`/ads/${id}/`);
       if (res.data.success) {
         setAd(res.data.data);
+        
+        // Sync to backend recently viewed
+        if (isLoggedIn) {
+          api.post('/recently-viewed/', { ad_uuid: res.data.data.uuid }).catch(() => {});
+        }
+
         // Fetch similar ads
         api.get(`/ads/${id}/similar/`).then(simRes => {
           if (simRes.data.success) setSimilarAds(simRes.data.data || []);

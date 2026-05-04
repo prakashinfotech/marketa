@@ -62,6 +62,13 @@ export default function PostAd() {
       const res = await api.get(`/ads/${adId}/`);
       if (res.data.success) {
         const ad = res.data.data;
+        
+        // Prevent editing someone else's ad
+        if (ad.user?.id && ad.user.id !== user?.id) {
+          navigate('/');
+          return;
+        }
+
         setTitle(ad.title || '');
         setDescription(ad.description || '');
         setPrice(ad.price || '');
@@ -155,6 +162,15 @@ export default function PostAd() {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    
+    // Check file size (max 5MB per image)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    const oversizedFiles = files.filter(f => f.size > MAX_SIZE);
+    if (oversizedFiles.length > 0) {
+      setError('One or more images exceed the 5MB size limit.');
+      return;
+    }
+
     const totalImages = (existingImages.length - removedImageIds.length) + images.length + files.length;
     if (totalImages > 5) {
       setError('You can have a maximum of 5 images total.');
@@ -182,10 +198,28 @@ export default function PostAd() {
     setError('');
     setSuccess('');
 
-    // In edit mode, category and city are optional if not changed
-    if (!isEditMode && (!categoryId || !cityId || !title)) {
-      setError('Please fill in all required fields.');
+    // Validate Required Fields
+    if (!title || !categoryId || !cityId || !description || !price) {
+      setError('Please fill in all required fields (Title, Category, City, Description, Price).');
       return;
+    }
+
+    if (parseFloat(price) <= 0) {
+      setError('Price must be greater than 0.');
+      return;
+    }
+
+    if (!isEditMode && images.length === 0) {
+      setError('Please upload at least 1 image.');
+      return;
+    }
+
+    if (isEditMode) {
+      const remainingImages = (existingImages.length - removedImageIds.length) + images.length;
+      if (remainingImages === 0) {
+        setError('An ad must have at least 1 image.');
+        return;
+      }
     }
     if (isEditMode && !title) {
         setError('Title is required.');
@@ -329,8 +363,8 @@ export default function PostAd() {
             </div>
 
             <div>
-              <label className="label">Description</label>
-              <textarea rows={4} className="input-field resize-none" value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what you are selling. Include details like age, warranty, features..." />
+              <label className="label">Description <span className="text-red-500">*</span></label>
+              <textarea required rows={4} className="input-field resize-none" value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what you are selling. Include details like age, warranty, features..." />
             </div>
           </div>
         </div>
@@ -398,12 +432,11 @@ export default function PostAd() {
           </h2>
           <div className="grid md:grid-cols-2 gap-5 items-end">
             <div>
-              <label className="label">Price (₹)</label>
+              <label className="label">Price (₹) <span className="text-red-500">*</span></label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-gray-500">₹</span>
-                <input type="number" min="0" step="0.01" className="input-field pl-8 font-bold text-gray-900" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
+                <input required type="number" min="1" step="0.01" className="input-field pl-8 font-bold text-gray-900" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" />
               </div>
-              <p className="text-xs text-gray-400 mt-1.5">Leave blank for "Contact for price"</p>
             </div>
             
             <div className="h-11 flex items-center">

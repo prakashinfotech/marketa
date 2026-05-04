@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
-import { Bell, BellOff, Trash2, Plus, Loader2, Search, MapPin, IndianRupee } from 'lucide-react';
+import { Bell, BellOff, Trash2, Plus, Loader2, Search, MapPin, IndianRupee, AlertCircle } from 'lucide-react';
 
 export default function SearchAlerts() {
   const { isLoggedIn } = useAuth();
@@ -10,6 +10,8 @@ export default function SearchAlerts() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [deleteModalAlertId, setDeleteModalAlertId] = useState(null);
+
 
   // Form State
   const [categories, setCategories] = useState([]);
@@ -138,8 +140,14 @@ export default function SearchAlerts() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this search alert?')) return;
+  const handleDelete = (id) => {
+    setDeleteModalAlertId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModalAlertId) return;
+    const id = deleteModalAlertId;
+    setDeleteModalAlertId(null);
     setActionLoading(`delete-${id}`);
     try {
       const res = await api.delete(`/alerts/${id}/`);
@@ -274,6 +282,38 @@ export default function SearchAlerts() {
           )}
         </div>
       </div>
+
+      {/* Delete Alert Confirmation Modal */}
+      {deleteModalAlertId && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Alert?</h3>
+              <p className="text-center text-gray-600 mb-6">
+                Are you sure you want to delete this search alert?
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteModalAlertId(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeDelete}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                >
+                  Yes, Delete Alert
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

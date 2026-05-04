@@ -59,6 +59,28 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    """ Schema for requesting a password reset link. """
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """ Schema for resetting password via email link. """
+    token: str
+    new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    """ Schema for changing password while logged in. """
+    old_password: str
+    new_password: str
+
+
+class ConfirmDeleteAccountRequest(BaseModel):
+    """ Schema for confirming account deletion. """
+    code: str
+
+
 # ── Response Schemas ─────────────────────────────────────────────────────────
 
 class UserResponse(BaseModel):

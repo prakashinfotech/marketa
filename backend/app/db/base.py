@@ -41,3 +41,6 @@ from app.modules.packages.model import AdPackage  # noqa: F401
 
 # ── Chatbot / Knowledge Base ─────────────────────────────────────
 from app.modules.chatbot.model import KnowledgeChunk, FAQ  # noqa: F401
+
+# ── Recently Viewed ──────────────────────────────────────────────
+from app.modules.recently_viewed.model import RecentlyViewed  # noqa: F401

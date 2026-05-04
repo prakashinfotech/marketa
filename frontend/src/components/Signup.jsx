@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import api from '../api';
 import { User, Mail, Lock, AtSign, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -8,6 +9,7 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -23,7 +25,10 @@ export default function Signup() {
     try {
       const res = await api.post('/users/create/', form);
       if (res.data.success) {
-        navigate('/login', { state: { registered: true } });
+        // Auto-login after successful registration
+        const { tokens, user } = res.data.data;
+        login(tokens.access_token, tokens.refresh_token, user);
+        navigate('/');
       } else {
         setError(res.data.msg || 'Signup failed');
       }

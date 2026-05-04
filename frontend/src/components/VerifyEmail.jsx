@@ -21,19 +21,27 @@ export default function VerifyEmail() {
 
     const verify = async () => {
       try {
-        const res = await api.get(`/users/verify-email/?token=${token}`);
+        const res = await api.get(`/users/verify-email/?token=${encodeURIComponent(token)}`);
         if (res.data.success) {
           setStatus('success');
           setMessage(res.data.msg || 'Your account has been successfully verified!');
           // Attempt to refresh user profile to update badge if logged in
-          await fetchUserProfile();
+          try {
+            await fetchUserProfile();
+          } catch (_) {
+            // Ignore — user might not be logged in
+          }
         } else {
           setStatus('error');
           setMessage(res.data.msg || 'Verification failed. The link might be expired.');
         }
       } catch (err) {
+        console.error('Verify email error:', err.response?.status, err.response?.data);
         setStatus('error');
-        setMessage(err.response?.data?.msg || 'An error occurred during verification.');
+        // Backend returns {success, msg, data} even on 400, so extract msg from err.response.data
+        const backendMsg = err.response?.data?.msg;
+        const detail = err.response?.data?.detail;
+        setMessage(backendMsg || detail || 'An error occurred during verification.');
       }
     };
 

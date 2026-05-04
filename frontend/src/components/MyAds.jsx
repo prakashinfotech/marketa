@@ -14,6 +14,7 @@ export default function MyAds() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all'); // all, active, sold, inactive
   const [actionLoading, setActionLoading] = useState(null);
+  const [deleteModalAdId, setDeleteModalAdId] = useState(null);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -54,9 +55,14 @@ export default function MyAds() {
     }
   };
 
-  const handleDelete = async (adId) => {
-    if (!window.confirm("Are you sure you want to delete this ad? This action cannot be undone.")) return;
-    
+  const handleDelete = (adId) => {
+    setDeleteModalAdId(adId);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModalAdId) return;
+    const adId = deleteModalAdId;
+    setDeleteModalAdId(null);
     setActionLoading(`delete-${adId}`);
     try {
       const res = await api.delete(`/ads/${adId}/`);
@@ -234,6 +240,38 @@ export default function MyAds() {
           </div>
         )}
       </div>
+
+      {/* Delete Ad Confirmation Modal */}
+      {deleteModalAdId && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Ad?</h3>
+              <p className="text-center text-gray-600 mb-6">
+                Are you sure you want to permanently delete this ad? This action cannot be undone.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteModalAdId(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={executeDelete}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                >
+                  Yes, Delete Ad
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

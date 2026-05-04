@@ -459,33 +459,46 @@ class AdCRUD:
                 return {"success": False, "msg": "You do not have permission to update this ad.", "data": {}}
 
             old_price = ad.price
+            changed_fields = []
 
             # Update text fields
-            if title is not None:
+            if title is not None and ad.title != title:
                 ad.title = title
-            if description is not None:
+                changed_fields.append("title")
+            if description is not None and ad.description != description:
                 ad.description = description
+                changed_fields.append("description")
             if price is not None:
                 from decimal import Decimal, InvalidOperation
                 try:
-                    ad.price = Decimal(str(price))
+                    new_p = Decimal(str(price))
+                    if ad.price != new_p:
+                        ad.price = new_p
+                        changed_fields.append("price")
                 except (InvalidOperation, ValueError):
                     pass
-            if price_negotiable is not None:
+            if price_negotiable is not None and ad.price_negotiable != price_negotiable:
                 ad.price_negotiable = price_negotiable
-            if condition is not None:
+                changed_fields.append("price negotiability")
+            if condition is not None and ad.condition != condition:
                 ad.condition = condition
-            if ad_type is not None:
+                changed_fields.append("condition")
+            if ad_type is not None and ad.ad_type != ad_type:
                 ad.ad_type = ad_type
-            if category_id is not None:
+                changed_fields.append("ad type")
+            if category_id is not None and ad.category_id != category_id:
                 ad.category_id = category_id
-            if city_id is not None:
+                changed_fields.append("category")
+            if city_id is not None and ad.city_id != city_id:
                 ad.city_id = city_id
-            if locality is not None:
+                changed_fields.append("city")
+            if locality is not None and ad.locality != locality:
                 ad.locality = locality
+                changed_fields.append("locality")
 
             # ── Remove images ────────────────────────────────────────────────
             if removed_image_ids:
+                changed_fields.append("images")
                 imgs_to_remove = (
                     db.query(AdImage)
                     .filter(AdImage.id.in_(removed_image_ids), AdImage.ad_id == ad.id)
@@ -502,6 +515,8 @@ class AdCRUD:
 
             # ── Add new images ───────────────────────────────────────────────
             if images:
+                if "images" not in changed_fields:
+                    changed_fields.append("images")
                 upload_dir = _get_ad_upload_dir(user_id, ad.id)
                 # Get max current display_order
                 existing_images = db.query(AdImage).filter(AdImage.ad_id == ad.id).all()
@@ -528,21 +543,33 @@ class AdCRUD:
             db.commit()
             db.refresh(ad)
             
-            # Phase 5: Trigger notification if price dropped
+            # Phase 5: Trigger notification if anything changed
             new_price = ad.price
-            _logger.info("Ad %d price check - new: %s, old: %s", ad.id, new_price, old_price)
-            if new_price is not None and old_price is not None and new_price < old_price:
+            if changed_fields:
                 from app.modules.notifications.crud import notification_crud
-                _logger.info("Price dropped for ad %d. Notifying %d favorites.", ad.id, len(ad.favorites))
+                _logger.info("Ad %d changed fields: %s. Notifying %d favorites.", ad.id, changed_fields, len(ad.favorites))
                 for fav in ad.favorites:
+                    # Provide specific messaging if only the price changed vs other details
+                    if "price" in changed_fields and len(changed_fields) == 1:
+                        if old_price is not None and new_price is not None and new_price < old_price:
+                            title = "Price Dropped on Wishlist Item! 📉"
+                            message = f"The price for '{ad.title}' has dropped to ₹{ad.price}."
+                        else:
+                            title = "Price Changed on Wishlist Item! 📈"
+                            message = f"The price for '{ad.title}' has changed to ₹{ad.price}."
+                    else:
+                        title = "Wishlist Item Updated! 🔔"
+                        changes_str = ", ".join(changed_fields)
+                        message = f"The ad '{ad.title}' has been updated. Changes: {changes_str}."
+                    
                     notification_crud.create_notification(
                         db=db,
                         user_id=fav.user_id,
                         type="wishlist_update",
-                        title="Price Dropped on Wishlist Item! 📉",
-                        message=f"The price for '{ad.title}' has dropped to ₹{ad.price}.",
+                        title=title,
+                        message=message,
                         ad_id=ad.id,
-                        data={"old_price": str(old_price), "new_price": str(ad.price)}
+                        data={"changed_fields": changed_fields, "old_price": str(old_price), "new_price": str(ad.price)}
                     )
 
             return {"success": True, "msg": "Ad updated successfully.", "data": {"id": ad.id}}

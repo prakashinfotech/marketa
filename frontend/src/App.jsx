@@ -27,6 +27,8 @@ import TermsOfUse from './components/TermsOfUse';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import ServicesPage from './components/ServicesPage';
 import VerifyEmail from './components/VerifyEmail';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import MyAds from './components/MyAds';
 import SearchAlerts from './components/SearchAlerts';
 import Notifications from './components/Notifications';
@@ -88,6 +90,8 @@ function App() {
           <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
           <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
           <Route path="/verify" element={<PublicLayout><VerifyEmail /></PublicLayout>} />
+          <Route path="/forgot-password" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
+          <Route path="/reset-password" element={<PublicLayout><ResetPassword /></PublicLayout>} />
           <Route path="/my-ads" element={<PublicLayout><MyAds /></PublicLayout>} />
           <Route path="/edit-ad/:id" element={<PublicLayout><PostAd /></PublicLayout>} />
           <Route path="/alerts" element={<PublicLayout><SearchAlerts /></PublicLayout>} />
