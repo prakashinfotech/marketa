@@ -70,4 +70,91 @@ class LocationCRUD:
             _logger.error(f"Error creating city: {e}")
             return {"success": False, "msg": "Database error or duplicate.", "data": None}
 
+    def update_state(self, db: Session, state_id: int, payload: schema.StateUpdate):
+        _logger.info(f"Updating state_id={state_id}")
+        try:
+            state = db.query(State).filter(State.id == state_id).first()
+            if not state:
+                return {"success": False, "msg": "State not found.", "data": None}
+            
+            update_data = payload.model_dump(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(state, key, value)
+            
+            db.commit()
+            db.refresh(state)
+            return {"success": True, "msg": "State updated.", "data": {"id": state.id}}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error updating state {state_id}: {e}")
+            return {"success": False, "msg": "Database error.", "data": None}
+
+    def delete_state(self, db: Session, state_id: int):
+        _logger.info(f"Deleting state_id={state_id}")
+        try:
+            state = db.query(State).filter(State.id == state_id).first()
+            if not state:
+                return {"success": False, "msg": "State not found.", "data": None}
+            
+            db.delete(state)
+            db.commit()
+            return {"success": True, "msg": "State deleted.", "data": None}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error deleting state {state_id}: {e}")
+            return {"success": False, "msg": "Database error. Check for dependencies.", "data": None}
+
+    def get_all_cities(self, db: Session):
+        _logger.info("Fetching all cities for admin")
+        try:
+            cities = db.query(City).all()
+            data = [
+                {
+                    "id": c.id, 
+                    "name": c.name, 
+                    "slug": c.slug, 
+                    "state_id": c.state_id,
+                    "is_popular": c.is_popular,
+                    "state_name": c.state.name if c.state else "Unknown"
+                } for c in cities
+            ]
+            return {"success": True, "msg": "Cities fetched.", "data": data}
+        except SQLAlchemyError as e:
+            _logger.error(f"Error fetching all cities: {e}")
+            return {"success": False, "msg": "Database error.", "data": []}
+
+    def update_city(self, db: Session, city_id: int, payload: schema.CityUpdate):
+        _logger.info(f"Updating city_id={city_id}")
+        try:
+            city = db.query(City).filter(City.id == city_id).first()
+            if not city:
+                return {"success": False, "msg": "City not found.", "data": None}
+            
+            update_data = payload.model_dump(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(city, key, value)
+            
+            db.commit()
+            db.refresh(city)
+            return {"success": True, "msg": "City updated.", "data": {"id": city.id}}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error updating city {city_id}: {e}")
+            return {"success": False, "msg": "Database error.", "data": None}
+
+    def delete_city(self, db: Session, city_id: int):
+        _logger.info(f"Deleting city_id={city_id}")
+        try:
+            city = db.query(City).filter(City.id == city_id).first()
+            if not city:
+                return {"success": False, "msg": "City not found.", "data": None}
+            
+            db.delete(city)
+            db.commit()
+            return {"success": True, "msg": "City deleted.", "data": None}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error deleting city {city_id}: {e}")
+            return {"success": False, "msg": "Database error. Check for dependencies.", "data": None}
+
 location = LocationCRUD()
