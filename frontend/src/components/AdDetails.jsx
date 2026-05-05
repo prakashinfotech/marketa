@@ -5,7 +5,7 @@ import { useAuth } from '../AuthContext';
 import { 
   MapPin, Clock, Eye, Share2, Heart, Flag, IndianRupee, 
   Phone, MessageCircle, ShieldCheck, ChevronLeft, ChevronRight, User as UserIcon,
-  X, ChevronDown, Copy, Check, ExternalLink, Layers
+  X, ChevronDown, Copy, Check, ExternalLink, Layers, AlertCircle, CheckCircle, Info
 } from 'lucide-react';
 
 export default function AdDetails() {
@@ -26,6 +26,16 @@ export default function AdDetails() {
   const [reportDescription, setReportDescription] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
   const [similarAds, setSimilarAds] = useState([]);
+
+  // Toast notification state
+  const [toast, setToast] = useState(null); // { type: 'success'|'error'|'info', message: '' }
+  const toastTimer = useRef(null);
+
+  const showToast = (type, message) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ type, message });
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  };
   
   const viewCounted = useRef(false);
   const navigate = useNavigate();
@@ -104,7 +114,7 @@ export default function AdDetails() {
 
   const toggleFavorite = async () => {
     if (!isLoggedIn) {
-      alert("Please login to save favorites.");
+      showToast('info', 'Please login to save favorites.');
       return;
     }
     try {
@@ -131,7 +141,7 @@ export default function AdDetails() {
 
   const startChat = async () => {
     if (!isLoggedIn) {
-      alert("Please login to chat");
+      showToast('info', 'Please login to chat with the seller.');
       return;
     }
     try {
@@ -139,18 +149,18 @@ export default function AdDetails() {
       if (res.data.success) {
         navigate(`/chat?room=${res.data.data.room_id}`);
       } else {
-        alert(res.data.msg);
+        showToast('error', res.data.msg);
       }
     } catch (err) {
       console.error('Error starting chat', err);
-      alert('Could not start chat. Please try again.');
+      showToast('error', 'Could not start chat. Please try again.');
     }
   };
 
   const handleReportAd = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
-      alert("Please login to report an ad.");
+      showToast('info', 'Please login to report an ad.');
       navigate('/login');
       return;
     }
@@ -162,15 +172,15 @@ export default function AdDetails() {
         description: reportDescription
       });
       if (res.data.success) {
-        alert("Report submitted successfully. Thank you for your feedback.");
+        showToast('success', 'Report submitted successfully. Thank you for your feedback.');
         setShowReportModal(false);
         setReportDescription('');
       } else {
-        alert(res.data.msg);
+        showToast('error', res.data.msg || 'Failed to submit report.');
       }
     } catch (err) {
       console.error('Failed to submit report', err);
-      alert('Failed to submit report.');
+      showToast('error', 'Failed to submit report. Please try again.');
     } finally {
       setSubmittingReport(false);
     }
@@ -469,7 +479,7 @@ export default function AdDetails() {
                     onClick={() => {
                       if (!isLoggedIn) {
                         // redirect to login or show modal
-                        alert("Please login to view phone number");
+                        showToast('info', 'Please login to view phone number.');
                         return;
                       }
                       setShowPhone(true);
@@ -578,6 +588,51 @@ export default function AdDetails() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-[100] animate-slide-in max-w-sm w-full">
+          <div className={`flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl transition-all duration-300 ${
+            toast.type === 'success' ? 'bg-emerald-50/95 border-emerald-200 shadow-emerald-500/10' :
+            toast.type === 'error' ? 'bg-red-50/95 border-red-200 shadow-red-500/10' :
+            'bg-blue-50/95 border-blue-200 shadow-blue-500/10'
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+              toast.type === 'success' ? 'bg-emerald-100' :
+              toast.type === 'error' ? 'bg-red-100' :
+              'bg-blue-100'
+            }`}>
+              {toast.type === 'success' && <CheckCircle className="w-4.5 h-4.5 text-emerald-600" />}
+              {toast.type === 'error' && <AlertCircle className="w-4.5 h-4.5 text-red-600" />}
+              {toast.type === 'info' && <Info className="w-4.5 h-4.5 text-blue-600" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-bold ${
+                toast.type === 'success' ? 'text-emerald-800' :
+                toast.type === 'error' ? 'text-red-800' :
+                'text-blue-800'
+              }`}>
+                {toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Error' : 'Info'}
+              </p>
+              <p className={`text-sm mt-0.5 font-medium ${
+                toast.type === 'success' ? 'text-emerald-600' :
+                toast.type === 'error' ? 'text-red-600' :
+                'text-blue-600'
+              }`}>{toast.message}</p>
+            </div>
+            <button 
+              onClick={() => setToast(null)} 
+              className={`p-1 rounded-full transition-colors shrink-0 ${
+                toast.type === 'success' ? 'hover:bg-emerald-200/50 text-emerald-400' :
+                toast.type === 'error' ? 'hover:bg-red-200/50 text-red-400' :
+                'hover:bg-blue-200/50 text-blue-400'
+              }`}
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

@@ -7,9 +7,21 @@ import {
 } from 'lucide-react';
 
 export default function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isAdmin = user?.role_id === 1 || user?.role_id === 2;
+
+  React.useEffect(() => {
+    if (!isLoggedIn || !isAdmin) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [isLoggedIn, isAdmin, navigate]);
+
+  if (!isLoggedIn || !isAdmin) {
+    return null; // Or a loading spinner
+  }
 
   const handleLogout = () => {
     logout();

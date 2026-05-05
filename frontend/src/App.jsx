@@ -22,6 +22,7 @@ import AdminReports from './components/AdminReports';
 import AdminFAQs from './components/AdminFAQs';
 import AdminKnowledgeBase from './components/AdminKnowledgeBase';
 import AdminLayout from './components/AdminLayout';
+import AdminLogin from './components/AdminLogin';
 import ChatBot from './components/ChatBot';
 import TermsOfUse from './components/TermsOfUse';
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -63,8 +64,9 @@ function App() {
         <ScrollToTop />
         <Routes>
           {/* Admin Routes with Dedicated Layout */}
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="inquiries" replace />} />
+            <Route index element={<Navigate to="categories" replace />} />
             <Route path="inquiries" element={<AdminInquiries />} />
             <Route path="locations" element={<AdminLocations />} />
             <Route path="categories" element={<AdminCategories />} />
@@ -85,7 +87,7 @@ function App() {
           <Route path="/search" element={<PublicLayout><SearchResults /></PublicLayout>} />
           <Route path="/ad/:id" element={<PublicLayout><AdDetails /></PublicLayout>} />
           <Route path="/chat" element={<PublicLayout><Chat /></PublicLayout>} />
-          <Route path="/inquiries" element={<PublicLayout><SellerInquiries /></PublicLayout>} />
+          {/* <Route path="/inquiries" element={<PublicLayout><SellerInquiries /></PublicLayout>} /> */}
           <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
           <Route path="/terms" element={<PublicLayout><TermsOfUse /></PublicLayout>} />
           <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />

@@ -104,9 +104,7 @@ export default function MyAds() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <h1 className="text-2xl font-bold text-gray-900">My Ads</h1>
           <div className="flex items-center gap-3">
-            <Link to="/inquiries" className="btn-outline flex items-center gap-1.5 text-sm">
-              <Inbox className="w-4 h-4" /> Inquiries Hub
-            </Link>
+            {/* Inquiries Hub disabled for now */}
             <Link to="/post-ad" className="btn-primary">Post New Ad</Link>
           </div>
         </div>
@@ -180,9 +178,9 @@ export default function MyAds() {
                       <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {ad.city}</span>
                       <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {ad.views_count || 0} views</span>
                       {ad.inquiry_count > 0 && (
-                        <Link to="/inquiries" className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                        <span className="flex items-center gap-1 text-indigo-600 font-medium">
                           <MessageSquare className="w-3.5 h-3.5" /> {ad.inquiry_count} {ad.inquiry_count === 1 ? 'inquiry' : 'inquiries'}
-                        </Link>
+                        </span>
                       )}
                       <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(ad.created_at).toLocaleDateString()}</span>
                     </div>

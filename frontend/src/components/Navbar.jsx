@@ -188,9 +188,7 @@ export default function Navbar() {
                         <Link to="/chat" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <MessageCircle className="w-4 h-4 text-gray-400" /> Messages
                         </Link>
-                        <Link to="/inquiries" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Inbox className="w-4 h-4 text-gray-400" /> Inquiries Hub
-                        </Link>
+                        {/* Inquiries Hub disabled for now */}
                         <Link to="/favorites" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <Heart className="w-4 h-4 text-gray-400" /> My Favorites
                         </Link>
