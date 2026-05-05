@@ -128,3 +128,114 @@ def create_city(
             content={"success": False, "msg": "Internal server error", "data": {}},
         )
 
+
+@router.get("/cities/", response_model=schema.Response)
+def list_all_cities(
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """List all cities (Admin only)."""
+    try:
+        _logger.info("Fetching all cities for admin")
+        response = crud.location.get_all_cities(db=db)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error fetching all cities: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": []},
+        )
+
+
+@router.put("/states/{state_id}", response_model=schema.Response)
+def update_state(
+    state_id: int,
+    payload: schema.StateUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Update a state (Admin only)."""
+    try:
+        _logger.info("Update state request for id: %s", state_id)
+        response = crud.location.update_state(db=db, state_id=state_id, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error updating state: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.delete("/states/{state_id}", response_model=schema.Response)
+def delete_state(
+    state_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Delete a state (Admin only)."""
+    try:
+        _logger.info("Delete state request for id: %s", state_id)
+        response = crud.location.delete_state(db=db, state_id=state_id)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error deleting state: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.put("/cities/{city_id}", response_model=schema.Response)
+def update_city(
+    city_id: int,
+    payload: schema.CityUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Update a city (Admin only)."""
+    try:
+        _logger.info("Update city request for id: %s", city_id)
+        response = crud.location.update_city(db=db, city_id=city_id, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error updating city: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.delete("/cities/{city_id}", response_model=schema.Response)
+def delete_city(
+    city_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Delete a city (Admin only)."""
+    try:
+        _logger.info("Delete city request for id: %s", city_id)
+        response = crud.location.delete_city(db=db, city_id=city_id)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content=response,
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error deleting city: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
