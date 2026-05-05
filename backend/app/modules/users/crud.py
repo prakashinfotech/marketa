@@ -142,6 +142,52 @@ class UserCRUD:
             _logger.exception("Error authenticating user: %s", str(e))
             return {"success": False, "msg": "Internal server error.", "data": {}}
 
+    def admin_authenticate_user(self, db: Session, payload: schema.LoginRequest) -> dict:
+        """
+        Authenticates an admin user and generates a JWT.
+        """
+        _logger.info("Admin authentication attempt for email: %s", payload.email)
+        try:
+            from app.core.roles import RoleConstants
+            user = db.query(User).filter(User.email == payload.email, User.is_delete.isnot(True)).first()
+            if not user or not user.is_active:
+                return {"success": False, "msg": "Incorrect email or password.", "data": {}}
+
+            if not verify_password(payload.password, user.password):
+                return {"success": False, "msg": "Incorrect email or password.", "data": {}}
+
+            # Role check
+            if user.role_id not in [RoleConstants.SUPER_ADMIN, RoleConstants.ADMIN]:
+                _logger.warning("Non-admin user %s attempted admin login.", payload.email)
+                return {"success": False, "msg": "Access denied. Admin privileges required.", "data": {}}
+
+            # Generate tokens
+            access_token = create_access_token(data={"sub": str(user.id), "token_version": user.token_version})
+            refresh_token = create_refresh_token(data={"sub": str(user.id), "token_version": user.token_version})
+
+            return {
+                "success": True,
+                "msg": "Admin login successful.",
+                "data": {
+                    "access_token": access_token,
+                    "refresh_token": refresh_token,
+                    "token_type": "bearer",
+                    "user": {
+                        "id": user.id,
+                        "uuid": user.uuid,
+                        "name": user.name,
+                        "email": user.email,
+                        "role_id": user.role_id,
+                    }
+                }
+            }
+        except SQLAlchemyError as e:
+            _logger.error("Database error authenticating admin: %s", str(e))
+            return {"success": False, "msg": "Database error.", "data": {}}
+        except Exception as e:
+            _logger.exception("Error authenticating admin: %s", str(e))
+            return {"success": False, "msg": "Internal server error.", "data": {}}
+
     def refresh_access_token(self, db: Session, payload: schema.RefreshTokenRequest) -> dict:
         """
         Validates a refresh token and generates a new access token.

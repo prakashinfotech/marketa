@@ -41,7 +41,7 @@ class ReportCRUD:
         for r in reports:
             data = schema.ReportResponse.model_validate(r).model_dump()
             data['ad_title'] = r.ad.title if r.ad else "Unknown Ad"
-            data['reporter_name'] = r.reporter.full_name if r.reporter else "Unknown User"
+            data['reporter_name'] = r.reporter.name if r.reporter else "Unknown User"
             result.append(data)
             
         return {"success": True, "msg": "Reports retrieved.", "data": result}

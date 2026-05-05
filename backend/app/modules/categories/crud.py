@@ -10,8 +10,11 @@ class CategoryCRUD:
     def get_all_categories(self, db: Session):
         _logger.info("Fetching all categories (tree structure)")
         try:
-            # Only top level categories for the tree
-            categories = db.query(Category).filter(Category.parent_id == None).order_by(Category.display_order).all()
+            # Only top level categories for the tree, excluding deleted ones
+            categories = db.query(Category).filter(
+                Category.parent_id == None,
+                Category.is_delete.isnot(True)
+            ).order_by(Category.display_order).all()
             
             # Recursive function to build the tree
             def build_tree(cat):
@@ -20,7 +23,7 @@ class CategoryCRUD:
                     "name": cat.name,
                     "slug": cat.slug,
                     "icon_url": cat.icon_url,
-                    "children": [build_tree(child) for child in cat.children] if cat.children else []
+                    "children": [build_tree(child) for child in cat.children if not child.is_delete] if cat.children else []
                 }
 
             data = [build_tree(cat) for cat in categories]
@@ -49,6 +52,26 @@ class CategoryCRUD:
     def create_category(self, db: Session, payload: schema.CategoryCreate):
         _logger.info(f"Creating category: {payload.name}")
         try:
+            # Check if category with this slug already exists (including soft-deleted)
+            existing = db.query(Category).filter(Category.slug == payload.slug).first()
+            if existing:
+                if existing.is_delete:
+                    # Restore soft-deleted category
+                    _logger.info(f"Restoring soft-deleted category with slug '{payload.slug}'")
+                    existing.is_delete = False
+                    existing.deleted_at = None
+                    existing.name = payload.name
+                    existing.parent_id = payload.parent_id
+                    existing.icon_url = payload.icon_url
+                    existing.description = payload.description
+                    existing.display_order = payload.display_order
+                    existing.is_active = payload.is_active
+                    db.commit()
+                    db.refresh(existing)
+                    return {"success": True, "msg": "Category restored from trash.", "data": {"id": existing.id}}
+                else:
+                    return {"success": False, "msg": "A category with this slug already exists.", "data": None}
+
             category = Category(
                 name=payload.name,
                 slug=payload.slug,
@@ -66,7 +89,7 @@ class CategoryCRUD:
         except SQLAlchemyError as e:
             db.rollback()
             _logger.error(f"Error creating category: {e}")
-            return {"success": False, "msg": "Database error or duplicate.", "data": None}
+            return {"success": False, "msg": "Database error or duplicate slug.", "data": None}
 
     def create_attribute(self, db: Session, payload: schema.CategoryAttributeCreate):
         _logger.info(f"Creating attribute '{payload.name}' for category_id={payload.category_id}")
@@ -88,6 +111,93 @@ class CategoryCRUD:
         except SQLAlchemyError as e:
             db.rollback()
             _logger.error(f"Error creating attribute: {e}")
+            return {"success": False, "msg": "Database error.", "data": None}
+
+    def update_category(self, db: Session, category_id: int, payload: schema.CategoryUpdate):
+        _logger.info(f"Updating category_id={category_id}")
+        try:
+            category = db.query(Category).filter(Category.id == category_id, Category.is_delete.isnot(True)).first()
+            if not category:
+                return {"success": False, "msg": "Category not found.", "data": None}
+            
+            update_data = payload.dict(exclude_unset=True)
+            
+            # Check for slug uniqueness if it's being changed
+            if 'slug' in update_data and update_data['slug'] != category.slug:
+                existing = db.query(Category).filter(Category.slug == update_data['slug']).first()
+                if existing:
+                    return {"success": False, "msg": "A category with this slug already exists.", "data": None}
+
+            for key, value in update_data.items():
+                setattr(category, key, value)
+            
+            db.commit()
+            db.refresh(category)
+            _logger.info(f"Category updated successfully: id={category.id}")
+            return {"success": True, "msg": "Category updated.", "data": {"id": category.id}}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error updating category: {e}")
+            return {"success": False, "msg": "Database error or duplicate slug.", "data": None}
+
+    def delete_category(self, db: Session, category_id: int):
+        _logger.info(f"Deleting category_id={category_id}")
+        try:
+            category = db.query(Category).filter(Category.id == category_id, Category.is_delete.isnot(True)).first()
+            if not category:
+                return {"success": False, "msg": "Category not found.", "data": None}
+            
+            # Soft delete
+            from datetime import datetime
+            category.is_delete = True
+            category.deleted_at = datetime.utcnow()
+            
+            db.commit()
+            _logger.info(f"Category soft-deleted: id={category_id}")
+            return {"success": True, "msg": "Category deleted.", "data": None}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error deleting category: {e}")
+            return {"success": False, "msg": "Database error.", "data": None}
+
+    def update_attribute(self, db: Session, attribute_id: int, payload: schema.CategoryAttributeUpdate):
+        _logger.info(f"Updating attribute_id={attribute_id}")
+        try:
+            attr = db.query(CategoryAttribute).filter(CategoryAttribute.id == attribute_id, CategoryAttribute.is_delete.isnot(True)).first()
+            if not attr:
+                return {"success": False, "msg": "Attribute not found.", "data": None}
+            
+            update_data = payload.dict(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(attr, key, value)
+            
+            db.commit()
+            db.refresh(attr)
+            _logger.info(f"Attribute updated successfully: id={attr.id}")
+            return {"success": True, "msg": "Attribute updated.", "data": {"id": attr.id}}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error updating attribute: {e}")
+            return {"success": False, "msg": "Database error.", "data": None}
+
+    def delete_attribute(self, db: Session, attribute_id: int):
+        _logger.info(f"Deleting attribute_id={attribute_id}")
+        try:
+            attr = db.query(CategoryAttribute).filter(CategoryAttribute.id == attribute_id, CategoryAttribute.is_delete.isnot(True)).first()
+            if not attr:
+                return {"success": False, "msg": "Attribute not found.", "data": None}
+            
+            # Soft delete
+            from datetime import datetime
+            attr.is_delete = True
+            attr.deleted_at = datetime.utcnow()
+            
+            db.commit()
+            _logger.info(f"Attribute soft-deleted: id={attribute_id}")
+            return {"success": True, "msg": "Attribute deleted.", "data": None}
+        except SQLAlchemyError as e:
+            db.rollback()
+            _logger.error(f"Error deleting attribute: {e}")
             return {"success": False, "msg": "Database error.", "data": None}
 
 category = CategoryCRUD()

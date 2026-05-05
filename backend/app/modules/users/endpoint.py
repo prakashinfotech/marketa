@@ -67,6 +67,31 @@ def login_user(
         )
 
 
+@router.post("/admin-login/", response_model=schema.Response)
+def admin_login(
+    payload: schema.LoginRequest,
+    db: Session = Depends(get_db),
+):
+    """ Authenticates an admin user and returns a JWT. """
+    try:
+        _logger.info("Admin login request for: %s", payload.email)
+        response = crud.user.admin_authenticate_user(db=db, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 401,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error during admin login: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
 @router.post("/refresh-token/", response_model=schema.Response)
 def refresh_token(
     payload: schema.RefreshTokenRequest,

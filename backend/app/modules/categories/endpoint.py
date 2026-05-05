@@ -105,3 +105,109 @@ def create_attribute(
             status_code=500,
             content={"success": False, "msg": "Internal server error", "data": {}},
         )
+
+
+@router.put("/{category_id}/", response_model=schema.Response)
+def update_category(
+    category_id: int,
+    payload: schema.CategoryUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Update an existing category (Admin only)."""
+    try:
+        _logger.info("Update category request for id: %s", category_id)
+        response = crud.category.update_category(db=db, category_id=category_id, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error updating category: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.delete("/{category_id}/", response_model=schema.Response)
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Soft delete a category (Admin only)."""
+    try:
+        _logger.info("Delete category request for id: %s", category_id)
+        response = crud.category.delete_category(db=db, category_id=category_id)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error deleting category: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.put("/attributes/{attribute_id}/", response_model=schema.Response)
+def update_attribute(
+    attribute_id: int,
+    payload: schema.CategoryAttributeUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Update an existing category attribute (Admin only)."""
+    try:
+        _logger.info("Update attribute request for id: %s", attribute_id)
+        response = crud.category.update_attribute(db=db, attribute_id=attribute_id, payload=payload)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error updating attribute: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
+
+
+@router.delete("/attributes/{attribute_id}/", response_model=schema.Response)
+def delete_attribute(
+    attribute_id: int,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin_user)
+):
+    """Soft delete a category attribute (Admin only)."""
+    try:
+        _logger.info("Delete attribute request for id: %s", attribute_id)
+        response = crud.category.delete_attribute(db=db, attribute_id=attribute_id)
+        return JSONResponse(
+            status_code=200 if response.get("success") else 400,
+            content={
+                "success": response.get("success"),
+                "msg": response.get("msg"),
+                "data": response.get("data", {}),
+            },
+        )
+    except Exception as e:
+        _logger.exception("Unexpected error deleting attribute: %s", str(e))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "msg": "Internal server error", "data": {}},
+        )
