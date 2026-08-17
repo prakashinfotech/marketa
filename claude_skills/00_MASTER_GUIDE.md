@@ -1,6 +1,6 @@
-# QuikrClone — Master Reproduction Guide for Claude
+# Marketa — Master Reproduction Guide for Claude
 
-> **Purpose:** This is the single entry point. Hand this file (and the entire `claude_skills/` folder) to Claude, and it will know exactly how to recreate the entire QuikrClone classifieds platform from scratch — no additional explanation needed.
+> **Purpose:** This is the single entry point. Hand this file (and the entire `claude_skills/` folder) to Claude, and it will know exactly how to recreate the entire Marketa classifieds platform from scratch — no additional explanation needed.
 
 ---
 

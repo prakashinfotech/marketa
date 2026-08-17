@@ -32,17 +32,37 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
 
     # ── App Settings ─────────────────────────────────────────────────────────
-    APP_NAME: str = "FastAPI Template"
+    APP_NAME: str = "Marketa"
     DEBUG: bool = False
+
+    # Comma-separated list of allowed origins for CORS, e.g.
+    # "http://localhost:3000,http://localhost:5173,https://marketa.example.com"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+
+    # ── File Uploads ─────────────────────────────────────────────────────────
+    MAX_UPLOAD_SIZE_MB: int = 5
+    ALLOWED_IMAGE_MIME_TYPES: str = "image/jpeg,image/png,image/webp,image/gif"
 
     # ── Email Settings ───────────────────────────────────────────────────────
     SMTP_HOST: str | None = None
     SMTP_PORT: int = 587
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
-    SMTP_FROM_EMAIL: str = "noreply@quikrclone.com"
-    SMTP_FROM_NAME: str = "QuikrClone"
+    SMTP_FROM_EMAIL: str = "noreply@marketa.com"
+    SMTP_FROM_NAME: str = "Marketa"
     FRONTEND_URL: str = "http://localhost:3000"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def allowed_image_mime_types_set(self) -> set[str]:
+        return {t.strip().lower() for t in self.ALLOWED_IMAGE_MIME_TYPES.split(",") if t.strip()}
+
+    @property
+    def max_upload_size_bytes(self) -> int:
+        return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 

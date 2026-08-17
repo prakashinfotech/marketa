@@ -1,4 +1,4 @@
-# QuikrClone — Email System
+# Marketa — Email System
 
 > Complete email system specification. All emails are sent via Gmail SMTP with branded HTML templates.
 
@@ -12,7 +12,7 @@
 | Host | `smtp.gmail.com` |
 | Port | `587` |
 | Auth | Gmail App Password (NOT regular password) |
-| From Header | `QuikrClone <your-email@gmail.com>` |
+| From Header | `Marketa <your-email@gmail.com>` |
 
 ---
 
@@ -52,9 +52,9 @@ Every email uses this wrapper:
 <html>
 <body style="font-family: 'Segoe UI', Arial; background: #f5f5f5;">
   <div style="max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px;">
-    <!-- Header: Indigo gradient with "QuikrClone" title -->
+    <!-- Header: Indigo gradient with "Marketa" title -->
     <div style="background: linear-gradient(135deg, #4f46e5, #6366f1); padding: 30px; text-align: center;">
-      <h1 style="color: #fff;">QuikrClone</h1>
+      <h1 style="color: #fff;">Marketa</h1>
       <p style="color: rgba(255,255,255,0.8);">Buy & Sell Locally</p>
     </div>
     <!-- Body: Dynamic content -->
@@ -64,7 +64,7 @@ Every email uses this wrapper:
     <!-- Footer: Copyright -->
     <div style="background: #f9fafb; padding: 20px; text-align: center;">
       <p style="font-size: 12px; color: #9ca3af;">
-        © 2026 QuikrClone. All rights reserved.
+        © 2026 Marketa. All rights reserved.
         This is an automated message — please do not reply.
       </p>
     </div>
@@ -94,18 +94,18 @@ Every email uses this wrapper:
 ## Email Types Detail
 
 ### 1. Welcome Email
-- **Subject:** "Welcome to QuikrClone! 🎉"
+- **Subject:** "Welcome to Marketa! 🎉"
 - **Content:** Greeting, feature list (Post ads, Browse, Chat, Favorites), "Start Exploring" CTA
 - **Trigger:** Automatic on signup
 
 ### 2. Verification Email
-- **Subject:** "Verify Your QuikrClone Account ✅"
+- **Subject:** "Verify Your Marketa Account ✅"
 - **Content:** "Verify My Email" button with token link, raw link fallback, 24hr expiry notice
 - **Link:** `{FRONTEND_URL}/verify?token={token}`
 - **Trigger:** Auto on signup + manual from Profile "Verify Account" button
 
 ### 3. Forgot Password Email
-- **Subject:** "Reset Your QuikrClone Password 🔐"
+- **Subject:** "Reset Your Marketa Password 🔐"
 - **Content:** "Reset Password" button (red), raw link fallback, 1hr expiry warning
 - **Link:** `{FRONTEND_URL}/reset-password?token={token}`
 - **Security:** Always returns success (prevents email enumeration)
@@ -116,7 +116,7 @@ Every email uses this wrapper:
 - **Trigger:** After password reset OR password change from Profile
 
 ### 5. Account Deletion Code
-- **Subject:** "QuikrClone: Account Deletion Code ⚠️"
+- **Subject:** "Marketa: Account Deletion Code ⚠️"
 - **Content:** Warning message, large formatted code display, safety notice
 - **Code:** Static 6-digit code displayed in a dashed-border box
 

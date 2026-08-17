@@ -1,4 +1,4 @@
-# QuikrClone — UI Component Specifications
+# Marketa — UI Component Specifications
 
 > Every React component, its route, purpose, and key behavior.
 
@@ -14,7 +14,7 @@
 
 ### Footer (`Footer.jsx`)
 - Links: About, Contact, Services, Terms, Privacy
-- Copyright text with QuikrClone branding
+- Copyright text with Marketa branding
 - Consistent across all public pages
 
 ### AdminLayout (`AdminLayout.jsx`)

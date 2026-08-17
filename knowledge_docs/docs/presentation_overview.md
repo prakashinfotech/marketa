@@ -1,4 +1,4 @@
-# QuikrClone — Platform Overview
+# Marketa — Platform Overview
 
 > A modern, full-stack classified ads marketplace built with **FastAPI + React + PostgreSQL**.
 > Designed for buying, selling, and renting products through direct buyer-seller communication.
@@ -41,7 +41,7 @@ WebSocket-powered buyer-seller messaging. Chat rooms are auto-created when a buy
 
 ---
 
-## 🤖 7. AI Chatbot (QuikrBot)
+## 🤖 7. AI Chatbot (MarketaBot)
 
 A floating chatbot widget available on every page. Uses a multi-layered response strategy:
 1. **Database FAQs** (admin-managed) → instant answer

@@ -1,4 +1,4 @@
-# QuikrClone — Feature Enhancement Implementation Plan
+# Marketa — Feature Enhancement Implementation Plan
 
 ## Current State Analysis
 
@@ -83,7 +83,7 @@
 - `config.py` — `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_NAME`, `FRONTEND_URL`
 
 #### Backend: `app/utils/email.py` (Complete Rewrite)
-- `_email_wrapper()` — Branded HTML template with QuikrClone header/footer
+- `_email_wrapper()` — Branded HTML template with Marketa header/footer
 - `_send_html_email()` — Core SMTP sender (Gmail STARTTLS)
 - `send_verification_email()` — 24hr token link
 - `send_welcome_email()` — Post-signup welcome with feature highlights

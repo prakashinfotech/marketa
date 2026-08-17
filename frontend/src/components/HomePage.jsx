@@ -85,7 +85,7 @@ const TESTIMONIALS = [
     avatar: 'M',
     city: 'Pune',
     rating: 5,
-    text: 'Moved cities and furnished my entire house through QuikrClone. Saved lakhs compared to buying new!',
+    text: 'Moved cities and furnished my entire house through Marketa. Saved lakhs compared to buying new!',
     color: 'from-rose-500 to-pink-400',
   },
   {
@@ -539,7 +539,7 @@ export default function HomePage() {
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
             How It Works
           </h2>
-          <p className="text-gray-500 mt-2 max-w-md mx-auto">Three simple steps to buy or sell anything on QuikrClone</p>
+          <p className="text-gray-500 mt-2 max-w-md mx-auto">Three simple steps to buy or sell anything on Marketa</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -567,7 +567,7 @@ export default function HomePage() {
       <section className="mt-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">Happy Customers ❤️</h2>
-          <p className="text-gray-500 mt-2 max-w-md mx-auto">See what our users are saying about QuikrClone</p>
+          <p className="text-gray-500 mt-2 max-w-md mx-auto">See what our users are saying about Marketa</p>
         </div>
 
         <TestimonialSlider />

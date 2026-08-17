@@ -45,11 +45,11 @@ export default function AdminLayout() {
         <div className="px-6 py-5 border-b border-gray-800/50">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <span className="text-white font-extrabold text-lg">Q</span>
+              <span className="text-white font-extrabold text-lg">M</span>
             </div>
             <div>
               <span className="text-base font-extrabold text-white tracking-tight block leading-tight">Admin Panel</span>
-              <span className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">QuikrClone</span>
+              <span className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">Marketa</span>
             </div>
           </Link>
         </div>
@@ -104,7 +104,7 @@ export default function AdminLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{user?.name || 'Admin'}</p>
-              <p className="text-[10px] text-gray-500 truncate font-medium">{user?.email || 'admin@quikr.com'}</p>
+              <p className="text-[10px] text-gray-500 truncate font-medium">{user?.email || 'admin@marketa.com'}</p>
             </div>
           </div>
           <button 

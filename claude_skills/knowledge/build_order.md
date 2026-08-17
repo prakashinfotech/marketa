@@ -1,4 +1,4 @@
-# QuikrClone — Build Order (Step-by-Step Session Plan)
+# Marketa — Build Order (Step-by-Step Session Plan)
 
 > Exact prompts to give Claude for each session. Follow this order precisely.
 

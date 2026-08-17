@@ -148,9 +148,9 @@ class CategoryCRUD:
                 return {"success": False, "msg": "Category not found.", "data": None}
             
             # Soft delete
-            from datetime import datetime
+            from datetime import datetime, timezone
             category.is_delete = True
-            category.deleted_at = datetime.utcnow()
+            category.deleted_at = datetime.now(timezone.utc)
             
             db.commit()
             _logger.info(f"Category soft-deleted: id={category_id}")
@@ -188,9 +188,9 @@ class CategoryCRUD:
                 return {"success": False, "msg": "Attribute not found.", "data": None}
             
             # Soft delete
-            from datetime import datetime
+            from datetime import datetime, timezone
             attr.is_delete = True
-            attr.deleted_at = datetime.utcnow()
+            attr.deleted_at = datetime.now(timezone.utc)
             
             db.commit()
             _logger.info(f"Attribute soft-deleted: id={attribute_id}")

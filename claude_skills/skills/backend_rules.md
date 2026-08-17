@@ -1,4 +1,4 @@
-# QuikrClone — Backend Rules (FastAPI Skill File)
+# Marketa — Backend Rules (FastAPI Skill File)
 
 > **Scope:** This file governs ALL Python code in the `backend/` directory. Claude MUST follow these patterns exactly.
 

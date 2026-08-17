@@ -26,7 +26,7 @@ const DEFAULT_AVATARS = [
 ];
 
 export default function Profile() {
-  const { user, isLoggedIn, login, logout } = useAuth();
+  const { user, isLoggedIn, updateUser, logout } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(user);
@@ -111,10 +111,7 @@ export default function Profile() {
         setSuccess('Profile updated successfully!');
         const updatedData = res.data.data;
         setProfile({ ...profile, ...updatedData });
-        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
-          ...user,
-          ...updatedData
-        });
+        updateUser(updatedData);
       } else {
         setError(res.data.msg || 'Update failed');
       }
@@ -146,10 +143,7 @@ export default function Profile() {
       if (res.data.success) {
         const newAvatar = res.data.data.avatar_url;
         setProfile({ ...profile, avatar: newAvatar });
-        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
-          ...user,
-          avatar: newAvatar
-        });
+        updateUser({ avatar: newAvatar });
         setSuccess('Avatar updated successfully!');
       } else {
         setError(res.data.msg);
@@ -168,10 +162,7 @@ export default function Profile() {
       const res = await api.put('/users/me/update/', { avatar: url });
       if (res.data.success) {
         setProfile({ ...profile, avatar: url });
-        login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), {
-          ...user,
-          avatar: url
-        });
+        updateUser({ avatar: url });
         setSuccess('Avatar updated successfully!');
       } else {
         setError(res.data.msg);

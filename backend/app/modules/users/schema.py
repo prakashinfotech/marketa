@@ -3,24 +3,43 @@ Pydantic schemas for the User module.
 Defines the data structure for API requests and responses.
 """
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, Any
+
+
+# Password policy: 8–72 chars (bcrypt truncates at 72 bytes), must contain at
+# least one letter and one digit. Centralized here so create/reset/change all
+# enforce the same rule.
+PasswordStr = Field(..., min_length=8, max_length=72)
+
+
+def _validate_password_complexity(v: str) -> str:
+    if not any(c.isalpha() for c in v):
+        raise ValueError("Password must contain at least one letter.")
+    if not any(c.isdigit() for c in v):
+        raise ValueError("Password must contain at least one digit.")
+    return v
 
 
 # ── Request Schemas ──────────────────────────────────────────────────────────
 
 class CreateUserRequest(BaseModel):
     """ Schema for creating a new user. """
-    name: str
-    username: str
+    name: str = Field(..., min_length=1, max_length=100)
+    username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-    password: str
+    password: str = PasswordStr
+
+    @field_validator("password")
+    @classmethod
+    def _check_password(cls, v: str) -> str:
+        return _validate_password_complexity(v)
 
 
 class LoginRequest(BaseModel):
     """ Schema for user login. """
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=1, max_length=72)
 
 
 class GetAllUsersRequest(BaseModel):
@@ -67,13 +86,23 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     """ Schema for resetting password via email link. """
     token: str
-    new_password: str
+    new_password: str = PasswordStr
+
+    @field_validator("new_password")
+    @classmethod
+    def _check_password(cls, v: str) -> str:
+        return _validate_password_complexity(v)
 
 
 class ChangePasswordRequest(BaseModel):
     """ Schema for changing password while logged in. """
-    old_password: str
-    new_password: str
+    old_password: str = Field(..., min_length=1, max_length=72)
+    new_password: str = PasswordStr
+
+    @field_validator("new_password")
+    @classmethod
+    def _check_password(cls, v: str) -> str:
+        return _validate_password_complexity(v)
 
 
 class ConfirmDeleteAccountRequest(BaseModel):

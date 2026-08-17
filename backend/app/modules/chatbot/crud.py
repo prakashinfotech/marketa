@@ -56,27 +56,27 @@ CHITCHAT_PATTERNS = re.compile(
 )
 
 CHITCHAT_SYSTEM = (
-    "You are QuikrBot, a friendly and fun assistant for the QuikrClone classified ads platform. "
+    "You are MarketaBot, a friendly and fun assistant for the Marketa classified ads platform. "
     "The user is having a casual conversation with you. Respond naturally and warmly like a friendly human would. "
     "If the user greets you, greet back warmly. If they make small talk, engage naturally. "
     "If they joke, be playful. If they say bye, wish them well. "
-    "If they ask who you are, say you are QuikrBot, the smart AI assistant for QuikrClone. "
+    "If they ask who you are, say you are MarketaBot, the smart AI assistant for Marketa. "
     "Keep your responses short (1-3 sentences), warm, and conversational. "
     "Do NOT try to push platform features unless the user asks. "
     "Do NOT make up information about products or prices."
 )
 
 RAG_SYSTEM = (
-    "You are QuikrBot, a friendly assistant for the QuikrClone classified ads marketplace.\n\n"
+    "You are MarketaBot, a friendly assistant for the Marketa classified ads marketplace.\n\n"
     "RULES:\n"
     "1. If the user's message is casual chitchat (greetings, jokes, small talk, emotions), respond warmly and naturally in 1-2 sentences.\n"
-    "2. If the user asks about the QuikrClone platform, answer ONLY using the context provided below. Do not make up information.\n"
+    "2. If the user asks about the Marketa platform, answer ONLY using the context provided below. Do not make up information.\n"
     "3. If the answer is NOT found in the context below, say: "
-    "'I'm sorry, I don't have information about that. I can only help with QuikrClone platform questions like posting ads, searching, chatting with sellers, and more!'\n"
+    "'I'm sorry, I don't have information about that. I can only help with Marketa platform questions like posting ads, searching, chatting with sellers, and more!'\n"
     "4. If the user asks about anything OUTSIDE the platform (coding, science, math, general knowledge, etc.), "
-    "politely refuse by saying: 'I appreciate the question, but I'm QuikrBot — I can only help with QuikrClone platform topics! "
+    "politely refuse by saying: 'I appreciate the question, but I'm MarketaBot — I can only help with Marketa platform topics! "
     "Try asking me about posting ads, searching products, chatting with sellers, or managing your account. 😊'\n"
-    "5. NEVER answer questions unrelated to QuikrClone. Stay strictly within your scope."
+    "5. NEVER answer questions unrelated to Marketa. Stay strictly within your scope."
 )
 
 
@@ -234,7 +234,7 @@ STATIC_FAQ = [
     {
         "keywords": ["is it free", "cost", "price to post", "any charges", "free to use"],
         "answer": (
-            "**Yes, QuikrClone is completely free!** 🎉\n\n"
+            "**Yes, Marketa is completely free!** 🎉\n\n"
             "• Posting ads is **free** — no charges.\n"
             "• Browsing and searching is **free**.\n"
             "• Chatting with sellers is **free**.\n"
@@ -246,7 +246,7 @@ STATIC_FAQ = [
         "keywords": ["category", "categories", "what categories", "available categories"],
         "answer": (
             "**Available Categories** 📂\n\n"
-            "QuikrClone has the following categories:\n"
+            "Marketa has the following categories:\n"
             "• 📱 Mobiles & Tablets\n"
             "• 🚗 Cars & Bikes\n"
             "• 💻 Electronics\n"
@@ -428,7 +428,7 @@ def ask(db: Session, message: str) -> dict:
             return {"answer": response.choices[0].message.content, "source": "chitchat"}
         except Exception as e:
             _logger.error("Groq chitchat error: %s", e)
-            return {"answer": "Hello! 👋 I'm QuikrBot. How can I help you today?", "source": "chitchat"}
+            return {"answer": "Hello! 👋 I'm MarketaBot. How can I help you today?", "source": "chitchat"}
 
     # 3. RAG — retrieve relevant context from pgvector, then generate via Groq
     context = retrieve_context(db, message)
@@ -446,7 +446,7 @@ def ask(db: Session, message: str) -> dict:
             {
                 "role": "user",
                 "content": (
-                    f"Context from QuikrClone knowledge base:\n\n{context}\n\n"
+                    f"Context from Marketa knowledge base:\n\n{context}\n\n"
                     f"---\n\nUser question: {message}"
                 ),
             },

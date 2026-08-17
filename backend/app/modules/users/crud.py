@@ -4,7 +4,7 @@ Handles user creation, listing, updating, and soft-deletion.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -251,29 +251,34 @@ class UserCRUD:
                 return {"success": False, "msg": "Unsupported file format. Use JPG, PNG, or WebP.", "data": {}}
 
             filename = f"{uuid.uuid4()}{ext}"
-            file_path = os.path.join(upload_dir, filename)
+            file_path = os.path.join(upload_dir, filename)              # on-disk path
+            avatar_url = "/" + file_path.replace(os.sep, "/").lstrip("/")  # served URL
 
             # Save file
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
-            # Update DB (delete old avatar if exists)
+            # Delete old avatar if exists. Old records may have stored either a
+            # leading-slash URL ("/uploads/...") or a bare disk path ("uploads/...").
             old_avatar = user.avatar
-            if old_avatar and os.path.exists(old_avatar):
-                try:
-                    os.remove(old_avatar)
-                except Exception:
-                    pass
+            if old_avatar:
+                old_disk_path = old_avatar.lstrip("/")
+                if os.path.exists(old_disk_path):
+                    try:
+                        os.remove(old_disk_path)
+                    except Exception:
+                        pass
 
-            user.avatar = file_path
+            # Always store the URL-relative path so consumers don't need to patch it.
+            user.avatar = avatar_url
             db.commit()
             db.refresh(user)
-            _logger.info("Avatar updated successfully for user: %s, path: %s", user.email, file_path)
+            _logger.info("Avatar updated successfully for user: %s, url: %s", user.email, avatar_url)
 
             return {
                 "success": True,
                 "msg": "Avatar uploaded successfully.",
-                "data": {"avatar_url": f"/uploads/avatars/{filename}"}
+                "data": {"avatar_url": avatar_url}
             }
         except Exception as e:
             db.rollback()
@@ -458,7 +463,7 @@ class UserCRUD:
                 return {"success": False, "msg": "User not found.", "data": {}}
 
             user.is_delete = True
-            user.deleted_at = datetime.utcnow()
+            user.deleted_at = datetime.now(timezone.utc)
             db.commit()
 
             return {"success": True, "msg": "User deleted successfully.", "data": {}}
@@ -484,7 +489,7 @@ class UserCRUD:
             # Generate token (expires in 24 hours)
             from datetime import timedelta
             token_data = {"sub": str(user.id), "type": "verify_email"}
-            expire = datetime.utcnow() + timedelta(hours=24)
+            expire = datetime.now(timezone.utc) + timedelta(hours=24)
             to_encode = token_data.copy()
             to_encode.update({"exp": expire})
             token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -549,7 +554,7 @@ class UserCRUD:
             if user and user.is_active:
                 from datetime import timedelta
                 token_data = {"sub": str(user.id), "type": "reset_password", "token_version": user.token_version}
-                expire = datetime.utcnow() + timedelta(hours=1)
+                expire = datetime.now(timezone.utc) + timedelta(hours=1)
                 to_encode = token_data.copy()
                 to_encode.update({"exp": expire})
                 token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -682,7 +687,7 @@ class UserCRUD:
 
             # Soft delete user
             user.is_delete = True
-            user.deleted_at = datetime.utcnow()
+            user.deleted_at = datetime.now(timezone.utc)
             user.token_version = (user.token_version or 0) + 1  # Invalidate tokens
             
             # Anonymize unique fields to allow re-registration with the same email/phone
@@ -697,7 +702,7 @@ class UserCRUD:
             from app.modules.recently_viewed.model import RecentlyViewed
             from app.modules.notifications.model import Notification
 
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             
             db.query(Ad).filter(Ad.user_id == user.id, Ad.is_delete.isnot(True)).update(
                 {"is_delete": True, "deleted_at": now}, synchronize_session=False

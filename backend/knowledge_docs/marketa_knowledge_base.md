@@ -1,10 +1,10 @@
-# QuikrClone Platform — Complete Knowledge Base
+# Marketa Platform — Complete Knowledge Base
 
-## 1. What is QuikrClone?
+## 1. What is Marketa?
 
-QuikrClone is a free online classified ads marketplace where anyone can buy and sell used or new items. It is similar to Quikr or OLX. Users can post ads for products, search for items, contact sellers, and chat in real time.
+Marketa is a free online classified ads marketplace where anyone can buy and sell used or new items. It is similar to Quikr or OLX. Users can post ads for products, search for items, contact sellers, and chat in real time.
 
-You can use QuikrClone to:
+You can use Marketa to:
 - Buy and sell second-hand or new goods like mobiles, cars, electronics, furniture, clothes, and more.
 - Post a free ad to sell something you no longer need.
 - Chat directly with buyers or sellers inside the platform.
@@ -242,7 +242,7 @@ On the **Ad Details page**, look at the right-side panel called **"Seller Detail
 
 ## 17. Frequently Asked Questions
 
-**Q: Is QuikrClone free to use?**
+**Q: Is Marketa free to use?**
 A: Yes! Posting an ad and browsing are completely free.
 
 **Q: Can I post multiple ads?**
@@ -257,7 +257,7 @@ A: Ads stay active until you delete them or they are removed for policy violatio
 **Q: I forgot my password. What do I do?**
 A: Password reset is coming soon. Please contact support in the meantime.
 
-**Q: Can I use QuikrClone without an account?**
+**Q: Can I use Marketa without an account?**
 A: Yes! You can browse and search ads without an account. However, to post ads, chat, or save favorites, you need to create a free account.
 
 **Q: How do I report a suspicious ad?**
@@ -278,7 +278,7 @@ A: The chat icon in the top navigation bar shows a notification badge when you h
 
 | Where do you want to go? | How to get there |
 |---|---|
-| Home / All listings | Click the **QuikrClone logo** or "Home" |
+| Home / All listings | Click the **Marketa logo** or "Home" |
 | Search results | Type in the search bar and press Enter |
 | Post a new ad | Click the orange **"Post Free Ad"** button |
 | My Messages / Chat | Click the 💬 icon in the top bar |

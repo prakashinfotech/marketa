@@ -3,7 +3,7 @@ API endpoints for User management.
 """
 
 import logging
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -12,9 +12,23 @@ from app.api.deps import get_current_admin_user, get_current_user
 from app.modules.users.model import User
 from . import schema, crud
 
+# Rate limiter — apply @limiter.limit on abuse-prone routes. Endpoints decorated
+# with @limiter.limit must accept `request: Request` as a parameter.
+from app.core.limiter import limiter
+
 _logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _normalize_avatar_url(avatar: str | None) -> str | None:
+    """
+    Normalizes a stored avatar value into a URL the frontend can use directly.
+    Handles legacy records that were saved without a leading slash.
+    """
+    if not avatar:
+        return None
+    return avatar if avatar.startswith("/") else "/" + avatar
 
 
 @router.post("/create/", response_model=schema.Response)
@@ -43,7 +57,9 @@ def create_user(
 
 
 @router.post("/login/", response_model=schema.Response)
+@limiter.limit("10/minute")
 def login_user(
+    request: Request,
     payload: schema.LoginRequest,
     db: Session = Depends(get_db),
 ):
@@ -68,7 +84,9 @@ def login_user(
 
 
 @router.post("/admin-login/", response_model=schema.Response)
+@limiter.limit("10/minute")
 def admin_login(
+    request: Request,
     payload: schema.LoginRequest,
     db: Session = Depends(get_db),
 ):
@@ -93,7 +111,9 @@ def admin_login(
 
 
 @router.post("/refresh-token/", response_model=schema.Response)
+@limiter.limit("30/minute")
 def refresh_token(
+    request: Request,
     payload: schema.RefreshTokenRequest,
     db: Session = Depends(get_db),
 ):
@@ -135,7 +155,7 @@ def get_my_profile(
                 "username": current_user.username,
                 "email": current_user.email,
                 "phone": current_user.phone,
-                "avatar": current_user.avatar.replace("uploads/", "/uploads/") if current_user.avatar else None,
+                "avatar": _normalize_avatar_url(current_user.avatar),
                 "is_verified": current_user.is_verified,
                 "role_id": current_user.role_id,
                 "created_at": str(current_user.created_at) if current_user.created_at else None,
@@ -321,7 +341,9 @@ def verify_email(
 
 
 @router.post("/forgot-password/", response_model=schema.Response)
+@limiter.limit("5/minute")
 def forgot_password(
+    request: Request,
     payload: schema.ForgotPasswordRequest,
     db: Session = Depends(get_db),
 ):
@@ -346,7 +368,9 @@ def forgot_password(
 
 
 @router.post("/reset-password/", response_model=schema.Response)
+@limiter.limit("10/minute")
 def reset_password(
+    request: Request,
     payload: schema.ResetPasswordRequest,
     db: Session = Depends(get_db),
 ):
