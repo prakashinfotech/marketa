@@ -4,17 +4,27 @@ import shutil
 import uuid
 from typing import List, Optional
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 
 from app.modules.ads.model import Ad, AdImage, AdAttributeValue
 from app.modules.ads import schema
+from app.core.config import settings
 
 _logger = logging.getLogger(__name__)
 
 UPLOAD_BASE = "uploads/users"
+
+# Map allowed MIME types to a canonical extension. We normalize the saved
+# filename so we never trust the client-supplied original extension.
+_MIME_TO_EXT = {
+    "image/jpeg": ".jpg",
+    "image/png":  ".png",
+    "image/webp": ".webp",
+    "image/gif":  ".gif",
+}
 
 
 def _get_ad_upload_dir(user_id: int, ad_id: int) -> str:
@@ -24,16 +34,53 @@ def _get_ad_upload_dir(user_id: int, ad_id: int) -> str:
     return path
 
 
+def _validate_image_or_raise(file: UploadFile) -> str:
+    """
+    Validate an uploaded file is an image we accept.
+
+    Checks:
+      * declared `content_type` is in the configured whitelist
+      * file size is under `MAX_UPLOAD_SIZE_MB`
+
+    Returns the canonical extension to use (e.g. ".jpg"). Raises HTTP 400 / 413
+    on failure. Note: a fully defensive implementation would also verify magic
+    bytes (e.g. with Pillow's `Image.open`); see docs/issues.json BE-004.
+    """
+    allowed_mimes = settings.allowed_image_mime_types_set
+    mime = (file.content_type or "").lower()
+    if mime not in allowed_mimes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported image type '{mime or 'unknown'}'. Allowed: {sorted(allowed_mimes)}",
+        )
+
+    # Determine size without reading the whole file into memory
+    file.file.seek(0, os.SEEK_END)
+    size = file.file.tell()
+    file.file.seek(0)
+    if size > settings.max_upload_size_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Image too large ({size // 1024} KB). Max allowed: {settings.MAX_UPLOAD_SIZE_MB} MB.",
+        )
+    if size == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    return _MIME_TO_EXT.get(mime, ".jpg")
+
+
 def _save_image_file(file: UploadFile, upload_dir: str) -> str:
-    """Saves an uploaded image to disk and returns the relative URL path."""
-    ext = os.path.splitext(file.filename)[1] or ".jpg"
-    filename = f"{uuid.uuid4().hex[:12]}{ext}"
+    """
+    Saves a validated upload to disk via a streaming copy and returns the
+    URL-relative path served from the /uploads static mount.
+    """
+    ext = _validate_image_or_raise(file)
+    filename = f"{uuid.uuid4().hex[:16]}{ext}"
     filepath = os.path.join(upload_dir, filename)
-    with open(filepath, "wb") as f:
-        content = file.file.read()
-        f.write(content)
-    # Return URL relative to the static mount (e.g. /uploads/users/1/ads/5/abc.jpg)
-    return f"/{filepath}"
+    with open(filepath, "wb") as dst:
+        shutil.copyfileobj(file.file, dst)
+    # filepath starts with "uploads/..."; ensure the served URL is "/uploads/..."
+    return "/" + filepath.replace(os.sep, "/").lstrip("/")
 
 
 class AdCRUD:
@@ -624,8 +671,8 @@ class AdCRUD:
                 return {"success": False, "msg": "You do not have permission to delete this ad.", "data": {}}
 
             ad.is_delete = True
-            from datetime import datetime
-            ad.deleted_at = datetime.utcnow()
+            from datetime import datetime, timezone
+            ad.deleted_at = datetime.now(timezone.utc)
             db.commit()
 
             # Clean up image files from disk

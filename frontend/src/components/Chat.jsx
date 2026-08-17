@@ -95,10 +95,19 @@ export default function Chat() {
       ws.current.close();
     }
 
+    // Send token as the first message after connect rather than via URL query
+    // (which can leak via access logs). The backend accepts both forms for
+    // backwards compat.
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//127.0.0.1:8000/api/v1/chat/ws/${roomId}?token=${token}`;
-    
+    const wsUrl = `${protocol}//127.0.0.1:8000/api/v1/chat/ws/${roomId}`;
+
     ws.current = new WebSocket(wsUrl);
+
+    ws.current.onopen = () => {
+      try {
+        ws.current.send(JSON.stringify({ type: 'auth', token }));
+      } catch { /* socket may have closed already */ }
+    };
 
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);

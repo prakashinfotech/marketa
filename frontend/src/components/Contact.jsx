@@ -58,7 +58,7 @@ export default function Contact() {
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-primary-100 text-lg max-w-2xl mx-auto">
-            Have questions or need assistance? Our team is here to help you get the most out of QuikrClone.
+            Have questions or need assistance? Our team is here to help you get the most out of Marketa.
           </p>
         </div>
       </section>
@@ -74,7 +74,7 @@ export default function Contact() {
               <div>
                 <h3 className="font-bold text-gray-900 mb-1">Email Us</h3>
                 <p className="text-gray-500 text-sm mb-1">Our team will get back to you within 24 hours.</p>
-                <a href="mailto:support@quikrclone.sample" className="text-primary-600 font-medium hover:underline text-sm">support@quikrclone.sample</a>
+                <a href="mailto:support@marketa.sample" className="text-primary-600 font-medium hover:underline text-sm">support@marketa.sample</a>
               </div>
             </div>
 

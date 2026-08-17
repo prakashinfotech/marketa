@@ -1,4 +1,4 @@
-# QuikrClone — Test Cases (Positive & Negative)
+# Marketa — Test Cases (Positive & Negative)
 
 > Comprehensive test plan covering all features.
 > ✅ = Positive (expected to work) · ❌ = Negative (expected to fail gracefully)
@@ -10,7 +10,7 @@
 | # | Type | Test Case | Expected Result |
 |---|------|-----------|-----------------|
 | 1.1 | ✅ | Sign up with valid name, email, and password | Account created, redirected to login |
-| 1.2 | ✅ | Sign up and check welcome email received | Welcome email in inbox with QuikrClone branding |
+| 1.2 | ✅ | Sign up and check welcome email received | Welcome email in inbox with Marketa branding |
 | 1.3 | ✅ | Sign up and check verification email received | Verification email with "Verify My Email" button |
 | 1.4 | ✅ | Sign up and check JWT token flow | Token present after login, user stays logged in on refresh |
 | 1.5 | ❌ | Sign up with an already registered email | Error message: "Email already exists" |
@@ -247,7 +247,7 @@
 
 ---
 
-## 15. AI Chatbot (QuikrBot)
+## 15. AI Chatbot (MarketaBot)
 
 | # | Type | Test Case | Expected Result |
 |---|------|-----------|-----------------|
@@ -257,7 +257,7 @@
 | 15.4 | ✅ | Ask "what is python" (FAQ with keywords "python aiml") | FAQ answer returned (keyword match) |
 | 15.5 | ✅ | Say "Hello" or "Hi" | Friendly chitchat response from LLM |
 | 15.6 | ✅ | Ask "How do I search?" | Detailed platform FAQ answer |
-| 15.7 | ✅ | Ask an off-topic question (e.g., "What is calculus?") | Politely refused: "I can only help with QuikrClone" |
+| 15.7 | ✅ | Ask an off-topic question (e.g., "What is calculus?") | Politely refused: "I can only help with Marketa" |
 | 15.8 | ✅ | Click a FAQ suggestion chip | That question is sent and answered |
 | 15.9 | ❌ | Send empty message | Not sent, validation prevents it |
 | 15.10 | ✅ | Ask question related to uploaded knowledge doc | RAG retrieves relevant chunks, grounded answer |
@@ -377,7 +377,7 @@
 |---|------|-----------|-----------------|
 | 24.1 | ✅ | Navbar shows correct items based on login state | Login/Signup when logged out; Avatar/name when logged in |
 | 24.2 | ✅ | Admin user sees "Admin Panel" link in navbar dropdown | Link present, navigates to /admin |
-| 24.3 | ✅ | Clicking QuikrClone logo navigates to homepage | Redirect to / |
+| 24.3 | ✅ | Clicking Marketa logo navigates to homepage | Redirect to / |
 | 24.4 | ✅ | Footer links (About, Contact, Terms, Privacy) work | All links navigate correctly |
 | 24.5 | ✅ | Page scrolls to top on route change | ScrollToTop component working |
 | 24.6 | ✅ | Mobile responsive — all pages render on small screens | No horizontal overflow, readable layout |

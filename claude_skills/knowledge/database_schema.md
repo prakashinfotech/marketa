@@ -1,4 +1,4 @@
-# QuikrClone — Complete Database Schema
+# Marketa — Complete Database Schema
 
 > Every table, column, relationship, and constraint in the system.
 

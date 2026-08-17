@@ -7,7 +7,7 @@ export default function About() {
       {/* Hero Section */}
       <section className="bg-primary-600 py-16 md:py-24 text-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-6">About QuikrClone</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-6">About Marketa</h1>
           <p className="text-xl text-primary-100 max-w-3xl mx-auto leading-relaxed">
             We are India's leading classifieds platform, connecting millions of buyers and sellers across thousands of cities.
           </p>

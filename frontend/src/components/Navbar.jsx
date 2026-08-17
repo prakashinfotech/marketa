@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import api from '../api';
 import {
   Search, Menu, X, PlusCircle, User, LogOut, ChevronDown,
   MessageSquare, MessageCircle, Heart, Bell, Settings, LayoutDashboard,
   ShieldAlert, HelpCircle, Inbox
 } from 'lucide-react';
+
+// Throttle to avoid hammering the API on every nav.
+const UNREAD_REFRESH_THROTTLE_MS = 30_000;
 
 export default function Navbar() {
   const { user, isLoggedIn, logout } = useAuth();
@@ -16,7 +20,9 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const dropdownRef = useRef(null);
+  const lastUnreadFetchRef = useRef(0);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -44,29 +50,27 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Refresh unread badges on login + route change, but throttled. Uses
+  // react-router's location.pathname (reactive) instead of window.location
+  // (non-reactive — the previous code never re-ran on client-side nav).
   useEffect(() => {
-    if (isLoggedIn) {
-      import('../api').then(({ default: api }) => {
-        api.get('/notifications/me/unread-count/')
-          .then(res => {
-            if (res.data.success) {
-              setUnreadCount(res.data.data.unread_count);
-            }
-          })
-          .catch(() => { });
-        api.get('/chat/unread-count/')
-          .then(res => {
-            if (res.data.success) {
-              setUnreadMsgCount(res.data.data.unread_count);
-            }
-          })
-          .catch(() => { });
-      });
-    } else {
+    if (!isLoggedIn) {
       setUnreadCount(0);
       setUnreadMsgCount(0);
+      lastUnreadFetchRef.current = 0;
+      return;
     }
-  }, [isLoggedIn, window.location.pathname]); // Refresh count on navigation
+    const now = Date.now();
+    if (now - lastUnreadFetchRef.current < UNREAD_REFRESH_THROTTLE_MS) return;
+    lastUnreadFetchRef.current = now;
+
+    api.get('/notifications/me/unread-count/')
+      .then(res => { if (res.data?.success) setUnreadCount(res.data.data.unread_count); })
+      .catch(() => {});
+    api.get('/chat/unread-count/')
+      .then(res => { if (res.data?.success) setUnreadMsgCount(res.data.data.unread_count); })
+      .catch(() => {});
+  }, [isLoggedIn, location.pathname]);
 
 
   const handleLogout = () => {
@@ -85,10 +89,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-200/50 group-hover:shadow-lg group-hover:shadow-indigo-300/50 transition-all">
-              <span className="text-white font-extrabold text-lg">Q</span>
+              <span className="text-white font-extrabold text-lg">M</span>
             </div>
             <span className="text-xl font-extrabold text-gray-900 tracking-tight">
-              Quikr<span className="text-gradient">Clone</span>
+              Mark<span className="text-gradient">eta</span>
             </span>
           </Link>
 
@@ -109,11 +113,8 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="hidden md:flex items-center gap-2">
-            <Link to="/services" className="relative px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-indigo-600 transition-colors text-sm font-semibold mr-2">
+            <Link to="/services" className="px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-indigo-600 transition-colors text-sm font-semibold mr-2">
               Services
-              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full leading-none shadow-sm">
-                SOON
-              </span>
             </Link>
             {isLoggedIn ? (
               <>
@@ -150,7 +151,11 @@ export default function Navbar() {
                 {/* User dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
+                    type="button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
+                    aria-haspopup="menu"
+                    aria-expanded={dropdownOpen}
+                    aria-label="User menu"
                     className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-sm transition-all ${dropdownOpen ? 'bg-gray-100' : 'hover:bg-gray-50'
                       }`}
                   >
@@ -168,7 +173,7 @@ export default function Navbar() {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl shadow-gray-200/50 border border-gray-100 py-2 z-50 animate-scale-in">
+                    <div role="menu" aria-label="User menu" className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl shadow-gray-200/50 border border-gray-100 py-2 z-50 animate-scale-in">
                       {/* User info header */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>

@@ -1,14 +1,14 @@
-# QuikrClone — Product Demo Flow 🎯
+# Marketa — Product Demo Flow 🎯
 
 > **For:** Manager Presentation  
-> **Product:** QuikrClone — Full-Stack Classified Ads Marketplace  
+> **Product:** Marketa — Full-Stack Classified Ads Marketplace  
 > **URLs:** Frontend → `http://localhost:3000` | Backend API → `http://localhost:8000/docs`
 
 ---
 
 ## 🔷 Product Summary (30-second pitch)
 
-QuikrClone is a **classified ads marketplace** (like Quikr/OLX) where users can **buy, sell, and rent** products through **direct buyer-seller communication**. No shopping cart, no checkout, no payment gateway — just **discovery + connection**.
+Marketa is a **classified ads marketplace** (like Quikr/OLX) where users can **buy, sell, and rent** products through **direct buyer-seller communication**. No shopping cart, no checkout, no payment gateway — just **discovery + connection**.
 
 **Key differentiators built into this product:**
 - 🤖 AI Chatbot with RAG (knowledge base retrieval)
@@ -307,7 +307,7 @@ QuikrClone is a **classified ads marketplace** (like Quikr/OLX) where users can 
 
 ---
 
-### DEMO 8: AI Chatbot — QuikrBot 🤖
+### DEMO 8: AI Chatbot — MarketaBot 🤖
 **Duration:** ~3 minutes  
 **Goal:** Show the multi-layer AI chatbot intelligence
 
@@ -331,7 +331,7 @@ QuikrClone is a **classified ads marketplace** (like Quikr/OLX) where users can 
    - Say "Hello" or "Thanks!" → friendly warm response
 
 7. **Test platform boundaries:**
-   - Ask "What is calculus?" → politely refused: "I can only help with QuikrClone-related questions"
+   - Ask "What is calculus?" → politely refused: "I can only help with Marketa-related questions"
 
 8. Show **markdown rendering** in responses (bold, lists, links)
 9. Show **typing indicator** animation while bot processes
@@ -424,14 +424,14 @@ QuikrClone is a **classified ads marketplace** (like Quikr/OLX) where users can 
 **Goal:** Show branded transactional emails
 
 Mention/show the 5 email types:
-1. **Welcome Email** — sent on signup, "Welcome to QuikrClone! 🎉"
+1. **Welcome Email** — sent on signup, "Welcome to Marketa! 🎉"
 2. **Verification Email** — "Verify My Email" button, 24hr expiry
 3. **Forgot Password Email** — "Reset Password" button (red), 1hr expiry
 4. **Password Changed Confirmation** — with timestamp
 5. **Account Deletion Code** — 6-digit code in styled box
 
 All emails use:
-- Branded indigo gradient header with "QuikrClone" title
+- Branded indigo gradient header with "Marketa" title
 - Consistent HTML template
 - Gmail SMTP with STARTTLS
 - Fallback: logs to console if SMTP not configured (dev-friendly)
@@ -481,9 +481,9 @@ All emails use:
 
 ---
 
-## 📊 Feature Comparison with Real Quikr.com
+## 📊 Feature Comparison with Real quikr.com
 
-| Feature | Real Quikr | Our QuikrClone |
+| Feature | Real quikr.com | Marketa |
 |---------|-----------|----------------|
 | Ad Posting | ✅ | ✅ |
 | Search & Filters | ✅ | ✅ |

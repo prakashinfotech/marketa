@@ -5,7 +5,7 @@ export default function TermsOfUse() {
   const sections = [
     {
       title: '1. Acceptance of Terms',
-      content: 'By accessing and using QuikrClone, you agree to be bound by these Terms of Use and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.',
+      content: 'By accessing and using Marketa, you agree to be bound by these Terms of Use and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.',
       icon: CheckCircle
     },
     {
@@ -15,7 +15,7 @@ export default function TermsOfUse() {
     },
     {
       title: '3. Posting Content',
-      content: 'Users are solely responsible for the content they post. You must not post illegal, offensive, or infringing material. QuikrClone reserves the right to remove any content at its sole discretion.',
+      content: 'Users are solely responsible for the content they post. You must not post illegal, offensive, or infringing material. Marketa reserves the right to remove any content at its sole discretion.',
       icon: Shield
     },
     {
@@ -35,7 +35,7 @@ export default function TermsOfUse() {
         
         <div className="p-10 space-y-10">
           <p className="text-gray-600 leading-relaxed">
-            Welcome to QuikrClone. Please read these terms carefully before using our services. Our goal is to provide a safe and reliable marketplace for everyone.
+            Welcome to Marketa. Please read these terms carefully before using our services. Our goal is to provide a safe and reliable marketplace for everyone.
           </p>
 
           <div className="grid gap-8">
@@ -55,7 +55,7 @@ export default function TermsOfUse() {
           <div className="pt-10 border-t border-gray-100">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Us</h2>
             <p className="text-gray-600 text-sm">
-              If you have any questions about these Terms, please contact our legal team at legal@quikrclone.com.
+              If you have any questions about these Terms, please contact our legal team at legal@marketa.com.
             </p>
           </div>
         </div>

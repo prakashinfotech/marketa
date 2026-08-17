@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.modules.chat.model import ChatRoom, Message
 from app.modules.ads.model import Ad
@@ -32,7 +32,7 @@ class ChatCRUD:
                     ad_id=ad_id,
                     buyer_id=buyer_id,
                     seller_id=ad.user_id,
-                    last_message_at=datetime.utcnow()
+                    last_message_at=datetime.now(timezone.utc)
                 )
                 db.add(room)
                 db.commit()
@@ -160,7 +160,7 @@ class ChatCRUD:
             # Update room
             room = db.query(ChatRoom).filter(ChatRoom.id == room_id).first()
             if room:
-                room.last_message_at = datetime.utcnow()
+                room.last_message_at = datetime.now(timezone.utc)
             
             db.commit()
             db.refresh(msg)

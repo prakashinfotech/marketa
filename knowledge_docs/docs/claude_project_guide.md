@@ -1,4 +1,4 @@
-# 🚀 Complete Guide: Building QuikrClone with Claude — Features, Skills & Best Practices
+# 🚀 Complete Guide: Building Marketa with Claude — Features, Skills & Best Practices
 
 > **Goal:** Use Claude's full feature set (CLAUDE.md, Skills, Project Knowledge, Custom Instructions) to efficiently build this classifieds platform with consistent, high-quality output.
 
@@ -108,10 +108,10 @@ quikr_copy/
 Create `CLAUDE.md` in your project root:
 
 ```markdown
-# CLAUDE.md — QuikrClone Project
+# CLAUDE.md — Marketa Project
 
 ## Project Overview
-QuikrClone is a classifieds platform (Quikr.com clone) built with:
+Marketa is a classifieds platform (quikr.com clone) built with:
 - **Backend:** FastAPI + PostgreSQL + SQLAlchemy + Alembic
 - **Frontend:** React 18 + Vite + Tailwind CSS + Lucide Icons
 - **Auth:** JWT-based authentication
@@ -350,13 +350,13 @@ Paginated:
 #### File: `docs/project_overview.md`
 
 > [!TIP]
-> This file should describe WHAT the app does. Copy/adapt from your existing `quikr_full_analysis.md` but focus on what YOU are building (not all of Quikr).
+> This file should describe WHAT the app does. Copy/adapt from your existing `marketa_full_analysis.md` but focus on what YOU are building (not all of Marketa).
 
 ```markdown
-# QuikrClone — Project Overview
+# Marketa — Project Overview
 
 ## What We're Building
-A classifieds platform inspired by Quikr.com where users can:
+A classifieds platform inspired by quikr.com where users can:
 - Post free classified ads (sell items, offer services)
 - Browse/search ads by category, location, and keywords
 - Chat with sellers in real-time (WebSocket)
@@ -448,7 +448,7 @@ A classifieds platform inspired by Quikr.com where users can:
 - **Reset Password:** Validates token + token_version, sets new password, invalidates old tokens
 - **Change Password:** Authenticated flow, verifies old password, sends confirmation email
 - **Wishlist Notifications:** When any favorited ad is updated, all interested users get notified
-- All emails use branded HTML templates with consistent QuikrClone branding
+- All emails use branded HTML templates with consistent Marketa branding
 ```
 
 ---

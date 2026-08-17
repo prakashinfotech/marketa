@@ -1,4 +1,4 @@
-# Quikr.com — Complete Platform Analysis & Documentation
+# quikr.com — Complete Platform Analysis & Documentation
 
 > **Source:** https://www.quikr.com/
 > **Tagline:** "Free Classified Ads in India, Post Ads Online"
@@ -17,7 +17,7 @@
 6. [Ad Posting System](#6-ad-posting-system)
 7. [Communication Features](#7-communication-features)
 8. [Monetization &amp; Premium Features](#8-monetization--premium-features)
-9. [Services Marketplace (QuikrEasy)](#9-services-marketplace-quikreasy)
+9. [Services Marketplace (MarketaEasy)](#9-services-marketplace-marketaeasy)
 10. [Financial Services Integration](#10-financial-services-integration)
 11. [Location System](#11-location-system)
 12. [UI Components &amp; Page Structure](#12-ui-components--page-structure)
@@ -32,7 +32,7 @@
 
 ## 1. Platform Overview
 
-Quikr is India's #1 online classifieds platform. It enables individuals and businesses to:
+Marketa is India's #1 online classifieds platform. It enables individuals and businesses to:
 
 - **Buy** — Browse and purchase used/new goods
 - **Sell** — Post free classified ads for items
@@ -58,7 +58,7 @@ Tiger Global, Kinnevik, Matrix Partners India, Omidyar Network, Norwest Venture 
 
 ## 2. Main Categories / Verticals
 
-Quikr organizes all listings into **13 main categories**:
+Marketa organizes all listings into **13 main categories**:
 
 | #  | Category                           | Description                                            |
 | -- | ---------------------------------- | ------------------------------------------------------ |
@@ -66,8 +66,8 @@ Quikr organizes all listings into **13 main categories**:
 | 2  | **Mobiles & Tablets**        | New/used phones, tablets, accessories                  |
 | 3  | **Electronics & Appliances** | TVs, ACs, fridges, washing machines, laptops           |
 | 4  | **Real Estate**              | Residential & commercial properties (sale/rent)        |
-| 5  | **Services**                 | 300+ professional services (QuikrEasy)                 |
-| 6  | **Jobs**                     | Blue collar, white collar, WFH, freelance (QuikrJobs)  |
+| 5  | **Services**                 | 300+ professional services (MarketaEasy)                 |
+| 6  | **Jobs**                     | Blue collar, white collar, WFH, freelance (MarketaJobs)  |
 | 7  | **Home & Lifestyle**         | Furniture, decor, kitchen items, gardening             |
 | 8  | **Education & Training**     | Colleges, courses, study abroad, distance learning     |
 | 9  | **Pets & Pet Care**          | Dogs, cats, birds, fish, pet accessories, pet services |
@@ -93,9 +93,9 @@ Additional quick-access categories visible on the homepage sidebar:
 
 ## 3. Sub-Platforms (Dedicated Microsites)
 
-Quikr operates **several branded sub-platforms**, each with its own dedicated UI, navigation, and functionality:
+Marketa operates **several branded sub-platforms**, each with its own dedicated UI, navigation, and functionality:
 
-### 3.1 QuikrBazaar (E-Commerce / Buy-Sell)
+### 3.1 MarketaBazaar (E-Commerce / Buy-Sell)
 
 - **URL:** `/Escrow/bazaar`
 - **Purpose:** Buy & sell used goods with escrow protection
@@ -105,9 +105,9 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Categories: Furniture & Decor, Electronics & Appliances, Mobiles & Tablets
   - Shopping Cart system
   - Order tracking (My Orders)
-  - Quikr Guaranteed™ — Verified product quality
+  - Marketa Guaranteed™ — Verified product quality
 
-### 3.2 QuikrCars
+### 3.2 MarketaCars
 
 - **URL:** `/cars/used-cars/all-india`
 - **Features:**
@@ -116,7 +116,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Sell Your Car (guided posting flow)
   - Auto services booking
 
-### 3.3 QuikrBikes
+### 3.3 MarketaBikes
 
 - **URL:** `/bikes-scooters/all-india`
 - **Features:**
@@ -124,7 +124,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Featured Bikes
   - Sell Your Bike
 
-### 3.4 QuikrHomes (Real Estate)
+### 3.4 MarketaHomes (Real Estate)
 
 - **URL:** `/homes`
 - **Description:** "Search your dream residential, commercial & agricultural properties"
@@ -138,7 +138,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Plots / Land
   - New Projects (Builder listings)
 
-### 3.5 QuikrJobs
+### 3.5 MarketaJobs
 
 - **URL:** `/jobs`
 - **Tagline:** "Jobs in India, Blue Collar Jobs"
@@ -148,19 +148,19 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - **By City:** Bangalore, Mumbai, Delhi, Chennai, Kolkata, Hyderabad, Pune, Gurgaon, Thane, Navi Mumbai
   - **By Industry:** Agriculture, Automobile, Banking, BPO, Chemical, Construction, Education, Entertainment, Finance, FMCG, Food, Healthcare, Hospitality, Hotel, IT, KPO, Medical, Mining, Oil & Gas, Pharma, Power, Real Estate, Recruitment, Retail, Software, Textile, Travel
   - **For Employers:** Post Free Job, Hire Candidates
-  - **Premium Features:** QuikrJobs Pro, Premium Job Seeker, VIP Landing Page
+  - **Premium Features:** MarketaJobs Pro, Premium Job Seeker, VIP Landing Page
   - **A-Z Company Directory**
   - **Job Alerts**
   - **Profile Creation** for job seekers
 
-### 3.6 QuikrEasy (Services)
+### 3.6 MarketaEasy (Services)
 
 - **URL:** `/services/services-India-all`
 - **Description:** "Connect with experts for 300+ Services"
 - **Featured Services:** Interior Design, Packers & Movers, B2B Suppliers
 - *(Detailed breakdown in Section 9 below)*
 
-### 3.7 QuikrLearner (Education)
+### 3.7 MarketaLearner (Education)
 
 - **URL:** `/education-training`
 - **Tagline:** "Explore your chances of landing a seat in your dream college"
@@ -172,7 +172,7 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
   - Competitive Exam Preparation
   - Skill Training
 
-### 3.8 QuikrPets
+### 3.8 MarketaPets
 
 - **URL:** `/pets/all-India`
 - **Features:** Pet buying/selling, pet care services, pet accessories
@@ -187,19 +187,19 @@ Quikr operates **several branded sub-platforms**, each with its own dedicated UI
 - **Mobile Number Verification:** Missed call verification to `1800 200 4141` (toll-free)
 - Phone-based authentication (OTP implied)
 
-### 4.2 My Account Dashboard (`/MyQuikr`)
+### 4.2 My Account Dashboard (`/MyMarketa`)
 
 | Feature                      | Path                                    | Description                         |
 | ---------------------------- | --------------------------------------- | ----------------------------------- |
-| **My Account**         | `/MyQuikr`                            | Main dashboard overview             |
-| **Chats**              | `/MyQuikr?action=mychats`             | All buyer-seller conversations      |
-| **Alerts**             | `/MyQuikr?action=alertsdetails`       | Saved search alerts & notifications |
-| **My Ads**             | `/MyQuikr?action=activeads`           | Manage active/inactive ads          |
-| **My Leads**           | `/MyQuikr?action=lead`                | Track inquiries on your ads         |
+| **My Account**         | `/MyMarketa`                            | Main dashboard overview             |
+| **Chats**              | `/MyMarketa?action=mychats`             | All buyer-seller conversations      |
+| **Alerts**             | `/MyMarketa?action=alertsdetails`       | Saved search alerts & notifications |
+| **My Ads**             | `/MyMarketa?action=activeads`           | Manage active/inactive ads          |
+| **My Leads**           | `/MyMarketa?action=lead`                | Track inquiries on your ads         |
 | **Get Instant Leads**  | `/instant-leads`                      | Premium lead generation tool        |
-| **My Cart**            | `/QuikrX/Cart`                        | Shopping cart (Bazaar)              |
+| **My Cart**            | `/MarketaX/Cart`                        | Shopping cart (Bazaar)              |
 | **My Doorstep Offers** | `/Escrow/MyOffers/getBuyersOfferForm` | Manage buy/sell offers              |
-| **My Orders**          | `/QuikrX/myorders`                    | Track placed/received orders        |
+| **My Orders**          | `/MarketaX/myorders`                    | Track placed/received orders        |
 | **Recommended for Me** | via alerts                              | AI-based matching ads               |
 | **Log Out**            | —                                      | Session termination                 |
 
@@ -270,9 +270,9 @@ Users can create customized alerts by selecting:
 
 - **In-app messaging** between buyers and sellers
 - Chat count badge in navigation
-- Accessible via `/MyQuikr?action=mychats`
+- Accessible via `/MyMarketa?action=mychats`
 
-### 7.2 QuikrNXT
+### 7.2 MarketaNXT
 
 - Privacy-first communication
 - Users can buy/sell **without revealing phone numbers**
@@ -292,7 +292,7 @@ Users can create customized alerts by selecting:
 
 - **URL:** `/purchase-ad-credits`
 - "Get up to 80% discounts on Premium Ads"
-- **Quikr Pack Credits** — Bulk purchase of ad credits
+- **Marketa Pack Credits** — Bulk purchase of ad credits
 - Convert existing free ads to Spotlight ads at a discount
 
 ### 8.2 Revenue Streams
@@ -303,16 +303,16 @@ Users can create customized alerts by selecting:
 | Spotlight Ads       | Top-of-page placement                |
 | Ad Credits Packs    | Bulk credit purchases                |
 | Business Listings   | For professional service providers   |
-| QuikrJobs Pro       | Employer recruitment tools           |
-| Quikr Guaranteed™  | Verified/refurbished product sales   |
+| MarketaJobs Pro       | Employer recruitment tools           |
+| Marketa Guaranteed™  | Verified/refurbished product sales   |
 | Partner Services    | Revenue share with service providers |
 | Advertising         | Third-party ad placements on site    |
 
 ---
 
-## 9. Services Marketplace (QuikrEasy)
+## 9. Services Marketplace (MarketaEasy)
 
-QuikrEasy is Quikr's services arm, connecting users with 300+ types of professionals.
+MarketaEasy is Marketa's services arm, connecting users with 300+ types of professionals.
 
 ### 9.1 Top Services (Sidebar Menu)
 
@@ -408,7 +408,7 @@ QuikrEasy is Quikr's services arm, connecting users with 300+ types of professio
 
 ## 10. Financial Services Integration
 
-Quikr has a dedicated financial services section on the homepage:
+Marketa has a dedicated financial services section on the homepage:
 
 | Service                  | Description                 |
 | ------------------------ | --------------------------- |
@@ -445,7 +445,7 @@ Quikr has a dedicated financial services section on the homepage:
 
 | Element           | Description                                       |
 | ----------------- | ------------------------------------------------- |
-| Logo              | "Quikr" brand logo                                |
+| Logo              | "Marketa" brand logo                                |
 | City Selector     | Dropdown with popular cities + state browse       |
 | Category Dropdown | "All Categories" with 13 items                    |
 | Search Bar        | Unified full-text search                          |
@@ -462,7 +462,7 @@ Quikr has a dedicated financial services section on the homepage:
 
 1. **Hero Banner** — City selector + search + main CTA
 2. **Category Sidebar** — 20+ quick-access categories with flyout menus
-3. **Quikr Bazaar Block** — Featured buy-sell categories
+3. **Marketa Bazaar Block** — Featured buy-sell categories
 4. **Real Estate Block** — Houses for sale/rent, commercial
 5. **Jobs Block** — Popular job roles
 6. **Cars Block** — Used cars, featured cars, sell your car
@@ -515,7 +515,7 @@ Each ad card typically contains:
 - About Us
 - Contact Us
 - Careers
-- Quikr Videos
+- Marketa Videos
 - Advertise With Us
 
 **Column 2 — Resources:**
@@ -531,8 +531,8 @@ Each ad card typically contains:
 - Listing Policy
 - Terms of Use
 - Privacy Policy
-- Quikr Mobiles Policy
-- Quikr Brand Guidelines
+- Marketa Mobiles Policy
+- Marketa Brand Guidelines
 
 **Column 4 — Partner Brands:**
 
@@ -560,7 +560,7 @@ All 17 popular cities + "All Cities"
 | Policies             | `/html/policies.php`                |
 | Terms & Conditions   | `/html/termsandconditions.php`      |
 | Privacy Policy       | `/html/policies.php#privacy-policy` |
-| Quikr Mobiles Policy | `/html/policies.php#quikrX-policy`  |
+| Marketa Mobiles Policy | `/html/policies.php#marketaX-policy`  |
 | Brand Guidelines     | `/html/brand_guidelines.php`        |
 | Help Center          | `/help/`                            |
 | Careers              | `/html/jobs.php`                    |
@@ -575,7 +575,7 @@ All 17 popular cities + "All Cities"
 - **Android App:** Available on Google Play Store
 - **Mobile Web:** Responsive design
 - "Download The App" promotion in header + footer
-- App-exclusive features promoted (QuikrEasy services app)
+- App-exclusive features promoted (MarketaEasy services app)
 
 ---
 
@@ -602,7 +602,7 @@ All 17 popular cities + "All Cities"
 ### 15.4 Recruiter Tools
 
 - Post Free Job
-- QuikrJobs Pro (premium employer tools)
+- MarketaJobs Pro (premium employer tools)
 - Hire Candidates flow
 
 ---
@@ -612,8 +612,8 @@ All 17 popular cities + "All Cities"
 | Feature                      | Description                                                            |
 | ---------------------------- | ---------------------------------------------------------------------- |
 | **Phone Verification** | Missed call verification (toll-free)                                   |
-| **Quikr Guaranteed™** | Verified product quality for mobile phones                             |
-| **QuikrNXT**           | Privacy-protected communication                                        |
+| **Marketa Guaranteed™** | Verified product quality for mobile phones                             |
+| **MarketaNXT**           | Privacy-protected communication                                        |
 | **Escrow System**      | Secure payment for Bazaar transactions                                 |
 | **Scam Warnings**      | "Beware of Scammers!" banners on jobs pages                            |
 | **Support Contact**    | Phone:`080-67364545` (Mon-Sat 9AM-9PM), Email: `support@quikr.com` |
@@ -640,10 +640,10 @@ All 17 popular cities + "All Cities"
 
 | Platform | Link                |
 | -------- | ------------------- |
-| Facebook | `/QuikrFans`      |
+| Facebook | `/MarketaFans`      |
 | LinkedIn | `/company/673276` |
-| Twitter  | `@quikr`          |
-| YouTube  | Quikr channel       |
+| Twitter  | `@marketa`          |
+| YouTube  | Marketa channel       |
 
 ---
 
@@ -684,14 +684,14 @@ All 17 popular cities + "All Cities"
 ### For Employers
 
 - [X] Post free job listings
-- [X] QuikrJobs Pro (premium tools)
+- [X] MarketaJobs Pro (premium tools)
 - [X] Hire candidates
 - [X] Filter by role/industry/city/type
 - [X] A-Z company directory
 
 ### For Service Providers
 
-- [X] List services on QuikrEasy
+- [X] List services on MarketaEasy
 - [X] Receive bookings
 - [X] Verified expert badge
 - [X] Partner integration (for fleet/rental services)

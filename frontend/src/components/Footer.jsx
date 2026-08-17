@@ -1,11 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { Heart, ExternalLink } from 'lucide-react';
 import api from '../api';
 
 export default function Footer() {
   const { user, isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => { logout(); navigate('/'); };
   const isAdmin = user?.role_id === 1 || user?.role_id === 2;
   const year = new Date().getFullYear();
   const [categories, setCategories] = React.useState([]);
@@ -32,9 +34,9 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <span className="text-white font-extrabold text-lg">Q</span>
+                <span className="text-white font-extrabold text-lg">M</span>
               </div>
-              <span className="text-lg font-extrabold text-white tracking-tight">QuikrClone</span>
+              <span className="text-lg font-extrabold text-white tracking-tight">Marketa</span>
             </div>
             <p className="text-sm leading-relaxed text-gray-500">
               India's largest classifieds platform. Buy, sell, rent — everything you need in one place.
@@ -71,7 +73,7 @@ export default function Footer() {
                 <>
                   <li><Link to="/profile" className="text-gray-500 hover:text-white transition-colors">My Profile</Link></li>
                   <li><Link to="/favorites" className="text-gray-500 hover:text-white transition-colors">My Favorites</Link></li>
-                  <li><button onClick={logout} className="text-gray-500 hover:text-white transition-colors">Logout</button></li>
+                  <li><button onClick={handleLogout} className="text-gray-500 hover:text-white transition-colors">Logout</button></li>
                 </>
               ) : (
                 <>
@@ -99,7 +101,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800/50 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">
-            &copy; {year} QuikrClone. All rights reserved.
+            &copy; {year} Marketa. All rights reserved.
           </p>
           <p className="text-xs text-gray-600 flex items-center gap-1.5">
             Built with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> for educational purposes

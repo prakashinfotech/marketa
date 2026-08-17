@@ -1,4 +1,4 @@
-# QuikrClone — Tech Stack & Environment Setup
+# Marketa — Tech Stack & Environment Setup
 
 ## Technology Stack
 
@@ -92,7 +92,7 @@ Place `.env` in the **project root** (NOT inside backend/ or frontend/).
 # PostgreSQL
 PG_USER=postgres
 PG_PASSWORD=your_password
-PG_DBNAME=quikr_db
+PG_DBNAME=marketa_db
 PG_HOSTNAME=localhost
 
 # JWT
@@ -106,7 +106,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-gmail-app-password
-SMTP_FROM_NAME=QuikrClone
+SMTP_FROM_NAME=Marketa
 FRONTEND_URL=http://localhost:3000
 ```
 
@@ -152,10 +152,10 @@ The frontend Vite dev server proxies `/api` requests to the backend at port 8000
 sudo apt install postgresql-14-pgvector  # or appropriate version
 
 # 2. Create database
-createdb quikr_db
+createdb marketa_db
 
 # 3. Enable pgvector
-psql -d quikr_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+psql -d marketa_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
 # 4. Run migrations
 cd backend && alembic upgrade head

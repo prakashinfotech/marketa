@@ -1,4 +1,4 @@
-# QuikrClone — Security & Validation Rules
+# Marketa — Security & Validation Rules
 
 > Every security measure, validation rule, and protection mechanism in the system.
 

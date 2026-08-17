@@ -5,7 +5,7 @@ Security utilities for password hashing and JWT management.
 import logging
 import secrets
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Union
 
 import bcrypt
@@ -39,18 +39,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
-    """ Creates a JWT access token. """
+    """ Creates a JWT access token (timezone-aware UTC). """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     _logger.info("Access token created for sub: %s", data.get("sub"))
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def create_refresh_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
-    """ Creates a JWT refresh token. """
+    """ Creates a JWT refresh token (timezone-aware UTC). """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
     to_encode.update({"type": "refresh", "exp": expire})
     _logger.info("Refresh token created for sub: %s", data.get("sub"))
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

@@ -1,4 +1,4 @@
-# QuikrClone — Module Specifications
+# Marketa — Module Specifications
 
 > Detailed requirements for every module. Claude should reference this when building a specific feature.
 
@@ -138,7 +138,7 @@
 
 ---
 
-## 6. AI Chatbot Module (QuikrBot)
+## 6. AI Chatbot Module (MarketaBot)
 
 ### Response Strategy (in order of priority)
 1. **Database FAQs** — Admin-managed Q&As. Checks: exact question substring match, keyword match, space-separated keyword fallback

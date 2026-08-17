@@ -1,6 +1,32 @@
-# FastAPI Project Template
+# Marketa — Full-Stack Classifieds Marketplace
 
-A clean, modular FastAPI project template designed for real-world applications. Built with a consistent structure that is easy to extend and easy for AI tools (Antigravity, Claude, ChatGPT) to follow.
+A modern, full-stack classifieds platform built with **FastAPI + React + PostgreSQL**.
+Buyers and sellers can post ads, search by category/location, chat in real time, and manage favorites — with an admin panel for moderation.
+
+For day-to-day commands and conventions, see [CLAUDE.md](CLAUDE.md).
+For git workflow & commit conventions, see [docs/GIT.md](docs/GIT.md).
+
+---
+
+## ✨ Highlights
+
+### Backend (FastAPI)
+- Modular per-domain structure (`app/modules/<entity>/`)
+- JWT auth with role-based access control (Super Admin / Admin / User)
+- Standardized response envelope: `{ success, msg, data }`
+- Alembic migrations, PostgreSQL, branded transactional emails
+
+### Frontend (React + Vite)
+- **Lazy-loaded routes** — code-split per page (~310 KB initial JS)
+- **Reusable UI primitives** in `src/components/ui/` (Button, Card, Input, Modal,
+  Skeleton, EmptyState, Spinner, ImageWithSkeleton)
+- **Global toast notifications** via `useToast()` hook
+- **Error boundary** with friendly recovery UI (no white screen of death)
+- **404 page** for unknown routes
+- **Keyboard shortcuts** (`/` focus search, `?` help, `g h/a/m/f` jump, `Esc` close)
+- **Web Share API** integration for ad sharing (with copy/WhatsApp/SMS/Email fallback)
+- **Accessibility baselines**: skip-to-main, ARIA on modals/toasts, semantic HTML, focus rings
+- **Image lazy-loading** with skeleton placeholders on ad cards
 
 ---
 
@@ -94,7 +120,7 @@ nano .env
 | `SMTP_PORT`      | SMTP server port          | `587`                         |
 | `SMTP_USER`      | SMTP login email          | `you@gmail.com`               |
 | `SMTP_PASSWORD`  | SMTP app password         | (Gmail App Password)            |
-| `SMTP_FROM_NAME` | Sender display name       | `QuikrClone`                  |
+| `SMTP_FROM_NAME` | Sender display name       | `Marketa`                  |
 | `FRONTEND_URL`   | Frontend base URL         | `http://localhost:3000`       |
 
 ### 3. Create Virtual Environment & Install Dependencies

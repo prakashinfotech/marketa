@@ -4,7 +4,7 @@ Database model for Recently Viewed Ads.
 
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.db.session import Base
 from common_models import CommonModelMixin
@@ -21,7 +21,7 @@ class RecentlyViewed(Base, CommonModelMixin):
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     ad_id = Column(Integer, ForeignKey("ads.id"), nullable=False)
-    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    viewed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # ── Relationships ────────────────────────────────────────────────────────
     user = relationship("User")

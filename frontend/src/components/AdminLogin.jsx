@@ -46,7 +46,7 @@ export default function AdminLogin() {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">Admin Portal</h1>
-          <p className="text-gray-500 mt-2 text-sm font-medium">Restricted access for QuikrClone administrators</p>
+          <p className="text-gray-500 mt-2 text-sm font-medium">Restricted access for Marketa administrators</p>
         </div>
 
         <div className="bg-gray-900/50 backdrop-blur-xl rounded-3xl border border-gray-800 p-8 shadow-2xl">
@@ -68,7 +68,7 @@ export default function AdminLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-gray-800/50 border border-gray-700 text-white pl-12 pr-4 py-3.5 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-600"
-                  placeholder="admin@quikrclone.com"
+                  placeholder="admin@marketa.com"
                 />
               </div>
             </div>

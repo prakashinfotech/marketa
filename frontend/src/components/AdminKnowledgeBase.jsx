@@ -134,7 +134,7 @@ export default function AdminKnowledgeBase() {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Knowledge Base</h1>
-            <p className="text-sm text-gray-500">Upload documents to power QuikrBot's AI responses</p>
+            <p className="text-sm text-gray-500">Upload documents to power MarketaBot's AI responses</p>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function AdminKnowledgeBase() {
           </div>
           <div className="flex items-start gap-2">
             <span className="w-5 h-5 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center font-bold shrink-0 text-[10px]">3</span>
-            <span>QuikrBot retrieves relevant chunks to answer user questions accurately</span>
+            <span>MarketaBot retrieves relevant chunks to answer user questions accurately</span>
           </div>
         </div>
       </div>

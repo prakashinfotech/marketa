@@ -1,0 +1,433 @@
+{
+  "$schema": "Marketa issue audit",
+  "generated_at": "2026-05-18",
+  "generated_by": "Claude Code audit",
+  "scope": "Whole-repo audit: frontend (React+Vite), backend (FastAPI), build, docs.",
+  "method": "Static read of critical infra files (App.jsx, AuthContext, api.js, ToastContext, Navbar, Footer, main.py, deps.py, security.py, schemas, ads/users CRUD), targeted greps for known anti-patterns, vite build, and cross-check of rule docs vs. actual code.",
+  "legend": {
+    "severity": ["critical", "high", "medium", "low", "info"],
+    "category": ["security", "bug", "ux", "performance", "accessibility", "validation", "consistency", "docs", "tech-debt", "dead-code"],
+    "status": "open"
+  },
+  "summary": {
+    "total": 38,
+    "by_severity": { "critical": 4, "high": 8, "medium": 14, "low": 9, "info": 3 }
+  },
+  "issues": [
+
+    {
+      "id": "BE-001",
+      "severity": "critical",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/main.py",
+      "lines": "43-49",
+      "title": "Session secret is regenerated on every server restart",
+      "details": "`secret_key = str(uuid.uuid4())` generates a fresh secret each time the process boots, then passes it to `SessionMiddleware`. Effect: every existing signed session cookie is invalidated whenever the server is restarted or auto-reloaded, breaking any session-dependent flow. Should be loaded from a stable secret in settings (e.g. `settings.SESSION_SECRET_KEY`).",
+      "repro": "Start the server, get a session cookie. Restart `uvicorn`. Cookie is no longer accepted."
+    },
+    {
+      "id": "BE-002",
+      "severity": "critical",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/main.py",
+      "lines": "53-61",
+      "title": "CORS uses wildcard origin together with allow_credentials=True",
+      "details": "`allow_origins=['*']` combined with `allow_credentials=True` is rejected by browsers per the CORS spec — credentialed requests with `*` origin are blocked. It is also a security smell (any origin can call the API). Set `allow_origins` to an explicit allow-list driven from settings (`FRONTEND_URL`, dev URLs)."
+    },
+    {
+      "id": "BE-003",
+      "severity": "critical",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/app/modules/users/endpoint.py",
+      "lines": "45-93",
+      "title": "Login / admin-login / forgot-password have no rate limiting",
+      "details": "`slowapi` is initialized in main.py (`limiter = Limiter(...)`) but no endpoint uses `@limiter.limit(...)`. Public auth endpoints (`/users/login/`, `/users/admin-login/`, `/users/forgot-password/`, `/users/refresh-token/`) are wide open to brute-force and credential-stuffing attacks. Apply at minimum `5/minute` per IP to login endpoints."
+    },
+    {
+      "id": "BE-004",
+      "severity": "critical",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/app/modules/ads/crud.py",
+      "lines": "27-44",
+      "title": "Ad image upload has no size, MIME, or content validation",
+      "details": "`_save_image_file` writes any uploaded file to disk with its original extension. Issues: (a) no max-file-size check — DOS via large uploads; (b) no MIME / magic-byte verification — non-image files (e.g. .php, .html, executables) can be stored under /uploads and served via the StaticFiles mount; (c) original filename's extension is reused verbatim — opens path-traversal / double-extension risks; (d) entire file is read into memory with `.read()` instead of streamed. Must validate `content_type` against a whitelist, cap size (~5 MB), normalize extension, and verify with PIL.Image.open() or `python-magic`."
+    },
+
+    {
+      "id": "BE-005",
+      "severity": "high",
+      "category": "bug",
+      "area": "backend",
+      "file": "backend/app/core/security.py",
+      "lines": "44-58",
+      "title": "datetime.utcnow() is deprecated in Python 3.12+",
+      "details": "`datetime.utcnow()` emits a DeprecationWarning on Python 3.12 and will be removed. Use `datetime.now(timezone.utc)` and store timezone-aware datetimes consistently throughout."
+    },
+    {
+      "id": "BE-006",
+      "severity": "high",
+      "category": "validation",
+      "area": "backend",
+      "file": "backend/app/modules/users/schema.py",
+      "lines": "12-77",
+      "title": "Passwords have no minimum length or complexity validation",
+      "details": "`CreateUserRequest`, `ResetPasswordRequest`, `ChangePasswordRequest` accept `password: str` with no constraints. An empty string or `'a'` will pass validation and bcrypt-hash successfully. Add `Field(min_length=8, max_length=72)` and ideally a custom validator enforcing at least one letter + one digit. Note: bcrypt truncates at 72 bytes — enforce max client-side to avoid silent truncation."
+    },
+    {
+      "id": "BE-007",
+      "severity": "high",
+      "category": "consistency",
+      "area": "backend",
+      "file": "backend/app/modules/users/endpoint.py",
+      "lines": "131",
+      "title": "Avatar URL is patched via string replace",
+      "details": "`current_user.avatar.replace('uploads/', '/uploads/')` is a hacky string fix because saved paths and served paths differ. Standardize: always store the URL-relative path (with leading slash) on write, never patch on read. Same pattern likely exists for ad images — audit and unify."
+    },
+    {
+      "id": "FE-001",
+      "severity": "high",
+      "category": "bug",
+      "area": "frontend",
+      "file": "frontend/src/components/Navbar.jsx",
+      "lines": "47-69",
+      "title": "useEffect uses window.location.pathname as a dependency (non-reactive)",
+      "details": "`useEffect(... , [isLoggedIn, window.location.pathname])` — `window.location.pathname` is a plain string read at render time, not a React-observable value. The effect will not re-run on client-side navigation, so unread badge counts go stale. Fix: read pathname via `useLocation()` from react-router-dom and depend on `location.pathname`.",
+      "repro": "Open the site logged in. Send yourself a message in another tab. Click between routes — the unread bubble does not update until a hard reload."
+    },
+    {
+      "id": "FE-002",
+      "severity": "high",
+      "category": "performance",
+      "area": "frontend",
+      "file": "frontend/src/components/Navbar.jsx",
+      "lines": "47-64",
+      "title": "Dynamic import of api.js prevents chunking",
+      "details": "Navbar does `import('../api').then(...)` but every other file uses a static import. Vite emits an INEFFECTIVE_DYNAMIC_IMPORT warning at build time and cannot move api.js into a separate chunk. Replace with `import api from '../api'` at the top of the file."
+    },
+    {
+      "id": "FE-003",
+      "severity": "high",
+      "category": "bug",
+      "area": "frontend",
+      "file": "frontend/src/api.js",
+      "lines": "18-57",
+      "title": "Refresh-token interceptor has no concurrency guard",
+      "details": "Multiple in-flight requests that all 401 will each independently call `/users/refresh-token/`. The server will see N refresh calls; only one succeeds; the rest may invalidate the refresh token (depending on rotation policy) and force a logout. Implement a single-flight refresh: queue subsequent 401s on the promise of the first refresh call, resolve them all with the new token."
+    },
+    {
+      "id": "FE-004",
+      "severity": "high",
+      "category": "bug",
+      "area": "frontend",
+      "file": "frontend/src/api.js",
+      "lines": "46-52",
+      "title": "Refresh failure clears storage but leaves AuthContext state inconsistent",
+      "details": "On refresh failure, the interceptor wipes sessionStorage and hard-redirects to /login. The React `AuthContext` still holds the old `user` and `token` state until reload happens. Between the storage clear and the redirect, any render relying on `isLoggedIn` is stale (could expose user-only UI to a logged-out user briefly). Better: dispatch a custom event or call a context-provided `forceLogout()` instead of `window.location.href = '/login'`.",
+      "repro": "Temporarily make refresh-token endpoint return 500 server-side. Trigger a 401 request. Observe state vs storage."
+    },
+    {
+      "id": "FE-005",
+      "severity": "high",
+      "category": "security",
+      "area": "frontend",
+      "file": "frontend/src/AuthContext.jsx",
+      "lines": "6-32",
+      "title": "Tokens stored in sessionStorage (XSS-readable) and no cross-tab sync",
+      "details": "(a) Any XSS on any page can exfiltrate the JWT from `sessionStorage`. The most defensible storage is an HttpOnly cookie set by the backend at login, with CSRF protection. (b) No `storage` event listener — login/logout in one tab does not propagate to other open tabs.",
+      "recommendation": "At minimum, add a `window.addEventListener('storage', ...)` to react to changes. Ideally switch to HttpOnly cookies."
+    },
+    {
+      "id": "FE-006",
+      "severity": "high",
+      "category": "consistency",
+      "area": "frontend",
+      "file": "frontend/src/components/AdminLocations.jsx",
+      "lines": "100",
+      "title": "Uses native window.confirm() despite rule forbidding it",
+      "details": "`if (!window.confirm('Are you sure you want to delete this ...')) return;` directly violates `frontend_rules.md` (\"NEVER use window.confirm/alert/prompt\"). Replace with `<ConfirmDialog>` from `components/ui/`."
+    },
+
+    {
+      "id": "BE-008",
+      "severity": "medium",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/app/modules/chat/endpoint.py",
+      "lines": "151-174",
+      "title": "WebSocket auth token passed in URL query string",
+      "details": "`?token=<jwt>` survives in webserver access logs, browser history, referer headers when documents link out, and any proxy along the path. Prefer: send the token in the first WebSocket message after `accept()`, or use an HttpOnly cookie + Origin check during the WS handshake."
+    },
+    {
+      "id": "BE-009",
+      "severity": "medium",
+      "category": "bug",
+      "area": "backend",
+      "file": "backend/main.py",
+      "lines": "44-51",
+      "title": "SessionMiddleware may be unused dead-weight",
+      "details": "Session middleware is mounted but no endpoint observed uses `request.session`. If genuinely unused, remove it (one less attack surface, one less moving piece). If kept, BE-001 must be fixed first."
+    },
+    {
+      "id": "BE-010",
+      "severity": "medium",
+      "category": "consistency",
+      "area": "backend",
+      "file": "backend/app/api/v1/api.py",
+      "lines": "28",
+      "title": "Notifications router registered without a URL prefix",
+      "details": "All other modules use `prefix='/...'`, but `api_router.include_router(notifications.router, tags=['Notifications'])` has no prefix. Endpoints may be at the root of /api/v1/, contradicting the convention documented in `skills/api_conventions.md`. Add `prefix='/notifications'` (and verify the module's own router does not already declare it)."
+    },
+    {
+      "id": "BE-011",
+      "severity": "medium",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/main.py",
+      "lines": "67-68",
+      "title": "User-uploaded files served directly under /uploads with no auth",
+      "details": "`app.mount('/uploads', StaticFiles(...))` serves anything under uploads/ to anyone who knows the URL. Ad images may be public by design, but user avatars / chatbot knowledge docs uploaded by admins probably should not be. Consider segmenting paths and gating private folders behind an authenticated endpoint that issues short-lived signed URLs."
+    },
+    {
+      "id": "BE-012",
+      "severity": "medium",
+      "category": "performance",
+      "area": "backend",
+      "file": "backend/app/modules/ads/crud.py",
+      "lines": "27-44",
+      "title": "Image upload reads entire file into memory and writes synchronously",
+      "details": "`file.file.read()` loads the whole upload into RAM, then `open(... 'wb').write(...)` blocks the event loop on FS I/O. For a multi-image post, this serializes per-image work. Stream the upload (`shutil.copyfileobj(file.file, dst)`) and offload to a thread (`run_in_threadpool`) to keep the loop responsive."
+    },
+    {
+      "id": "BE-013",
+      "severity": "medium",
+      "category": "consistency",
+      "area": "backend",
+      "file": "backend/main.py",
+      "lines": "1-93",
+      "title": "App title still reads APP_NAME='FastAPI Template'",
+      "details": "`settings.APP_NAME` default is `'FastAPI Template'` (see config.py). Unless the .env overrides it, the OpenAPI docs at /docs are titled 'FastAPI Template' instead of 'Marketa'. Set a sensible product default in config.py."
+    },
+    {
+      "id": "BE-014",
+      "severity": "medium",
+      "category": "tech-debt",
+      "area": "backend",
+      "file": "backend/app/modules/users/crud.py",
+      "lines": "many",
+      "title": "Soft-delete check pattern is repeated and error-prone",
+      "details": "`User.is_delete.isnot(True)` appears in dozens of queries. Easy to forget on a new query and accidentally return deleted users. Encapsulate in a base query (e.g. a `User.active()` classmethod) or use a SQLAlchemy ORM event / global filter."
+    },
+    {
+      "id": "FE-007",
+      "severity": "medium",
+      "category": "ux",
+      "area": "frontend",
+      "file": "frontend/src/components/AdDetails.jsx",
+      "lines": "300-380",
+      "title": "AdDetails has a hand-rolled Share dropdown duplicating new ShareButton primitive",
+      "details": "AdDetails ships its own share UI (Twitter, Facebook, WhatsApp, copy-link) embedded inline. We just added a reusable `<ShareButton>` primitive. Two consequences: (a) Twitter/Facebook share links use icons that do NOT exist in the installed `lucide-react@1.11.0` — verify the icons render (they may already be broken if the imports use brand names that no longer ship); (b) we now have two implementations to maintain. Replace the inline dropdown with `<ShareButton url={...} title={ad.title} />`."
+    },
+    {
+      "id": "FE-008",
+      "severity": "medium",
+      "category": "tech-debt",
+      "area": "frontend",
+      "file": "frontend/src/components/Profile.jsx",
+      "lines": "114, 149, 171",
+      "title": "Profile re-calls login() three times to refresh user state",
+      "details": "After updates, Profile calls `login(sessionStorage.getItem('token'), sessionStorage.getItem('refreshToken'), { ...user, name })` — using `login` to mean 'replace the user object'. This is misleading and fragile (any change to login signature breaks it). Add an explicit `updateUser(partial)` method on AuthContext and use it here."
+    },
+    {
+      "id": "FE-009",
+      "severity": "medium",
+      "category": "consistency",
+      "area": "frontend",
+      "file": "CLAUDE.md",
+      "lines": "53-56",
+      "title": "CLAUDE.md says tokens go to localStorage; actual code uses sessionStorage",
+      "details": "CLAUDE.md `Authentication Flow` says 'Frontend stores token in localStorage' but `AuthContext.jsx` uses `sessionStorage` (and also defensively clears `localStorage` for an older version). Pick one truth and update the doc — sessionStorage is the current reality."
+    },
+    {
+      "id": "FE-010",
+      "severity": "medium",
+      "category": "docs",
+      "area": "frontend",
+      "file": "CLAUDE.md / frontend/package.json",
+      "lines": "18 / scripts",
+      "title": "CLAUDE.md documents `npm run lint` but no lint script exists",
+      "details": "`frontend/package.json` has only `dev`, `build`, `preview`. Either add an `eslint` setup and a `lint` script, or remove the doc reference. For a production-grade codebase, adding ESLint + `eslint-plugin-react-hooks` is a real win (would have caught FE-001 automatically)."
+    },
+    {
+      "id": "FE-011",
+      "severity": "medium",
+      "category": "consistency",
+      "area": "frontend",
+      "file": "frontend/src/components/Footer.jsx",
+      "lines": "28",
+      "title": "Footer uses dark gray-950 background; rest of the app is light",
+      "details": "Visual jolt at the end of every page — the rest of the app is on `gray-50` / `white` indigo/purple. Not necessarily a bug (many sites do dark footers), but flag for design review since it conflicts with the otherwise uniform light look promised by `design_system.md`. If kept, document it explicitly there."
+    },
+    {
+      "id": "FE-012",
+      "severity": "medium",
+      "category": "ux",
+      "area": "frontend",
+      "file": "frontend/src/components/Footer.jsx",
+      "lines": "74",
+      "title": "Footer logout button does not redirect",
+      "details": "Clicking 'Logout' calls `logout()` but stays on the current page. If the user is on a protected page, the UI may flash protected content briefly before any guards kick in. Pass a `navigate('/')` (or accept it via context) so logout always returns to a safe public route."
+    },
+    {
+      "id": "FE-013",
+      "severity": "medium",
+      "category": "performance",
+      "area": "frontend",
+      "file": "frontend/src/components/Navbar.jsx",
+      "lines": "47-64",
+      "title": "Unread counts re-fetched on every route change",
+      "details": "Each navigation issues two GETs (`/notifications/me/unread-count/`, `/chat/unread-count/`). On a chatty user that's expensive and chatty. Two improvements: (a) put the counts in a `NotificationContext` with an interval / WS push; (b) at minimum throttle to once per 30s and dedupe in-flight."
+    },
+    {
+      "id": "FE-014",
+      "severity": "medium",
+      "category": "accessibility",
+      "area": "frontend",
+      "file": "frontend/src/components/Navbar.jsx",
+      "lines": "152-218",
+      "title": "User-menu dropdown lacks aria-haspopup / aria-expanded / role=menu",
+      "details": "The avatar dropdown is a div-based menu without ARIA semantics. Add `aria-haspopup='menu'` and `aria-expanded={dropdownOpen}` to the trigger, `role='menu'` to the panel and `role='menuitem'` to each item, plus arrow-key navigation. Same pattern needed in any custom dropdown."
+    },
+    {
+      "id": "FE-015",
+      "severity": "medium",
+      "category": "tech-debt",
+      "area": "frontend",
+      "file": "frontend/src/components/",
+      "lines": "33 hits across many files",
+      "title": "33 stray console.log/error/warn calls",
+      "details": "Production builds should be quiet. Either remove the calls or gate them behind `if (import.meta.env.DEV)`. A Vite plugin (`vite-plugin-remove-console`) can strip them in production builds automatically."
+    },
+
+    {
+      "id": "BE-015",
+      "severity": "low",
+      "category": "tech-debt",
+      "area": "backend",
+      "file": "backend/app/modules/chat/endpoint.py",
+      "lines": "19-47",
+      "title": "In-memory WebSocket connection manager is single-process only",
+      "details": "`ConnectionManager` stores connections in a process-local dict. The moment you run more than one uvicorn worker, broadcasts only reach the subset of clients connected to the same worker. For a 'production-grade' WS chat, plug in Redis pub/sub (`broadcaster` library or similar). Acceptable for dev / single-worker prod, but worth documenting."
+    },
+    {
+      "id": "BE-016",
+      "severity": "low",
+      "category": "consistency",
+      "area": "backend",
+      "file": "backend/app/api/v1/api.py",
+      "lines": "26",
+      "title": "Search alerts router uses /alerts not /search-alerts",
+      "details": "Module name is `search_alerts` but the prefix is `/alerts`. Frontend uses `/alerts` too, so functionally fine, but the inconsistency in module-name vs URL-prefix mapping makes the route map harder to scan. Either rename the module to `alerts` or change the prefix to `/search-alerts/`."
+    },
+    {
+      "id": "BE-017",
+      "severity": "low",
+      "category": "tech-debt",
+      "area": "backend",
+      "file": "backend/app/modules/users/crud.py",
+      "lines": "—",
+      "title": "Repeated 200/400 status patterns in endpoints could be a helper",
+      "details": "Every endpoint returns `JSONResponse(status_code=200 if response.get('success') else 400, ...)`. Wrap into a small `envelope(response, ok=200, err=400)` helper to reduce noise — also makes consistent error logging easier."
+    },
+    {
+      "id": "BE-018",
+      "severity": "low",
+      "category": "security",
+      "area": "backend",
+      "file": "backend/app/modules/users/crud.py",
+      "lines": "111-117",
+      "title": "Login error messages distinguish 'unknown user' from 'wrong password'",
+      "details": "Need to verify — common anti-pattern is to return different messages for 'no such email' vs 'wrong password', which lets attackers enumerate registered emails. Confirm both paths return the same generic message ('Invalid email or password.')."
+    },
+    {
+      "id": "FE-016",
+      "severity": "low",
+      "category": "ux",
+      "area": "frontend",
+      "file": "frontend/src/components/Navbar.jsx",
+      "lines": "114",
+      "title": "'SOON' badge on Services link, but route is enabled",
+      "details": "The link to `/services` displays a 'SOON' marker, but the route is wired up and the page actually loads. Either remove the badge or hide the link until the feature is ready."
+    },
+    {
+      "id": "FE-017",
+      "severity": "low",
+      "category": "tech-debt",
+      "area": "frontend",
+      "file": "frontend/src/components/AdDetails.jsx",
+      "lines": "71-75",
+      "title": "Recently-viewed cache mixes sessionStorage (frontend) and a server-side endpoint",
+      "details": "HomePage hydrates `Recently Viewed` from `GET /recently-viewed/me/`, but AdDetails also stuffs viewed ad IDs into `sessionStorage` for some reason. Pick one source of truth — server-synced is already richer (works across devices)."
+    },
+    {
+      "id": "FE-018",
+      "severity": "low",
+      "category": "accessibility",
+      "area": "frontend",
+      "file": "frontend/src/components/ToastContext.jsx",
+      "lines": "100-110",
+      "title": "Error toasts use role='alert'; OK — but global Esc handler closes whichever toast was last mounted",
+      "details": "`document.addEventListener('keydown', onKey)` is added in every `ToastItem`. With multiple toasts visible, every Esc fires N close handlers. Move the listener up to `ToastContainer` and close the most recent toast only."
+    },
+    {
+      "id": "FE-019",
+      "severity": "low",
+      "category": "validation",
+      "area": "frontend",
+      "file": "frontend/src/components/PostAd.jsx",
+      "lines": "166-",
+      "title": "PostAd validates 5MB per image client-side; backend does not",
+      "details": "Client guard is fine for UX but a hostile client can bypass it. Tracked together with BE-004 — backend MUST enforce the same limit."
+    },
+
+    {
+      "id": "INFO-001",
+      "severity": "info",
+      "category": "dead-code",
+      "area": "repo",
+      "file": "various",
+      "lines": "—",
+      "title": "33 console.* statements + ~zero tests",
+      "details": "There is no jest/vitest setup in the frontend, no pytest setup visible in backend (no `tests/` folder). For a 'production-grade' codebase, at minimum smoke tests on auth, ad creation, and report flow are worth adding."
+    },
+    {
+      "id": "INFO-002",
+      "severity": "info",
+      "category": "docs",
+      "area": "repo",
+      "file": "claude_skills/skills/frontend_rules.md",
+      "lines": "—",
+      "title": "Rule says NEVER use window.confirm; one component still does",
+      "details": "AdminLocations.jsx violates this (see FE-006). Either fix the violation or relax the rule and document the exception."
+    },
+    {
+      "id": "INFO-003",
+      "severity": "info",
+      "category": "performance",
+      "area": "frontend",
+      "file": "vite build output",
+      "lines": "—",
+      "title": "Main bundle is 310 KB (gzip 100 KB)",
+      "details": "After lazy-loading routes, the always-on bundle is ~310 KB pre-gzip. Largest known contributor is likely lucide-react importing the full icon set. Consider switching to named per-icon imports from `lucide-react/icons` (or another tree-shakable strategy) if bundle is a priority. Not urgent at 100 KB gzipped."
+    }
+  ],
+  "next_steps": [
+    "Review this file and tell me which IDs to address first.",
+    "Recommended fix order: BE-001 → BE-002 → BE-003 → BE-004 (security critical) → BE-006 (validation) → FE-001 → FE-002 → FE-003 → FE-004 → FE-006 → FE-009 → BE-005.",
+    "Then sweep medium severity items in priority by frequency-of-impact: FE-007, FE-013, FE-014, BE-010, BE-011.",
+    "Low/info items can be batched in a single 'polish' PR."
+  ]
+}

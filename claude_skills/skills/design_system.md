@@ -1,4 +1,4 @@
-# QuikrClone — Design System
+# Marketa — Design System
 
 > Visual design language, CSS classes, color palette, typography, and animation patterns.
 
@@ -202,4 +202,86 @@ input:focus, select:focus, textarea:focus {
 3. **Rounded corners:** Cards = `rounded-2xl`, Buttons/inputs = `rounded-xl`, Badges = `rounded-full`
 4. **No browser defaults:** Custom modals (no `window.confirm`), custom scrollbars, custom focus rings
 5. **Hover states:** Everything interactive has a visible hover transition
-6. **Loading states:** Spinner animation while data loads, disabled buttons during submission
+6. **Loading states:** Skeletons for content (preferred), spinner for actions, disabled buttons during submission
+
+---
+
+## React Component Library (`frontend/src/components/ui/`)
+
+The primitives below wrap the CSS classes above. Visuals are identical — use the components in new code instead of repeating Tailwind classes.
+
+### `<Button>`
+Wraps `.btn-primary` plus secondary / ghost / danger / amber variants. Renders a built-in spinner when `loading` is true.
+```jsx
+<Button variant="primary" leftIcon={Plus}>Save</Button>
+<Button variant="amber"   leftIcon={PlusCircle}>Post Free Ad</Button>
+<Button variant="secondary" fullWidth>Cancel</Button>
+```
+Variants: `primary` · `secondary` · `ghost` · `danger` · `amber`
+Sizes: `sm` · `md` · `lg`
+
+### `<Card>` / `<CardHeader>`
+Wraps `.card`. Standard padding presets (`none` / `sm` / `md` / `lg`) and optional `interactive` prop for hover lift.
+
+### `<Input>`, `<Textarea>`, `<Select>`
+Wrap `.input-field` + `.label`. Built-in label, hint, error message, left icon slot, right slot, `aria-invalid` / `aria-describedby` wiring.
+
+### `<Modal>` / `<ConfirmDialog>`
+Replaces all `window.confirm`/`alert`. Handles Esc, scroll lock, backdrop click, focus, ARIA.
+Sizes: `sm` · `md` · `lg` · `xl` · `2xl`.
+
+### `<Skeleton>` / `<SkeletonText>` / `<SkeletonAdCard>` / `<SkeletonList>`
+Tailwind `animate-pulse` placeholders. Use for content-shaped loading states (preferred over a full-page spinner).
+
+### `<EmptyState>`
+Light indigo icon + title + description + optional action. Use whenever a list/grid is empty.
+
+### `<Spinner>` / `<PageSpinner>`
+Border-spinner (indigo). `PageSpinner` for Suspense fallbacks; `Spinner` for inline action loading.
+
+### `<ImageWithSkeleton>`
+Drop-in `<img>` replacement with: `loading="lazy"`, `decoding="async"`, skeleton placeholder during load, friendly "image unavailable" fallback on error. Use on every ad image.
+
+---
+
+## Toast Notifications
+
+Global system, mounted via `<ToastProvider>` at the app root. Consume with the `useToast()` hook:
+
+```jsx
+const toast = useToast();
+toast.success('Saved');
+toast.error('Failed');
+toast.info('Heads up');
+toast.warning('Careful');
+toast.show('Custom', { variant: 'success', title: 'Heads up', duration: 6000 });
+```
+
+Visual: success = emerald gradient (uses `.toast-success`), error = red gradient (`.toast-error`), info = sky, warning = amber. Mounted top-right, max 4 stacked. Auto-dismiss after `duration` ms (default 4000). Esc closes the focused toast.
+
+---
+
+## Accessibility Patterns
+
+- **Skip link:** `PublicLayout` renders a visually-hidden link that becomes visible on focus.
+- **Modals:** `role="dialog"`, `aria-modal="true"`, `aria-labelledby` (title), Esc-to-close, scroll lock, focus moves into dialog.
+- **Toasts:** wrapper has `aria-live="polite"`; error variant uses `role="alert"`.
+- **Icon-only buttons:** must have `aria-label` (or visible `title` text). Lucide icons use `aria-hidden="true"`.
+- **Forms:** errors set `aria-invalid` and link to a hint/error message via `aria-describedby`.
+- **Focus ring:** all focusable elements have a visible 3px indigo ring.
+
+---
+
+## Keyboard Shortcuts (Global)
+
+Mounted via `<GlobalShortcuts />` in `App.jsx`. Visible to the user via the `?` help dialog.
+
+| Keys | Action |
+|------|--------|
+| `/` | Focus the navbar search input |
+| `?` | Open the shortcuts help dialog |
+| `g h` | Navigate home |
+| `g a` | Navigate to post-ad |
+| `g m` | Navigate to my-ads |
+| `g f` | Navigate to favorites |
+| `Esc` | Close active modal / blur active input |

@@ -1,4 +1,4 @@
-# QuikrClone — Architecture & Project Structure
+# Marketa — Architecture & Project Structure
 
 ## Complete Directory Tree
 

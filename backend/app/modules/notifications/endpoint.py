@@ -8,10 +8,7 @@ from app.api.deps import get_current_user
 from app.modules.users.model import User
 from . import schema, crud
 
-router = APIRouter(
-    prefix="/notifications",
-    tags=["Notifications"],
-)
+router = APIRouter()
 _logger = logging.getLogger(__name__)
 
 @router.get("/me/", response_model=schema.Response)

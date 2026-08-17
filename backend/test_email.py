@@ -14,7 +14,7 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USER = "parthmagic123@gmail.com"
 SMTP_PASSWORD = "odah aeup gpjh xxla"
-FROM_NAME = "QuikrClone"
+FROM_NAME = "Marketa"
 
 
 def test_email(to_email: str):
@@ -27,7 +27,7 @@ def test_email(to_email: str):
     print(f"{'='*60}\n")
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = "✅ QuikrClone Email Test — It Works!"
+    msg["Subject"] = "✅ Marketa Email Test — It Works!"
     msg["From"] = f"{FROM_NAME} <{SMTP_USER}>"
     msg["To"] = to_email
 
@@ -41,7 +41,7 @@ def test_email(to_email: str):
           </p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
           <p style="color: #9ca3af; font-size: 12px;">
-            Sent from QuikrClone email test script
+            Sent from Marketa email test script
           </p>
         </div>
       </body>

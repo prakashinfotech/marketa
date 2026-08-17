@@ -1,4 +1,4 @@
-# QuikrClone — API Conventions
+# Marketa — API Conventions
 
 > Every API endpoint in the system MUST follow these rules. No exceptions.
 

@@ -1,8 +1,8 @@
-# QuikrClone — Project Identity
+# Marketa — Project Identity
 
 ## What Is This Product?
 
-QuikrClone is a **full-stack classified ads marketplace** inspired by Quikr.com. It allows users to buy, sell, and rent products through direct buyer-seller communication — no shopping cart, no checkout, no payment processing.
+Marketa is a **full-stack classified ads marketplace** inspired by quikr.com. It allows users to buy, sell, and rent products through direct buyer-seller communication — no shopping cart, no checkout, no payment processing.
 
 **Business Model:** Communication-focused. Buyers contact sellers via real-time chat or phone. The platform facilitates discovery and connection, not transactions.
 
@@ -10,7 +10,7 @@ QuikrClone is a **full-stack classified ads marketplace** inspired by Quikr.com.
 
 ## Product Name
 
-**QuikrClone** — used in all UI text, emails, branding, and metadata.
+**Marketa** — used in all UI text, emails, branding, and metadata.
 
 ---
 

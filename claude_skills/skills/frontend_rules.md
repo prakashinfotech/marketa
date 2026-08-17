@@ -1,4 +1,4 @@
-# QuikrClone — Frontend Rules (React Skill File)
+# Marketa — Frontend Rules (React Skill File)
 
 > **Scope:** This file governs ALL JSX/CSS code in the `frontend/` directory. Claude MUST follow these patterns exactly.
 
@@ -73,12 +73,13 @@ export default function ComponentName() {
 
 ## 2. Component Rules
 
-1. **Functional components only** — NO class components.
+1. **Functional components only** — NO class components (one exception: `ErrorBoundary` must be a class — React requires it).
 2. **File naming:** PascalCase (e.g., `PostAd.jsx`, `AdminFAQs.jsx`).
 3. **One component per file.**
-4. **ALL components** go in `frontend/src/components/` (flat structure, no subdirectories).
-5. **`export default`** — every component is a default export.
-6. **No prop drilling** — use `useAuth()` from `AuthContext` for auth state.
+4. **Page components** go in `frontend/src/components/` (flat).
+5. **Reusable primitives** go in `frontend/src/components/ui/` and are exported via `ui/index.js`.
+6. **`export default`** — every component is a default export.
+7. **No prop drilling** — use `useAuth()` from `AuthContext` and `useToast()` from `ToastContext`.
 
 ---
 
@@ -292,16 +293,169 @@ import { Search, Heart, MapPin, Clock, Eye, Loader2, AlertCircle, CheckCircle } 
 
 ## 10. Form Pattern
 
-```jsx
-<form onSubmit={handleSubmit} className="space-y-4">
-  <div>
-    <label className="label">Name <span className="text-red-500">*</span></label>
-    <input required className="input-field" value={name} onChange={e => setName(e.target.value)} placeholder="Enter name" />
-  </div>
+Either use raw `.input-field` / `.label` classes (legacy), OR use the `Input` / `Textarea` / `Select` primitives (preferred for new code):
 
-  <button type="submit" disabled={loading} className="btn-primary w-full !py-3 flex items-center justify-center gap-2">
-    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-    {loading ? 'Saving...' : 'Create'}
-  </button>
+```jsx
+import { Input, Textarea, Button } from './ui';
+
+<form onSubmit={handleSubmit} className="space-y-4">
+  <Input
+    label="Name"
+    required
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    placeholder="Enter name"
+    error={errors.name}
+    hint="Public display name"
+  />
+  <Textarea label="Bio" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
+  <Button type="submit" loading={loading} fullWidth>
+    {loading ? 'Saving…' : 'Create'}
+  </Button>
 </form>
 ```
+
+---
+
+## 11. Reusable UI Primitives (`components/ui/`)
+
+For all new code, prefer these over re-implementing buttons/cards/inputs/modals.
+They wrap the existing `.btn-primary` / `.card` / `.input-field` design classes — **visuals are identical**, just less duplication.
+
+```jsx
+import {
+  Button, Card, CardHeader,
+  Input, Textarea, Select,
+  Modal, ConfirmDialog,
+  Skeleton, SkeletonText, SkeletonAdCard, SkeletonList,
+  EmptyState,
+  Spinner, PageSpinner,
+  ImageWithSkeleton,
+} from './ui';
+```
+
+### Button
+```jsx
+<Button variant="primary" size="md" leftIcon={Plus} loading={saving} onClick={save}>Save</Button>
+<Button as={Link} to="/post-ad" variant="amber" leftIcon={PlusCircle}>Post Free Ad</Button>
+<Button variant="secondary" fullWidth>Cancel</Button>
+```
+Variants: `primary` (indigo gradient), `secondary` (outlined), `ghost`, `danger`, `amber` (post-ad CTA).
+
+### Card
+```jsx
+<Card padding="md">...</Card>
+<Card padding="lg" interactive onClick={...}>...</Card>
+<Card padding="none">
+  <CardHeader title="Settings" description="Manage your profile" action={<Button>Edit</Button>} />
+</Card>
+```
+
+### Modal & ConfirmDialog
+```jsx
+const [open, setOpen] = useState(false);
+<Modal open={open} onClose={() => setOpen(false)} title="Edit profile" size="md"
+       footer={<><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={save}>Save</Button></>}>
+  ...form...
+</Modal>
+
+// Drop-in replacement for window.confirm():
+<ConfirmDialog
+  open={deleting}
+  onClose={() => setDeleting(false)}
+  onConfirm={handleDelete}
+  title="Delete this ad?"
+  description="This cannot be undone."
+  confirmLabel="Delete"
+  loading={isDeleting}
+/>
+```
+Handles Esc, scroll lock, backdrop click, focus, ARIA — automatically.
+
+### Skeletons (preferred over spinners for content)
+```jsx
+{loading ? <SkeletonList count={8} /> : <AdsGrid ads={ads} />}
+<Skeleton className="h-4 w-32" />
+<SkeletonText lines={3} />
+```
+
+### EmptyState
+```jsx
+<EmptyState
+  icon={Heart}
+  title="No favorites yet"
+  description="Tap the heart on any ad to save it here."
+  action={<Button as={Link} to="/search">Browse ads</Button>}
+/>
+```
+
+### ImageWithSkeleton (use on every ad image)
+```jsx
+<ImageWithSkeleton
+  src={ad.image_url}
+  alt={ad.title}
+  aspect="aspect-[4/3]"
+  wrapperClassName="rounded-xl"
+/>
+```
+Lazy-loads, shows skeleton, falls back to a "Image unavailable" state on error.
+
+---
+
+## 12. Toast Notifications
+
+Replace inline `setError` / `setSuccess` patterns with global toasts in new code:
+
+```jsx
+import { useToast } from '../ToastContext';
+
+export default function MyComponent() {
+  const toast = useToast();
+
+  const save = async () => {
+    try {
+      const res = await api.post('/...');
+      if (res.data.success) toast.success('Saved successfully');
+      else toast.error(res.data.msg || 'Save failed');
+    } catch {
+      toast.error('Something went wrong');
+    }
+  };
+}
+```
+
+**Rule:** for user-actionable feedback (save/delete/share), use toasts. For form-field validation errors, keep them inline on the `Input` (`<Input error="…">`).
+
+---
+
+## 13. Routing & Code Splitting
+
+All page components are lazy-loaded in `App.jsx`:
+
+```jsx
+const NewPage = lazy(() => import('./components/NewPage'));
+
+<Route path="/new" element={<PublicLayout><NewPage /></PublicLayout>} />
+```
+`Suspense` is already provided by `PublicLayout` with a `<PageSpinner />` fallback — no need to add another.
+
+**Rule:** every new page must be added with `React.lazy()`, never a static import.
+
+---
+
+## 14. Error Handling
+
+`ErrorBoundary` is mounted at the root of `App.jsx`. It catches any uncaught render error and shows a recovery UI. You generally don't need to add boundaries inside pages — only for high-risk widgets (e.g. embedded 3rd-party iframes).
+
+---
+
+## 15. Keyboard Shortcuts
+
+`<GlobalShortcuts />` is mounted once in `App.jsx`. Shortcuts:
+- `/` — focus the navbar search input
+- `?` — open the shortcuts help dialog
+- `g h` → home, `g a` → post-ad, `g m` → my-ads, `g f` → favorites
+- `Esc` — close any open modal / blur the focused input
+
+If you add a new page worth a shortcut, edit `GlobalShortcuts.jsx` (don't add separate global listeners in random components).

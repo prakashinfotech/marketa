@@ -35,7 +35,7 @@ export default function PrivacyPolicy() {
         
         <div className="p-10 space-y-10">
           <p className="text-gray-600 leading-relaxed">
-            Your privacy is extremely important to us. This policy explains how we handle your data and the steps we take to ensure your personal information remains protected while you use QuikrClone.
+            Your privacy is extremely important to us. This policy explains how we handle your data and the steps we take to ensure your personal information remains protected while you use Marketa.
           </p>
 
           <div className="grid gap-8">

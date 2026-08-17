@@ -52,7 +52,7 @@ export default function Signup() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-600 rounded-xl mb-4">
-            <span className="text-white text-2xl font-bold">Q</span>
+            <span className="text-white text-2xl font-bold">M</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
           <p className="text-gray-500 mt-1 text-sm">Start buying and selling today</p>

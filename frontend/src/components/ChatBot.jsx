@@ -11,7 +11,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState([
     {
       from: 'bot',
-      text: "Hi there! 👋 I'm **QuikrBot**, your AI-powered assistant!\n\nAsk me anything about how to use QuikrClone — search for products, post ads, contact sellers, manage your profile, and more!",
+      text: "Hi there! 👋 I'm **MarketaBot**, your AI-powered assistant!\n\nAsk me anything about how to use Marketa — search for products, post ads, contact sellers, manage your profile, and more!",
       suggestions: INITIAL_SUGGESTIONS,
       id: 1,
     },
@@ -132,7 +132,7 @@ export default function ChatBot() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-bold text-sm flex items-center gap-1.5">
-                QuikrBot <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                MarketaBot <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
               </p>
               <p className="text-indigo-200 text-[11px] flex items-center gap-1">
                 <span className="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
@@ -225,7 +225,7 @@ export default function ChatBot() {
               </button>
             </div>
             <p className="text-center text-[10px] text-gray-400 mt-1.5">
-              Powered by QuikrBot AI · Groq LLaMA3 + RAG
+              Powered by MarketaBot AI · Groq LLaMA3 + RAG
             </p>
           </div>
         </div>

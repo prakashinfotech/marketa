@@ -1,7 +1,7 @@
 """
 CRUD operations for Recently Viewed Ads.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.modules.recently_viewed.model import RecentlyViewed
 from app.modules.ads.model import Ad
@@ -18,7 +18,7 @@ def add_recently_viewed(db: Session, user_id: int, ad_id: int) -> None:
     ).first()
 
     if record:
-        record.viewed_at = datetime.utcnow()
+        record.viewed_at = datetime.now(timezone.utc)
     else:
         record = RecentlyViewed(user_id=user_id, ad_id=ad_id)
         db.add(record)
