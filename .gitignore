@@ -280,3 +280,8 @@ backend/alembic/versions/__pycache__/
 .gemini/
 .claude/
 
+
+# ── Databases ────────────────────────────────────────────────────────────────
+*.db
+*.sqlite3
+
