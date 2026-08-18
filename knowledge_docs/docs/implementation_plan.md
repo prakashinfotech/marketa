@@ -409,7 +409,7 @@ alembic upgrade head
 
 > [!NOTE]
 >
-> 1. **Email Provider:** ✅ Resolved — Gmail SMTP with App Password (`parthmagic123@gmail.com`)
+> 1. **Email Provider:** ✅ Resolved — Gmail SMTP with an App Password, configured via `SMTP_USER` / `SMTP_PASSWORD` in `.env`
 > 2. **Cart & Orders:** ✅ Resolved — Removed. Platform focuses on direct buyer-seller communication (Chat + Phone).
 > 3. **Notifications:** ✅ Resolved — Poll-based via API (unread count badge in navbar).
 > 4. **Recently Viewed:** ✅ Resolved — Server-synced via PostgreSQL `recently_viewed_ads` table (replaced localStorage).

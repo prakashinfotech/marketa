@@ -1,0 +1,23 @@
+# Convenience file for pip users. Mirrors [project.dependencies] in pyproject.toml.
+# The authoritative, fully-pinned source is uv.lock — prefer `uv sync`.
+# If you change a dependency, update pyproject.toml first, then re-run `uv lock`
+# and mirror the change here.
+
+alembic>=1.18.4
+bcrypt>=5.0.0
+fastapi>=0.135.1
+psycopg2-binary>=2.9.11
+pydantic-settings>=2.13.1
+pydantic[email]>=2.12.5
+python-jose>=3.5.0
+sqlalchemy>=2.0.48
+uvicorn>=0.41.0
+python-dotenv>=1.0.1
+python-multipart>=0.0.22
+slowapi>=0.1.9
+httpx>=0.28.1
+itsdangerous>=2.2.0
+pgvector>=0.4.0
+sentence-transformers>=5.0.0
+groq>=1.2.0
+pdfminer-six>=20260107

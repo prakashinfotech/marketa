@@ -1,16 +1,13 @@
 {
-  "name": "frontend",
+  "name": "marketa-frontend",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "description": "React + Vite frontend for the Marketa classifieds marketplace.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "axios": "^1.15.2",
     "date-fns": "^4.1.0",

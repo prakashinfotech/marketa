@@ -6,7 +6,7 @@ Usage: cd backend && python download_seed_images.py
 """
 
 import os
-import requests
+import httpx
 import time
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads", "ads")
@@ -157,7 +157,7 @@ def download_images():
 
             try:
                 print(f"  ⬇ Downloading: {folder}/{filename} ...", end=" ", flush=True)
-                resp = requests.get(url, timeout=30, headers={
+                resp = httpx.get(url, timeout=30, follow_redirects=True, headers={
                     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
                 })
                 resp.raise_for_status()

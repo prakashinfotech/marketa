@@ -234,7 +234,20 @@ venv/
 env/
 
 # ── Environment Variables ────────────────────────────────────────────────────
+# Ignore every real env file; the committed templates are the only exception.
 .env
+.env.*
+!.env.example
+!frontend/.env.example
+
+# Other common secret-bearing files — never commit these.
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+service-account*.json
 
 # ── IDE ──────────────────────────────────────────────────────────────────────
 .idea/
@@ -257,7 +270,8 @@ htmlcov/
 logs/
 
 # ── uv ───────────────────────────────────────────────────────────────────────
-uv.lock
+# NOTE: backend/uv.lock is intentionally committed. Lock files make a fresh
+# clone reproducible — do not add it here.
 
 # ── Node / Frontend ─────────────────────────────────────────────────────────
 node_modules/

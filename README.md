@@ -1,558 +1,441 @@
-# Marketa — Full-Stack Classifieds Marketplace
+<div align="center">
 
-A modern, full-stack classifieds platform built with **FastAPI + React + PostgreSQL**.
-Buyers and sellers can post ads, search by category/location, chat in real time, and manage favorites — with an admin panel for moderation.
+# 🛒 Marketa
 
-For day-to-day commands and conventions, see [CLAUDE.md](CLAUDE.md).
-For git workflow & commit conventions, see [docs/GIT.md](docs/GIT.md).
+**Buy and sell anything, locally.**
 
----
+A full-stack classifieds marketplace — post ads, search by category and location, chat with sellers in real time, and moderate everything from an admin panel.
 
-## ✨ Highlights
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Frontend](https://img.shields.io/badge/Frontend-React_19_%2B_Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL_%2B_pgvector-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Migrations](https://img.shields.io/badge/Migrations-Alembic-6BA81E)](https://alembic.sqlalchemy.org/)
 
-### Backend (FastAPI)
-- Modular per-domain structure (`app/modules/<entity>/`)
-- JWT auth with role-based access control (Super Admin / Admin / User)
-- Standardized response envelope: `{ success, msg, data }`
-- Alembic migrations, PostgreSQL, branded transactional emails
-
-### Frontend (React + Vite)
-- **Lazy-loaded routes** — code-split per page (~310 KB initial JS)
-- **Reusable UI primitives** in `src/components/ui/` (Button, Card, Input, Modal,
-  Skeleton, EmptyState, Spinner, ImageWithSkeleton)
-- **Global toast notifications** via `useToast()` hook
-- **Error boundary** with friendly recovery UI (no white screen of death)
-- **404 page** for unknown routes
-- **Keyboard shortcuts** (`/` focus search, `?` help, `g h/a/m/f` jump, `Esc` close)
-- **Web Share API** integration for ad sharing (with copy/WhatsApp/SMS/Email fallback)
-- **Accessibility baselines**: skip-to-main, ARIA on modals/toasts, semantic HTML, focus rings
-- **Image lazy-loading** with skeleton placeholders on ad cards
+</div>
 
 ---
 
-## 📁 Project Structure
+## 📖 Overview
 
-```
-fastapi-template/
-├── main.py                      # FastAPI app entry point
-├── pyproject.toml               # Project metadata & dependencies (uv/pip)
-├── alembic.ini                  # Alembic configuration
-├── common_models.py             # Shared SQLAlchemy mixin (id, uuid, timestamps, soft-delete)
-├── .env.example                 # Environment variable template
-├── .gitignore                   # Git ignore rules
-│
-├── alembic/                     # Database migrations
-│   ├── env.py                   # Migration environment (loads settings + models)
-│   ├── script.py.mako           # Migration file template
-│   └── versions/                # Auto-generated migration files
-│
-├── app/
-│   ├── __init__.py
-│   │
-│   ├── core/                    # Application-wide configuration
-│   │   ├── config.py            # Settings (pydantic-settings, loads .env)
-│   │   ├── security.py          # Password hashing, JWT creation
-│   │   └── roles.py             # Role constants for RBAC
-│   │
-│   ├── db/                      # Database layer
-│   │   ├── session.py           # SQLAlchemy engine, SessionLocal, Base
-│   │   ├── base.py              # Model registry (import all models here for Alembic)
-│   │   └── deps.py              # get_db() dependency
-│   │
-│   ├── api/                     # API layer
-│   │   ├── deps.py              # Auth service (JWT decode + RBAC)
-│   │   └── v1/
-│   │       └── api.py           # Central router — register all module routers here
-│   │
-│   ├── modules/                 # Feature modules (one folder per domain entity)
-│   │   └── users/               # ← Sample module
-│   │       ├── __init__.py      # Exports: router, user_crud
-│   │       ├── model.py         # SQLAlchemy model
-│   │       ├── schema.py        # Pydantic request/response schemas
-│   │       ├── crud.py          # Business logic (class-based)
-│   │       └── endpoint.py      # FastAPI router endpoints
-│   │
-│   └── utils/                   # Shared utilities
-│       ├── logger.py            # Centralized logging setup
-│       └── email.py             # Email sending (SMTP, branded templates)
-│
-└── README.md                    # This file
+Marketa is an OLX/Quikr-style classifieds platform. Sellers publish ads with images and
+category-specific attributes; buyers browse, filter, favourite, and message sellers
+directly. An AI chatbot answers product and platform questions using a pgvector-backed
+knowledge base, and an admin panel handles categories, locations, reports, FAQs and
+enquiries.
+
+The backend is a modular FastAPI service where each domain lives in its own
+`app/modules/<entity>/` folder with a consistent `model / schema / crud / endpoint`
+layout. The frontend is a React 19 SPA built with Vite and Tailwind CSS.
+
+---
+
+## 🏗️ Architecture & Application Flow
+
+```mermaid
+flowchart TD
+    User["👤 Buyer / Seller / Admin"]
+
+    subgraph Frontend["Frontend — React 19 + Vite"]
+        Pages["Lazy-loaded Route Components<br/>Home · Search · Ad Details · Post Ad · Chat · Admin"]
+        Ctx["AuthContext + ToastContext<br/>global state and notifications"]
+        UI["UI Primitives<br/>Button · Card · Modal · Skeleton"]
+        Axios["api.js — Axios instance<br/>JWT interceptor + single-flight refresh"]
+        Pages --> Ctx
+        Pages --> UI
+        Pages --> Axios
+    end
+
+    subgraph Backend["Backend — FastAPI"]
+        Router["API Router — /api/v1"]
+        Limiter["SlowAPI Rate Limiter"]
+        Deps["Dependencies<br/>get_db · get_current_user · RBAC"]
+        Modules["Domain Modules<br/>users · ads · categories · locations · chat<br/>favorites · notifications · reports · alerts · chatbot"]
+        CRUD["CRUD Layer — SQLAlchemy ORM"]
+        Static["Static /uploads<br/>ad images and avatars"]
+        Router --> Limiter --> Deps --> Modules --> CRUD
+    end
+
+    subgraph Data["Data & External Services"]
+        DB[("PostgreSQL<br/>+ pgvector")]
+        Alembic["Alembic Migrations"]
+        SMTP["SMTP — transactional email"]
+        Groq["Groq LLM — llama-3.3-70b"]
+        Embed["SentenceTransformers<br/>all-MiniLM-L6-v2"]
+    end
+
+    User --> Pages
+    Axios -->|"HTTPS + JSON<br/>Bearer JWT"| Router
+    Axios -->|"Vite dev proxy"| Static
+    CRUD --> DB
+    Alembic --> DB
+    Modules -->|"verification & reset mails"| SMTP
+    Modules -->|"chatbot answers"| Groq
+    Modules -->|"embed & retrieve chunks"| Embed
+    Embed --> DB
 ```
 
+### Request lifecycle
+
+1. The React app attaches the JWT access token from `sessionStorage` to every request via an Axios interceptor.
+2. The request hits `/api/v1/<module>/...`, passes the SlowAPI rate limiter, then resolves a database session and the current user through FastAPI dependencies.
+3. The module's endpoint validates the payload with a Pydantic schema and delegates to its CRUD layer.
+4. Every endpoint answers with the same envelope: `{ "success": bool, "msg": str, "data": any }`.
+5. On a `401`, the frontend runs a **single-flight** refresh against `/users/refresh-token/` — parallel requests queue on one refresh promise and retry once it resolves. If the refresh fails, an `auth:forced-logout` event triggers a clean logout.
+
+### Typical user journey
+
+1. A visitor searches by keyword, category, location and category-specific attributes.
+2. They open an ad, view images, and save it to favourites or share it.
+3. After signing up and verifying their email, they can message the seller in a chat room.
+4. A seller posts an ad with images and dynamic attributes, then manages it from **My Ads**.
+5. Buyers create search alerts and receive notifications when matching ads appear.
+6. Admins moderate reported ads, manage categories, locations, FAQs and the chatbot knowledge base.
+
 ---
 
-## 🚀 Project Setup
+## ✨ Features
 
-### Prerequisites
+| Area | What's included |
+|---|---|
+| 🔐 **Authentication** | JWT access + refresh tokens, bcrypt hashing, email verification, forgot/reset password, change password, account deletion with confirmation |
+| 👥 **Roles** | Super Admin, Admin, User — enforced via role constants and route dependencies |
+| 📢 **Ads** | Create, edit, delete, status changes, image uploads, category-specific dynamic attributes, similar-ad suggestions, view counts |
+| 🔎 **Search** | Keyword search with category, location and attribute filters |
+| ❤️ **Favourites** | Toggle-based saved ads |
+| 💬 **Chat** | Per-ad chat rooms, message history, unread counts, seller inquiry inbox |
+| 🔔 **Notifications** | In-app notifications with unread counts and read-all |
+| 🚨 **Reports** | Users report ads; admins triage and change report status |
+| 🤖 **AI Chatbot** | Retrieval-augmented answers over a pgvector knowledge base, powered by Groq |
+| 📍 **Locations** | States, cities and popular-city listings with admin CRUD |
+| 🛠️ **Admin Panel** | Categories, locations, reports, FAQs, enquiries, knowledge base |
+| ♿ **Accessibility** | Skip-to-main link, ARIA on modals and toasts, focus management, keyboard shortcuts |
+| ⚡ **Performance** | Route-level code splitting, image lazy-loading with skeletons, `console.*` stripped from production bundles |
 
-- Python 3.12+
-- PostgreSQL
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+---
 
-### 1. Clone & Navigate
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, Vite 8, React Router 7, Tailwind CSS 3, Axios, Lucide React, date-fns |
+| **Backend** | Python 3.12+, FastAPI, Uvicorn, Pydantic v2, pydantic-settings |
+| **Database** | PostgreSQL with the `pgvector` extension |
+| **ORM / Migrations** | SQLAlchemy 2, Alembic |
+| **Authentication** | JWT (HS256) via python-jose, bcrypt password hashing |
+| **Rate Limiting** | SlowAPI |
+| **Email** | SMTP (branded HTML transactional mail) |
+| **AI** | Groq (`llama-3.3-70b-versatile`), SentenceTransformers (`all-MiniLM-L6-v2`) |
+| **Tooling** | `uv` for Python dependencies, npm for the frontend |
+
+---
+
+## 📁 Repository Structure
+
+```text
+marketa/
+├── .env.example                    # Environment template — copy to .env
+├── README.md
+├── CLAUDE.md                       # Day-to-day commands & conventions
+│
+├── backend/                        # FastAPI service
+│   ├── main.py                     # App entry point: CORS, rate limiter, static uploads, router
+│   ├── common_models.py            # Shared mixin: id, uuid, timestamps, soft delete
+│   ├── pyproject.toml              # Python dependencies (authoritative)
+│   ├── uv.lock                     # Pinned dependency lock file
+│   ├── requirements.txt            # Mirror of pyproject deps, for pip users
+│   ├── alembic.ini                 # Alembic configuration
+│   ├── alembic/versions/           # 15 migrations, single linear chain
+│   ├── app/
+│   │   ├── core/                   # config.py, security.py, roles.py, limiter.py
+│   │   ├── db/                     # session.py, base.py (model registry), deps.py
+│   │   ├── api/v1/                 # api.py — aggregates every module router
+│   │   ├── modules/<entity>/       # model.py · schema.py · crud.py · endpoint.py
+│   │   └── utils/                  # email templates, logging helpers
+│   ├── seed.py                     # States, cities, categories, attributes
+│   ├── seed_category_attributes.py # Category-specific filters (idempotent)
+│   ├── seed_data.sql               # Full reset + demo users/ads (destructive)
+│   ├── seed_dummy_data.py          # Demo ads, chats, favourites, reviews
+│   ├── download_seed_images.py     # Fetches demo ad images into uploads/
+│   ├── create_admin.py             # Creates a Super Admin account
+│   └── uploads/                    # Runtime upload target (gitignored)
+│
+├── frontend/                       # React + Vite SPA
+│   ├── .env.example
+│   ├── vite.config.js              # Dev server on :3000, proxies /api and /uploads
+│   └── src/
+│       ├── App.jsx                 # Lazy-loaded routes inside ErrorBoundary + providers
+│       ├── api.js                  # Axios instance, JWT interceptors, refresh flow
+│       ├── AuthContext.jsx         # Global auth state, cross-tab sync
+│       ├── ToastContext.jsx        # useToast() notifications
+│       └── components/
+│           ├── ui/                 # Button, Card, Input, Modal, Skeleton, EmptyState…
+│           └── *.jsx               # Page components
+│
+├── claude_skills/                  # Project knowledge base & conventions
+├── knowledge_docs/                 # Analysis, implementation plan, demo flow
+└── docs/                           # Git workflow, production gap analysis, issue log
+```
+
+---
+
+## 📋 Prerequisites
+
+| Tool | Version | Notes |
+|---|---|---|
+| **Python** | 3.12+ | Backend runtime |
+| **uv** | latest | Recommended installer — [install guide](https://docs.astral.sh/uv/getting-started/installation/). `pip` works too. |
+| **Node.js** | 20+ | Frontend runtime, ships with npm |
+| **PostgreSQL** | 14+ | Must support the `pgvector` extension |
+| **Git** | latest | — |
+
+**Optional service accounts** — the app runs without them, with the matching feature disabled:
+
+| Service | Needed for |
+|---|---|
+| SMTP mailbox (e.g. a Gmail App Password) | Email verification and password-reset mails |
+| [Groq API key](https://console.groq.com/keys) | AI chatbot answers |
+
+> ⚠️ **The first backend start downloads roughly 2 GB.** The chatbot module imports
+> `sentence-transformers`, which pulls in PyTorch and downloads the
+> `all-MiniLM-L6-v2` model on first import. Allow extra time on a fresh install.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
 
 ```bash
-# Copy template to your new project
-cp -r fastapi-template/ my-new-project/
-cd my-new-project/
+git clone https://github.com/prakashinfotech/marketa.git
+cd marketa
 ```
 
-### 2. Environment Setup
+### 2. Configure environment variables
+
+The backend and Alembic both read a single `.env` at the repository root.
 
 ```bash
-# Copy the example env file
 cp .env.example .env
-
-# Edit .env with your actual values
-nano .env
 ```
 
-**Required `.env` variables:**
-
-| Variable           | Description               | Example                         |
-| ------------------ | ------------------------- | ------------------------------- |
-| `PG_USER`        | PostgreSQL username       | `postgres`                    |
-| `PG_PASSWORD`    | PostgreSQL password       | `your_password`               |
-| `PG_DBNAME`      | Database name             | `my_project_db`               |
-| `PG_HOSTNAME`    | Database host             | `localhost`                   |
-| `JWT_SECRET_KEY` | Secret key for JWT tokens | (generate a long random string) |
-| `SMTP_HOST`      | SMTP server hostname      | `smtp.gmail.com`              |
-| `SMTP_PORT`      | SMTP server port          | `587`                         |
-| `SMTP_USER`      | SMTP login email          | `you@gmail.com`               |
-| `SMTP_PASSWORD`  | SMTP app password         | (Gmail App Password)            |
-| `SMTP_FROM_NAME` | Sender display name       | `Marketa`                  |
-| `FRONTEND_URL`   | Frontend base URL         | `http://localhost:3000`       |
-
-### 3. Create Virtual Environment & Install Dependencies
-
-**Using uv (recommended):**
+Open `.env` and fill in your own values. At minimum set `PG_USER`, `PG_PASSWORD`,
+`PG_DBNAME` and a strong `JWT_SECRET_KEY`:
 
 ```bash
-# Create venv and install dependencies in one step
-uv venv
-source .venv/bin/activate
-uv pip install -e .
+python -c "import secrets; print(secrets.token_urlsafe(64))"
 ```
 
-**Using pip:**
+> 🔒 `.env` is gitignored. Never commit it, and never paste real credentials into
+> source files or documentation.
+
+### 3. Create the database
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+createdb marketa
+
+# pgvector is required by the chatbot's knowledge_chunks table
+psql -d marketa -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
-### 4. Database Setup
+### 4. Set up the backend
 
 ```bash
-# Create the PostgreSQL database
-createdb my_project_db
+cd backend
 
-# Or via psql
-psql -U postgres -c "CREATE DATABASE my_project_db;"
-```
-
-### 5. Run Alembic Migrations
-
-```bash
-# Generate initial migration from your models
-alembic revision --autogenerate -m "initial"
-
-# Apply migrations to the database
-alembic upgrade head
-```
-
-### 6. Run the Application
-
-```bash
-# Development mode with auto-reload
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-Open your browser:
-
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
-
----
-
-## 🗄️ Alembic — Database Migrations
-
-### Configuration
-
-Alembic is pre-configured to:
-
-- Load the database URL from your `.env` via `app.core.config.settings`
-- Auto-detect models imported in `alembic/env.py`
-
-### Common Commands
-
-```bash
-# Generate a new migration after model changes
-alembic revision --autogenerate -m "describe your change"
-
-# Apply all pending migrations
-alembic upgrade head
-
-# Rollback one migration
-alembic downgrade -1
-
-# View current migration status
-alembic current
-
-# View migration history
-alembic history
-```
-
-### Adding Models to Alembic
-
-When you create a new module with a model, you must import it in **two places**:
-
-1. **`alembic/env.py`** — so Alembic can detect it:
-
-   ```python
-   from app.modules.your_module import model as your_module_model
-   ```
-2. **`app/db/base.py`** — so the app registry is complete:
-
-   ```python
-   from app.modules.your_module.model import YourModel
-   ```
-
----
-
-## 📦 Dependency Management
-
-### Using uv (recommended)
-
-```bash
-# Add a new dependency
-uv add package-name
-
-# Add a dev dependency
-uv add --dev pytest
-
-# Sync dependencies
+# With uv (recommended) — creates backend/.venv and installs every dependency.
+# uv resolves against uv.lock and refreshes it if pyproject.toml has changed.
 uv sync
+
+# Or with pip
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### Using pip
+Apply the migrations, then seed the reference data:
 
 ```bash
-# Install from pyproject.toml
-pip install -e .
-
-# Generate requirements.txt (if needed)
-pip freeze > requirements.txt
-```
-
----
-
-## 🧩 How to Create a New Module
-
-Follow these steps every time you add a new feature/entity:
-
-### Step 1: Create Module Folder
-
-```bash
-mkdir -p app/modules/products
-```
-
-### Step 2: Create Module Files
-
-Create these 5 files inside `app/modules/products/`:
-
-#### `__init__.py`
-
-```python
-from .endpoint import router
-from .crud import product as product_crud
-```
-
-#### `model.py`
-
-```python
-"""
-Database model for the Product entity.
-"""
-
-from sqlalchemy import Column, String, Float, Boolean
-
-from app.db.session import Base
-from common_models import CommonModelMixin
-
-
-class Product(Base, CommonModelMixin):
-    __tablename__ = "products"
-
-    name = Column(String, nullable=False, index=True)
-    description = Column(String, nullable=True)
-    price = Column(Float, nullable=False)
-    is_active = Column(Boolean, default=True)
-```
-
-#### `schema.py`
-
-```python
-"""
-Pydantic schemas for the Product module.
-"""
-
-from pydantic import BaseModel
-from typing import Optional, Any
-
-
-class CreateProductRequest(BaseModel):
-    name: str
-    description: Optional[str] = None
-    price: float
-
-
-class GetAllProductsRequest(BaseModel):
-    skip: int = 0
-    limit: int = 100
-
-
-class UpdateProductRequest(BaseModel):
-    product_uuid: str
-    name: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[float] = None
-
-
-class DeleteProductRequest(BaseModel):
-    product_uuid: str
-
-
-class Response(BaseModel):
-    success: bool
-    data: Optional[Any] = None
-    msg: Optional[str] = None
-```
-
-#### `crud.py`
-
-```python
-"""
-CRUD operations for the Product module.
-"""
-
-import logging
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-
-from .model import Product
-from . import schema
-
-_logger = logging.getLogger(__name__)
-
-
-class ProductCRUD:
-
-    def create_product(self, db: Session, payload: schema.CreateProductRequest) -> dict:
-        try:
-            new_product = Product(
-                name=payload.name,
-                description=payload.description,
-                price=payload.price,
-            )
-            db.add(new_product)
-            db.commit()
-            db.refresh(new_product)
-            return {"success": True, "msg": "Product created.", "data": {"uuid": new_product.uuid}}
-        except SQLAlchemyError as e:
-            db.rollback()
-            _logger.error("DB error: %s", str(e))
-            return {"success": False, "msg": "Database error.", "data": {}}
-
-    # ... add list, update, delete methods following the same pattern
-
-
-product = ProductCRUD()
-```
-
-#### `endpoint.py`
-
-```python
-"""
-API endpoints for Product management.
-"""
-
-import logging
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-
-from app.db.deps import get_db
-from app.api.deps import get_current_user
-from . import schema, crud
-
-_logger = logging.getLogger(__name__)
-router = APIRouter()
-
-
-@router.post("/create/", response_model=schema.Response)
-def create_product(
-    payload: schema.CreateProductRequest,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    try:
-        response = crud.product.create_product(db=db, payload=payload)
-        return JSONResponse(
-            status_code=200 if response.get("success") else 400,
-            content={
-                "success": response.get("success"),
-                "msg": response.get("msg"),
-                "data": response.get("data", {}),
-            },
-        )
-    except Exception as e:
-        _logger.exception("Error: %s", str(e))
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "msg": "Internal server error", "data": {}},
-        )
-```
-
-### Step 3: Register the Module
-
-**`app/api/v1/api.py`** — Add router:
-
-```python
-from app.modules import products
-api_router.include_router(products.router, prefix="/products", tags=["Products"])
-```
-
-**`app/db/base.py`** — Add model import:
-
-```python
-from app.modules.products.model import Product
-```
-
-**`alembic/env.py`** — Add model import:
-
-```python
-from app.modules.products import model as product_model
-```
-
-### Step 4: Run Migration
-
-```bash
-alembic revision --autogenerate -m "add products table"
 alembic upgrade head
+python seed.py                      # states, cities, categories, attributes
+python seed_category_attributes.py  # category-specific filters
 ```
 
----
-
-## 📐 Coding Conventions
-
-### API Response Format
-
-**Every** API response follows this structure:
-
-```json
-{
-    "success": true,
-    "msg": "Human-readable message",
-    "data": {}
-}
-```
-
-For paginated lists:
-
-```json
-{
-    "success": true,
-    "msg": "Items fetched successfully.",
-    "data": [...],
-    "total": 50,
-    "skip": 0,
-    "limit": 100
-}
-```
-
-Build responses as inline dicts in the CRUD layer:
-
-```python
-return {"success": True, "msg": "Created.", "data": {"id": 1}}
-return {"success": False, "msg": "Not found.", "data": {}}
-```
-
-In endpoints, use `JSONResponse` to set the HTTP status code:
-
-```python
-return JSONResponse(
-    status_code=200 if response.get("success") else 400,
-    content={
-        "success": response.get("success"),
-        "msg": response.get("msg"),
-        "data": response.get("data", {}),
-    },
-)
-```
-
-### Module Structure
-
-Each module follows the same 5-file pattern:
-
-| File            | Purpose                                                     |
-| --------------- | ----------------------------------------------------------- |
-| `__init__.py` | Exports `router` and CRUD instance                        |
-| `model.py`    | SQLAlchemy model (inherits `Base` + `CommonModelMixin`) |
-| `schema.py`   | Pydantic request/response schemas                           |
-| `crud.py`     | Business logic (class-based, returns response dicts)        |
-| `endpoint.py` | FastAPI router (thin controller, delegates to CRUD)         |
-
-### Naming Conventions
-
-- **Module folders**: lowercase, plural (`users`, `products`, `orders`)
-- **Model classes**: singular PascalCase (`User`, `Product`)
-- **Table names**: lowercase, plural (`users`, `products`)
-- **CRUD classes**: `{Entity}CRUD` (`UserCRUD`, `ProductCRUD`)
-- **CRUD instances**: lowercase singular (`user`, `product`)
-- **Schema classes**: descriptive PascalCase (`CreateUserRequest`, `UserResponse`)
-
-### Error Handling
-
-- **CRUD layer**: Catch `SQLAlchemyError`, `IntegrityError`, and generic `Exception`. Always `db.rollback()` on error. Return `{"success": False, "msg": "...", "data": {}}`.
-- **Endpoint layer**: Wrap CRUD calls in `try/except`. Catch unexpected exceptions and return 500 via `JSONResponse`.
-
----
-
-## 🤖 AI Tool Instructions
-
-When using AI tools (Antigravity, Claude, ChatGPT) to extend this project:
-
-1. **Always follow the module structure** — 5 files per module (`__init__`, `model`, `schema`, `crud`, `endpoint`)
-2. **Use inline dict responses** — CRUD returns `{"success": bool, "msg": str, "data": any}`, endpoints wrap with `JSONResponse`
-3. **Register in 3 places** — `api/v1/api.py`, `db/base.py`, `alembic/env.py`
-4. **Inherit CommonModelMixin** — Every model gets `id`, `uuid`, `created_at`, `modified_at`, `is_delete`, `deleted_at` automatically
-5. **Class-based CRUD** — Each module has a CRUD class with a global instance
-6. **Consistent response format** — `{"success": bool, "msg": str, "data": any}`
-7. **Pagination** — Use `skip` and `limit` fields directly in schemas
-
----
-
-## 📋 Quick Reference
+Create your own admin account:
 
 ```bash
-# Run dev server
+python create_admin.py admin@example.com 'YourStrongPassword@123' "Admin User" admin
+```
+
+Start the API:
+
+```bash
 uvicorn main:app --reload --port 8000
-
-# Create migration
-alembic revision --autogenerate -m "description"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback migration
-alembic downgrade -1
-
-# Add dependency (uv)
-uv add package-name
-
-# Add dependency (pip)
-pip install package-name
 ```
+
+| URL | What it serves |
+|---|---|
+| `http://localhost:8000/health` | Health check |
+| `http://localhost:8000/docs` | Swagger UI |
+| `http://localhost:8000/redoc` | ReDoc |
+
+### 5. Set up the frontend
+
+In a second terminal:
+
+```bash
+cd frontend
+cp .env.example .env   # optional — the dev server proxies to the API by default
+npm install
+npm run dev
+```
+
+The app is served at **http://localhost:3000**. Vite proxies `/api` and `/uploads`
+to `http://127.0.0.1:8000`, so no CORS configuration is needed in development.
+
+Production build:
+
+```bash
+npm run build      # outputs to frontend/dist
+npm run preview    # serves the built bundle locally
+```
+
+---
+
+## 🗄️ Database & Migrations
+
+Alembic owns the full schema — there is no `create_all()` at runtime. The
+`alembic/versions/` folder holds **15 migrations in a single linear chain**, from the
+initial revision through the pgvector knowledge-base table.
+
+| Command | Purpose |
+|---|---|
+| `alembic upgrade head` | Apply every pending migration |
+| `alembic downgrade -1` | Roll back one migration |
+| `alembic current` | Show the applied revision |
+| `alembic history --verbose` | Full migration history |
+| `alembic revision --autogenerate -m "description"` | Generate a migration from model changes |
+
+> When you add a model, import it in `app/db/base.py` first — Alembic only sees
+> models registered there.
+
+### Seed scripts
+
+Run these from the `backend/` folder with the virtual environment active. Order matters.
+
+| Script | What it does | Safe to re-run |
+|---|---|---|
+| `python seed.py` | States, cities, categories and their attributes. **Required.** | ✅ skips if already seeded |
+| `python seed_category_attributes.py` | Category-specific filter attributes. **Required.** | ✅ idempotent |
+| `python create_admin.py <email> <password> [name] [username]` | Creates a Super Admin. **Recommended.** | ✅ refuses duplicates |
+| `python download_seed_images.py` | Downloads demo ad images into `uploads/ads/`. Optional. | ✅ |
+| `python seed_dummy_data.py` | Demo users, ads, chats, favourites and reviews for a populated UI. Optional. | ⚠️ adds more data each run |
+| `psql -d marketa -f seed_data.sql` | Full demo dataset. Optional. | ❌ **destructive — truncates users, ads, categories and locations** |
+
+> ⚠️ The demo accounts created by `seed_data.sql` and `seed_dummy_data.py` all share one
+> hard-coded bcrypt hash. They are for local demos only — never load them into a
+> deployed environment, and create real admins with `create_admin.py`.
+
+---
+
+## 🔌 API Reference
+
+Every route is mounted under `/api/v1`. Full interactive docs live at `/docs`.
+All responses use the envelope `{ success, msg, data }`.
+
+| Module | Prefix | Representative endpoints |
+|---|---|---|
+| **Users** | `/users` | `POST /create/` · `POST /login/` · `POST /admin-login/` · `POST /refresh-token/` · `GET /me/` · `PUT /me/update/` · `POST /me/avatar/` · `POST /forgot-password/` · `POST /reset-password/` · `POST /change-password/` · `GET /verify-email/` |
+| **Ads** | `/ads` | `POST /create/` · `GET /list/` · `GET /me/` · `GET /{ad_id}/` · `GET /{ad_id}/similar/` · `PUT /{ad_id}/update/` · `PUT /{ad_id}/status/` · `DELETE /{ad_id}/` |
+| **Categories** | `/categories` | `GET /` · `GET /{category_id}/attributes/` · `POST /` · `PUT /{category_id}/` · `DELETE /{category_id}/` |
+| **Locations** | `/locations` | `GET /states/` · `GET /states/{state_id}/cities/` · `GET /cities/popular/` · admin CRUD for states and cities |
+| **Favorites** | `/favorites` | `GET /me/` · `POST /toggle/` |
+| **Chat** | `/chat` | `POST /rooms/` · `GET /rooms/` · `GET /rooms/{room_id}/messages` · `GET /unread-count/` · `GET /inquiries/` |
+| **Notifications** | `/notifications` | `GET /me/` · `GET /me/unread-count/` · `PUT /{notification_id}/read/` · `PUT /read-all/` |
+| **Search Alerts** | `/alerts` | `POST /` · `GET /me/` · `PUT /{alert_id}/toggle/` · `DELETE /{alert_id}/` |
+| **Reports** | `/reports` | `POST /` · `GET /admin/` · `PUT /admin/{report_id}/status/` |
+| **Recently Viewed** | `/recently-viewed` | `POST /` · `GET /me/` · `DELETE /` |
+| **Contact** | `/contact` | `POST /submit/` · `GET /` · `PATCH /{msg_id}/resolve/` |
+| **Chatbot** | `/chatbot` | `POST /ask/` · `POST /upload-doc/` · `GET /documents/` · `GET /faqs/` · admin FAQ CRUD |
+
+---
+
+## ⚙️ Configuration Reference
+
+All variables live in the root `.env`. See [`.env.example`](.env.example) for the full template.
+
+| Variable | Required | Default | Description |
+|---|:---:|---|---|
+| `PG_USER` | ✅ | — | PostgreSQL username |
+| `PG_PASSWORD` | ✅ | — | PostgreSQL password |
+| `PG_DBNAME` | ✅ | — | Database name |
+| `PG_HOSTNAME` | — | `localhost` | Database host |
+| `JWT_SECRET_KEY` | ✅ | — | Signing secret for access and refresh tokens |
+| `ALGORITHM` | — | `HS256` | JWT signing algorithm |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | — | `30` | Access-token lifetime |
+| `APP_NAME` | — | `Marketa` | Shown in Swagger and email templates |
+| `DEBUG` | — | `false` | Verbose application logging |
+| `CORS_ORIGINS` | — | `http://localhost:3000,http://localhost:5173` | Comma-separated allow-list. Never `*`. |
+| `FRONTEND_URL` | — | `http://localhost:3000` | Base URL used to build links in emails |
+| `MAX_UPLOAD_SIZE_MB` | — | `5` | Per-file upload limit |
+| `ALLOWED_IMAGE_MIME_TYPES` | — | `image/jpeg,image/png,image/webp,image/gif` | Accepted upload types |
+| `SMTP_HOST` / `SMTP_PORT` | — | — / `587` | Leave `SMTP_HOST` blank to disable email |
+| `SMTP_USER` / `SMTP_PASSWORD` | — | — | Use an app password, never an account password |
+| `SMTP_FROM_EMAIL` / `SMTP_FROM_NAME` | — | `noreply@marketa.com` / `Marketa` | From header |
+| `GROQ_API_KEY` | — | *(blank)* | Enables AI chatbot answers |
+
+Frontend variables live in `frontend/.env` — see [`frontend/.env.example`](frontend/.env.example).
+
+---
+
+## 🔒 Security Notes
+
+- **Secrets stay out of the repository.** `.env`, `.env.*`, key files and credential JSON are gitignored; only the `.env.example` templates are committed.
+- **Passwords** are hashed with bcrypt and truncated at 72 bytes before hashing. The policy requires 8–72 characters with at least one letter and one digit.
+- **JWTs** are HS256-signed. Refresh tokens carry a `type: "refresh"` claim so they cannot be replayed as access tokens.
+- **CORS** uses an explicit allow-list from `CORS_ORIGINS`; wildcards are never combined with credentials.
+- **Rate limiting** via SlowAPI protects auth and other abuse-prone routes — login is capped at 10 requests per minute.
+- **Uploads** under `/uploads` are public by design (ad images, avatars). Never place private documents there; serve those through authenticated endpoints.
+- **Production hardening:** set `DEBUG=false`, rotate `JWT_SECRET_KEY`, restrict `CORS_ORIGINS` to your real domains, and serve everything over HTTPS.
+
+Known gaps and planned hardening are tracked openly in [`docs/production_gaps.md`](docs/production_gaps.md).
+
+---
+
+## 🧪 Tests
+
+There is no automated test suite in this repository yet. Verify changes manually
+against Swagger UI at `http://localhost:8000/docs` and the running frontend.
+
+Planned: a pytest suite for the API, and Vitest with React Testing Library for the frontend.
+
+---
+
+## 📚 Further Documentation
+
+| Document | Contents |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Day-to-day commands, frontend patterns, coding conventions |
+| [`docs/GIT.md`](docs/GIT.md) | Branching strategy and commit conventions |
+| [`docs/production_gaps.md`](docs/production_gaps.md) | Module-by-module production-readiness audit |
+| [`claude_skills/knowledge/`](claude_skills/knowledge/) | Architecture, database schema, module specs, tech stack |
+| [`knowledge_docs/docs/`](knowledge_docs/docs/) | Full project analysis, implementation plan, demo flow |
+
+---
+
+## 🤝 Contributing
+
+```bash
+git checkout -b feat/<scope>
+# make changes, then commit using conventional commits
+git commit -m "feat(ads): add attribute filtering"
+git push -u origin feat/<scope>
+# open a pull request
+```
+
+See [`docs/GIT.md`](docs/GIT.md) for the full workflow.
+
+---
+
+## 📄 Repository Use
+
+Maintained by Prakash Infotech as a project showcase. Add an approved `LICENSE` file
+before distributing or reusing this source under a public software licence.

@@ -1,15 +1,20 @@
 # CLAUDE.md - Marketa Project Guide
 
 This guide provides essential commands and context for working on the Marketa project.
+For first-time setup, prerequisites and the architecture diagram, see [README.md](README.md).
 
 ## Build and Development Commands
 
 ### Backend (FastAPI)
+- **Install Dependencies**: `cd backend && uv sync` (creates `backend/.venv` from `uv.lock`)
 - **Start Server**: `cd backend && uvicorn main:app --reload --port 8000`
 - **Database Migrations**: `cd backend && alembic upgrade head`
 - **Create Migration**: `cd backend && alembic revision --autogenerate -m "description"`
-- **Seed Data**: `cd backend && python seed.py`
-- **Dependencies**: Uses `uv` (managed in `backend/.venv`)
+- **Seed Data**: `cd backend && python seed.py && python seed_category_attributes.py`
+- **Create Admin**: `cd backend && python create_admin.py <email> <password> [name] [username]`
+
+> `seed_data.sql` is **destructive** — it truncates users, ads, categories and
+> locations before inserting demo data. Never run it against a shared database.
 
 ### Frontend (React + Vite)
 - **Install Dependencies**: `cd frontend && npm install`
@@ -24,19 +29,23 @@ This guide provides essential commands and context for working on the Marketa pr
 ## Project Architecture
 
 ```
-quikr_copy/
-├── .env                    # Shared environment variables
+marketa/
+├── .env                    # Shared environment variables (gitignored)
+├── .env.example            # Committed template — copy to .env
 ├── backend/                # FastAPI backend
 │   ├── app/
-│   │   ├── core/           # Security (JWT), config, constants
+│   │   ├── core/           # Security (JWT), config, roles, rate limiter
 │   │   ├── db/             # Session management and base models
 │   │   ├── modules/        # Modular domain logic (Users, Ads, etc.)
 │   │   │   └── <module>/   # model.py, schema.py, crud.py, endpoint.py
 │   │   ├── api/            # API router and dependencies
 │   │   └── utils/          # Logging and utilities
-│   ├── alembic/            # Database migrations
+│   ├── alembic/            # Database migrations (15 revisions, linear chain)
 │   ├── main.py             # FastAPI entry point
-│   └── pyproject.toml      # Python dependencies
+│   ├── seed*.py            # Seed scripts — see README
+│   ├── create_admin.py     # Super Admin bootstrap
+│   ├── pyproject.toml      # Python dependencies
+│   └── uv.lock             # Pinned lock file (committed)
 └── frontend/                  # React + Vite frontend
     ├── src/
     │   ├── components/
@@ -51,8 +60,9 @@ quikr_copy/
     │   ├── ToastContext.jsx    # Global toast notifications (useToast hook)
     │   ├── App.jsx             # Lazy-loaded routes wrapped in ErrorBoundary + ToastProvider
     │   └── api.js              # Axios instance with JWT interceptors
+    ├── .env.example
     ├── package.json
-    └── vite.config.js
+    └── vite.config.js         # Dev server :3000, proxies /api and /uploads to :8000
 ```
 
 ## Frontend Architecture (Production Patterns)
@@ -108,6 +118,17 @@ toast.warning('Careful');
 - **Naming**: 
   - Python: `snake_case` for functions/variables, `PascalCase` for classes.
   - JS: `camelCase` for variables, `PascalCase` for Components.
+
+## Secrets & Configuration
+- All configuration lives in a single `.env` at the repository root; `backend/app/core/config.py` loads it via `pydantic-settings`.
+- **Never hard-code credentials in source files** — no SMTP passwords, API keys, connection strings or tokens, not even in throwaway scripts. Add the variable to `Settings` and to `.env.example` with a placeholder instead.
+- `.env`, `.env.*`, `*.pem`, `*.key` and credential JSON files are gitignored. Only `.env.example` and `frontend/.env.example` are committed.
+- Before pushing, sanity-check with `git diff --staged` and confirm no secret is present.
+
+## Testing
+There is no automated test suite yet. Verify changes against Swagger UI at
+`http://localhost:8000/docs` and the running frontend. A pytest suite for the API and
+Vitest + React Testing Library for the frontend are the planned next step.
 
 ## Authentication Flow
 1. User logs in via `/api/v1/users/login/`.

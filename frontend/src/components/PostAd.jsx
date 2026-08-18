@@ -488,7 +488,9 @@ export default function PostAd() {
               <div className="flex flex-wrap gap-4">
                 {existingImages.map((img, i) => (
                   <div key={img.id || i} className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm group">
-                    <img src={img.url.startsWith('http') ? img.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '')}${img.url}`} alt="existing" className="w-full h-full object-cover" />
+                    {/* Fall back to a relative URL so previews work without VITE_API_URL
+                        (the Vite dev server proxies /uploads to the API). */}
+                    <img src={img.url.startsWith('http') ? img.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') ?? ''}${img.url}`} alt="existing" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => handleRemoveExistingImage(img.id)}
