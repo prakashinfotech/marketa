@@ -1,18 +1,5 @@
 <div align="center">
 
-# 🛒 Marketa
-
-**Buy and sell anything, locally.**
-
-A full-stack classifieds marketplace — post ads, search by category and location, chat with sellers in real time, and moderate everything from an admin panel.
-
-[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Frontend](https://img.shields.io/badge/Frontend-React_19_%2B_Vite-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Database](https://img.shields.io/badge/Database-PostgreSQL_%2B_pgvector-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Migrations](https://img.shields.io/badge/Migrations-Alembic-6BA81E)](https://alembic.sqlalchemy.org/)
-
-</div>
-
 ---
 
 ## 📖 Overview
@@ -95,37 +82,37 @@ flowchart TD
 
 ## ✨ Features
 
-| Area | What's included |
-|---|---|
-| 🔐 **Authentication** | JWT access + refresh tokens, bcrypt hashing, email verification, forgot/reset password, change password, account deletion with confirmation |
-| 👥 **Roles** | Super Admin, Admin, User — enforced via role constants and route dependencies |
-| 📢 **Ads** | Create, edit, delete, status changes, image uploads, category-specific dynamic attributes, similar-ad suggestions, view counts |
-| 🔎 **Search** | Keyword search with category, location and attribute filters |
-| ❤️ **Favourites** | Toggle-based saved ads |
-| 💬 **Chat** | Per-ad chat rooms, message history, unread counts, seller inquiry inbox |
-| 🔔 **Notifications** | In-app notifications with unread counts and read-all |
-| 🚨 **Reports** | Users report ads; admins triage and change report status |
-| 🤖 **AI Chatbot** | Retrieval-augmented answers over a pgvector knowledge base, powered by Groq |
-| 📍 **Locations** | States, cities and popular-city listings with admin CRUD |
-| 🛠️ **Admin Panel** | Categories, locations, reports, FAQs, enquiries, knowledge base |
-| ♿ **Accessibility** | Skip-to-main link, ARIA on modals and toasts, focus management, keyboard shortcuts |
-| ⚡ **Performance** | Route-level code splitting, image lazy-loading with skeletons, `console.*` stripped from production bundles |
+| Area                       | What's included                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔐**Authentication** | JWT access + refresh tokens, bcrypt hashing, email verification, forgot/reset password, change password, account deletion with confirmation |
+| 👥**Roles**          | Super Admin, Admin, User — enforced via role constants and route dependencies                                                              |
+| 📢**Ads**            | Create, edit, delete, status changes, image uploads, category-specific dynamic attributes, similar-ad suggestions, view counts              |
+| 🔎**Search**         | Keyword search with category, location and attribute filters                                                                                |
+| ❤️**Favourites**   | Toggle-based saved ads                                                                                                                      |
+| 💬**Chat**           | Per-ad chat rooms, message history, unread counts, seller inquiry inbox                                                                     |
+| 🔔**Notifications**  | In-app notifications with unread counts and read-all                                                                                        |
+| 🚨**Reports**        | Users report ads; admins triage and change report status                                                                                    |
+| 🤖**AI Chatbot**     | Retrieval-augmented answers over a pgvector knowledge base, powered by Groq                                                                 |
+| 📍**Locations**      | States, cities and popular-city listings with admin CRUD                                                                                    |
+| 🛠️**Admin Panel**  | Categories, locations, reports, FAQs, enquiries, knowledge base                                                                             |
+| ♿**Accessibility**  | Skip-to-main link, ARIA on modals and toasts, focus management, keyboard shortcuts                                                          |
+| ⚡**Performance**    | Route-level code splitting, image lazy-loading with skeletons,`console.*` stripped from production bundles                                |
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 19, Vite 8, React Router 7, Tailwind CSS 3, Axios, Lucide React, date-fns |
-| **Backend** | Python 3.12+, FastAPI, Uvicorn, Pydantic v2, pydantic-settings |
-| **Database** | PostgreSQL with the `pgvector` extension |
-| **ORM / Migrations** | SQLAlchemy 2, Alembic |
-| **Authentication** | JWT (HS256) via python-jose, bcrypt password hashing |
-| **Rate Limiting** | SlowAPI |
-| **Email** | SMTP (branded HTML transactional mail) |
-| **AI** | Groq (`llama-3.3-70b-versatile`), SentenceTransformers (`all-MiniLM-L6-v2`) |
-| **Tooling** | `uv` for Python dependencies, npm for the frontend |
+| Layer                      | Technologies                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| **Frontend**         | React 19, Vite 8, React Router 7, Tailwind CSS 3, Axios, Lucide React, date-fns |
+| **Backend**          | Python 3.12+, FastAPI, Uvicorn, Pydantic v2, pydantic-settings                  |
+| **Database**         | PostgreSQL with the`pgvector` extension                                       |
+| **ORM / Migrations** | SQLAlchemy 2, Alembic                                                           |
+| **Authentication**   | JWT (HS256) via python-jose, bcrypt password hashing                            |
+| **Rate Limiting**    | SlowAPI                                                                         |
+| **Email**            | SMTP (branded HTML transactional mail)                                          |
+| **AI**               | Groq (`llama-3.3-70b-versatile`), SentenceTransformers (`all-MiniLM-L6-v2`) |
+| **Tooling**          | `uv` for Python dependencies, npm for the frontend                            |
 
 ---
 
@@ -140,9 +127,8 @@ marketa/
 ├── backend/                        # FastAPI service
 │   ├── main.py                     # App entry point: CORS, rate limiter, static uploads, router
 │   ├── common_models.py            # Shared mixin: id, uuid, timestamps, soft delete
-│   ├── pyproject.toml              # Python dependencies (authoritative)
+│   ├── pyproject.toml              # Python dependencies
 │   ├── uv.lock                     # Pinned dependency lock file
-│   ├── requirements.txt            # Mirror of pyproject deps, for pip users
 │   ├── alembic.ini                 # Alembic configuration
 │   ├── alembic/versions/           # 15 migrations, single linear chain
 │   ├── app/
@@ -180,20 +166,20 @@ marketa/
 
 ## 📋 Prerequisites
 
-| Tool | Version | Notes |
-|---|---|---|
-| **Python** | 3.12+ | Backend runtime |
-| **uv** | latest | Recommended installer — [install guide](https://docs.astral.sh/uv/getting-started/installation/). `pip` works too. |
-| **Node.js** | 20+ | Frontend runtime, ships with npm |
-| **PostgreSQL** | 14+ | Must support the `pgvector` extension |
-| **Git** | latest | — |
+| Tool                 | Version | Notes                                                                                                               |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Python**     | 3.12+   | Backend runtime                                                                                                     |
+| **uv**         | latest  | Recommended installer —[install guide](https://docs.astral.sh/uv/getting-started/installation/). `pip` works too. |
+| **Node.js**    | 20+     | Frontend runtime, ships with npm                                                                                    |
+| **PostgreSQL** | 14+     | Must support the`pgvector` extension                                                                              |
+| **Git**        | latest  | —                                                                                                                  |
 
 **Optional service accounts** — the app runs without them, with the matching feature disabled:
 
-| Service | Needed for |
-|---|---|
-| SMTP mailbox (e.g. a Gmail App Password) | Email verification and password-reset mails |
-| [Groq API key](https://console.groq.com/keys) | AI chatbot answers |
+| Service                                      | Needed for                                  |
+| -------------------------------------------- | ------------------------------------------- |
+| SMTP mailbox (e.g. a Gmail App Password)     | Email verification and password-reset mails |
+| [Groq API key](https://console.groq.com/keys) | AI chatbot answers                          |
 
 > ⚠️ **The first backend start downloads roughly 2 GB.** The chatbot module imports
 > `sentence-transformers`, which pulls in PyTorch and downloads the
@@ -242,13 +228,12 @@ psql -d marketa -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```bash
 cd backend
 
-# With uv (recommended) — creates backend/.venv and installs every dependency.
-# uv resolves against uv.lock and refreshes it if pyproject.toml has changed.
+# With uv (recommended) — creates .venv and installs from uv.lock
 uv sync
 
 # Or with pip
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
 Apply the migrations, then seed the reference data:
@@ -271,11 +256,11 @@ Start the API:
 uvicorn main:app --reload --port 8000
 ```
 
-| URL | What it serves |
-|---|---|
-| `http://localhost:8000/health` | Health check |
-| `http://localhost:8000/docs` | Swagger UI |
-| `http://localhost:8000/redoc` | ReDoc |
+| URL                              | What it serves |
+| -------------------------------- | -------------- |
+| `http://localhost:8000/health` | Health check   |
+| `http://localhost:8000/docs`   | Swagger UI     |
+| `http://localhost:8000/redoc`  | ReDoc          |
 
 ### 5. Set up the frontend
 
@@ -306,12 +291,12 @@ Alembic owns the full schema — there is no `create_all()` at runtime. The
 `alembic/versions/` folder holds **15 migrations in a single linear chain**, from the
 initial revision through the pgvector knowledge-base table.
 
-| Command | Purpose |
-|---|---|
-| `alembic upgrade head` | Apply every pending migration |
-| `alembic downgrade -1` | Roll back one migration |
-| `alembic current` | Show the applied revision |
-| `alembic history --verbose` | Full migration history |
+| Command                                              | Purpose                                 |
+| ---------------------------------------------------- | --------------------------------------- |
+| `alembic upgrade head`                             | Apply every pending migration           |
+| `alembic downgrade -1`                             | Roll back one migration                 |
+| `alembic current`                                  | Show the applied revision               |
+| `alembic history --verbose`                        | Full migration history                  |
 | `alembic revision --autogenerate -m "description"` | Generate a migration from model changes |
 
 > When you add a model, import it in `app/db/base.py` first — Alembic only sees
@@ -321,14 +306,14 @@ initial revision through the pgvector knowledge-base table.
 
 Run these from the `backend/` folder with the virtual environment active. Order matters.
 
-| Script | What it does | Safe to re-run |
-|---|---|---|
-| `python seed.py` | States, cities, categories and their attributes. **Required.** | ✅ skips if already seeded |
-| `python seed_category_attributes.py` | Category-specific filter attributes. **Required.** | ✅ idempotent |
-| `python create_admin.py <email> <password> [name] [username]` | Creates a Super Admin. **Recommended.** | ✅ refuses duplicates |
-| `python download_seed_images.py` | Downloads demo ad images into `uploads/ads/`. Optional. | ✅ |
-| `python seed_dummy_data.py` | Demo users, ads, chats, favourites and reviews for a populated UI. Optional. | ⚠️ adds more data each run |
-| `psql -d marketa -f seed_data.sql` | Full demo dataset. Optional. | ❌ **destructive — truncates users, ads, categories and locations** |
+| Script                                                          | What it does                                                                 | Safe to re-run                                                            |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `python seed.py`                                              | States, cities, categories and their attributes.**Required.**          | ✅ skips if already seeded                                                |
+| `python seed_category_attributes.py`                          | Category-specific filter attributes.**Required.**                      | ✅ idempotent                                                             |
+| `python create_admin.py <email> <password> [name] [username]` | Creates a Super Admin.**Recommended.**                                 | ✅ refuses duplicates                                                     |
+| `python download_seed_images.py`                              | Downloads demo ad images into`uploads/ads/`. Optional.                     | ✅                                                                        |
+| `python seed_dummy_data.py`                                   | Demo users, ads, chats, favourites and reviews for a populated UI. Optional. | ⚠️ adds more data each run                                              |
+| `psql -d marketa -f seed_data.sql`                            | Full demo dataset. Optional.                                                 | ❌**destructive — truncates users, ads, categories and locations** |
 
 > ⚠️ The demo accounts created by `seed_data.sql` and `seed_dummy_data.py` all share one
 > hard-coded bcrypt hash. They are for local demos only — never load them into a
@@ -341,20 +326,20 @@ Run these from the `backend/` folder with the virtual environment active. Order 
 Every route is mounted under `/api/v1`. Full interactive docs live at `/docs`.
 All responses use the envelope `{ success, msg, data }`.
 
-| Module | Prefix | Representative endpoints |
-|---|---|---|
-| **Users** | `/users` | `POST /create/` · `POST /login/` · `POST /admin-login/` · `POST /refresh-token/` · `GET /me/` · `PUT /me/update/` · `POST /me/avatar/` · `POST /forgot-password/` · `POST /reset-password/` · `POST /change-password/` · `GET /verify-email/` |
-| **Ads** | `/ads` | `POST /create/` · `GET /list/` · `GET /me/` · `GET /{ad_id}/` · `GET /{ad_id}/similar/` · `PUT /{ad_id}/update/` · `PUT /{ad_id}/status/` · `DELETE /{ad_id}/` |
-| **Categories** | `/categories` | `GET /` · `GET /{category_id}/attributes/` · `POST /` · `PUT /{category_id}/` · `DELETE /{category_id}/` |
-| **Locations** | `/locations` | `GET /states/` · `GET /states/{state_id}/cities/` · `GET /cities/popular/` · admin CRUD for states and cities |
-| **Favorites** | `/favorites` | `GET /me/` · `POST /toggle/` |
-| **Chat** | `/chat` | `POST /rooms/` · `GET /rooms/` · `GET /rooms/{room_id}/messages` · `GET /unread-count/` · `GET /inquiries/` |
-| **Notifications** | `/notifications` | `GET /me/` · `GET /me/unread-count/` · `PUT /{notification_id}/read/` · `PUT /read-all/` |
-| **Search Alerts** | `/alerts` | `POST /` · `GET /me/` · `PUT /{alert_id}/toggle/` · `DELETE /{alert_id}/` |
-| **Reports** | `/reports` | `POST /` · `GET /admin/` · `PUT /admin/{report_id}/status/` |
-| **Recently Viewed** | `/recently-viewed` | `POST /` · `GET /me/` · `DELETE /` |
-| **Contact** | `/contact` | `POST /submit/` · `GET /` · `PATCH /{msg_id}/resolve/` |
-| **Chatbot** | `/chatbot` | `POST /ask/` · `POST /upload-doc/` · `GET /documents/` · `GET /faqs/` · admin FAQ CRUD |
+| Module                    | Prefix               | Representative endpoints                                                                                                                                                                                                                                                      |
+| ------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Users**           | `/users`           | `POST /create/` · `POST /login/` · `POST /admin-login/` · `POST /refresh-token/` · `GET /me/` · `PUT /me/update/` · `POST /me/avatar/` · `POST /forgot-password/` · `POST /reset-password/` · `POST /change-password/` · `GET /verify-email/` |
+| **Ads**             | `/ads`             | `POST /create/` · `GET /list/` · `GET /me/` · `GET /{ad_id}/` · `GET /{ad_id}/similar/` · `PUT /{ad_id}/update/` · `PUT /{ad_id}/status/` · `DELETE /{ad_id}/`                                                                                         |
+| **Categories**      | `/categories`      | `GET /` · `GET /{category_id}/attributes/` · `POST /` · `PUT /{category_id}/` · `DELETE /{category_id}/`                                                                                                                                                        |
+| **Locations**       | `/locations`       | `GET /states/` · `GET /states/{state_id}/cities/` · `GET /cities/popular/` · admin CRUD for states and cities                                                                                                                                                        |
+| **Favorites**       | `/favorites`       | `GET /me/` · `POST /toggle/`                                                                                                                                                                                                                                             |
+| **Chat**            | `/chat`            | `POST /rooms/` · `GET /rooms/` · `GET /rooms/{room_id}/messages` · `GET /unread-count/` · `GET /inquiries/`                                                                                                                                                     |
+| **Notifications**   | `/notifications`   | `GET /me/` · `GET /me/unread-count/` · `PUT /{id}/read/` · `PUT /read-all/`                                                                                                                                                                                        |
+| **Search Alerts**   | `/alerts`          | `POST /` · `GET /me/` · `PUT /{alert_id}/toggle/` · `DELETE /{alert_id}/`                                                                                                                                                                                          |
+| **Reports**         | `/reports`         | `POST /` · `GET /admin/` · `PUT /admin/{report_id}/status/`                                                                                                                                                                                                           |
+| **Recently Viewed** | `/recently-viewed` | `POST /` · `GET /me/` · `DELETE /`                                                                                                                                                                                                                                    |
+| **Contact**         | `/contact`         | `POST /submit/` · `GET /` · `PATCH /{msg_id}/resolve/`                                                                                                                                                                                                                |
+| **Chatbot**         | `/chatbot`         | `POST /ask/` · `POST /upload-doc/` · `GET /documents/` · `GET /faqs/` · admin FAQ CRUD                                                                                                                                                                            |
 
 ---
 
@@ -362,25 +347,25 @@ All responses use the envelope `{ success, msg, data }`.
 
 All variables live in the root `.env`. See [`.env.example`](.env.example) for the full template.
 
-| Variable | Required | Default | Description |
-|---|:---:|---|---|
-| `PG_USER` | ✅ | — | PostgreSQL username |
-| `PG_PASSWORD` | ✅ | — | PostgreSQL password |
-| `PG_DBNAME` | ✅ | — | Database name |
-| `PG_HOSTNAME` | — | `localhost` | Database host |
-| `JWT_SECRET_KEY` | ✅ | — | Signing secret for access and refresh tokens |
-| `ALGORITHM` | — | `HS256` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | — | `30` | Access-token lifetime |
-| `APP_NAME` | — | `Marketa` | Shown in Swagger and email templates |
-| `DEBUG` | — | `false` | Verbose application logging |
-| `CORS_ORIGINS` | — | `http://localhost:3000,http://localhost:5173` | Comma-separated allow-list. Never `*`. |
-| `FRONTEND_URL` | — | `http://localhost:3000` | Base URL used to build links in emails |
-| `MAX_UPLOAD_SIZE_MB` | — | `5` | Per-file upload limit |
-| `ALLOWED_IMAGE_MIME_TYPES` | — | `image/jpeg,image/png,image/webp,image/gif` | Accepted upload types |
-| `SMTP_HOST` / `SMTP_PORT` | — | — / `587` | Leave `SMTP_HOST` blank to disable email |
-| `SMTP_USER` / `SMTP_PASSWORD` | — | — | Use an app password, never an account password |
-| `SMTP_FROM_EMAIL` / `SMTP_FROM_NAME` | — | `noreply@marketa.com` / `Marketa` | From header |
-| `GROQ_API_KEY` | — | *(blank)* | Enables AI chatbot answers |
+| Variable                                 | Required | Default                                         | Description                                    |
+| ---------------------------------------- | :------: | ----------------------------------------------- | ---------------------------------------------- |
+| `PG_USER`                              |    ✅    | —                                              | PostgreSQL username                            |
+| `PG_PASSWORD`                          |    ✅    | —                                              | PostgreSQL password                            |
+| `PG_DBNAME`                            |    ✅    | —                                              | Database name                                  |
+| `PG_HOSTNAME`                          |    —    | `localhost`                                   | Database host                                  |
+| `JWT_SECRET_KEY`                       |    ✅    | —                                              | Signing secret for access and refresh tokens   |
+| `ALGORITHM`                            |    —    | `HS256`                                       | JWT signing algorithm                          |
+| `ACCESS_TOKEN_EXPIRE_MINUTES`          |    —    | `30`                                          | Access-token lifetime                          |
+| `APP_NAME`                             |    —    | `Marketa`                                     | Shown in Swagger and email templates           |
+| `DEBUG`                                |    —    | `false`                                       | Verbose application logging                    |
+| `CORS_ORIGINS`                         |    —    | `http://localhost:3000,http://localhost:5173` | Comma-separated allow-list. Never`*`.        |
+| `FRONTEND_URL`                         |    —    | `http://localhost:3000`                       | Base URL used to build links in emails         |
+| `MAX_UPLOAD_SIZE_MB`                   |    —    | `5`                                           | Per-file upload limit                          |
+| `ALLOWED_IMAGE_MIME_TYPES`             |    —    | `image/jpeg,image/png,image/webp,image/gif`   | Accepted upload types                          |
+| `SMTP_HOST` / `SMTP_PORT`            |    —    | — /`587`                                     | Leave`SMTP_HOST` blank to disable email      |
+| `SMTP_USER` / `SMTP_PASSWORD`        |    —    | —                                              | Use an app password, never an account password |
+| `SMTP_FROM_EMAIL` / `SMTP_FROM_NAME` |    —    | `noreply@marketa.com` / `Marketa`           | From header                                    |
+| `GROQ_API_KEY`                         |    —    | *(blank)*                                     | Enables AI chatbot answers                     |
 
 Frontend variables live in `frontend/.env` — see [`frontend/.env.example`](frontend/.env.example).
 
@@ -411,13 +396,13 @@ Planned: a pytest suite for the API, and Vitest with React Testing Library for t
 
 ## 📚 Further Documentation
 
-| Document | Contents |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Day-to-day commands, frontend patterns, coding conventions |
-| [`docs/GIT.md`](docs/GIT.md) | Branching strategy and commit conventions |
-| [`docs/production_gaps.md`](docs/production_gaps.md) | Module-by-module production-readiness audit |
-| [`claude_skills/knowledge/`](claude_skills/knowledge/) | Architecture, database schema, module specs, tech stack |
-| [`knowledge_docs/docs/`](knowledge_docs/docs/) | Full project analysis, implementation plan, demo flow |
+| Document                                                | Contents                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                               | Day-to-day commands, frontend patterns, coding conventions |
+| [`docs/GIT.md`](docs/GIT.md)                           | Branching strategy and commit conventions                  |
+| [`docs/production_gaps.md`](docs/production_gaps.md)   | Module-by-module production-readiness audit                |
+| [`claude_skills/knowledge/`](claude_skills/knowledge/) | Architecture, database schema, module specs, tech stack    |
+| [`knowledge_docs/docs/`](knowledge_docs/docs/)         | Full project analysis, implementation plan, demo flow      |
 
 ---
 
