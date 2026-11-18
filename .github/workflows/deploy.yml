@@ -1,0 +1,317 @@
+name: CI / Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # The production server's major version (Node 24, npm 11).
+  NODE_VERSION: "24"
+  DEPLOY_DIR: ${{ vars.DEPLOY_DIR || '/var/www/marketa' }}
+  SYSTEMD_UNITS: ${{ vars.SYSTEMD_UNITS || 'marketa-backend.service' }}
+
+jobs:
+
+  # ==========================================
+  # CI: build every part
+  # Runs on GitHub-hosted runners
+  # ==========================================
+
+  build:
+    name: Build ${{ matrix.part }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - part: frontend
+            dir: "frontend"
+            install: "npm ci"
+            check: "npm run build"
+            setup: "node"
+          - part: backend
+            dir: "backend"
+            install: "pip install -r requirements.txt"
+            check: "python -m compileall -q app main.py"
+            setup: "python"
+            python: "3.10"
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: matrix.setup == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Python
+        if: matrix.setup == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+
+      - name: Check
+        run: ${{ matrix.check }}
+
+
+  # ==========================================
+  # DEPLOY: Production server
+  # Runs on the self-hosted runner on the production server
+  # ==========================================
+
+  deploy:
+    name: Deploy to production
+
+    needs:
+      - build
+
+    # Never deploy PR validation runs.
+    # Deploy only master branch pushes or manual runs
+    # started against master.
+
+    if: >
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/master'
+
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - brd
+      - local-server
+
+    environment: production
+
+    concurrency:
+      group: deploy-marketa
+      cancel-in-progress: false
+
+    steps:
+
+      # ------------------------------------------
+      # 1. Verify server configuration
+      # ------------------------------------------
+
+      - name: Check server prerequisites
+        run: |
+          set -euo pipefail
+
+          echo "Deployment directory: $DEPLOY_DIR"
+          echo "Runner user: $(whoami)"
+
+          node -v
+          npm -v
+          git --version
+
+
+          if [ ! -d "$DEPLOY_DIR/.git" ]; then
+            echo "::error::Deployment directory is not a Git repository"
+            exit 1
+          fi
+
+          for f in backend/.env frontend/.env; do
+            if [ ! -e "$DEPLOY_DIR/$f" ]; then
+              echo "::error::Missing $DEPLOY_DIR/$f"
+              exit 1
+            fi
+          done
+
+          for unit in $SYSTEMD_UNITS; do
+            systemctl is-active --quiet "$unit" || {
+              echo "::error::systemd service $unit is not running"
+              exit 1
+            }
+          done
+
+          echo "Server prerequisites verified."
+
+
+      # ------------------------------------------
+      # 2. Update deployment directory
+      # ------------------------------------------
+
+      - name: Pull latest master code
+        working-directory: ${{ env.DEPLOY_DIR }}
+        run: |
+          set -euo pipefail
+
+          git config --global --add safe.directory "$DEPLOY_DIR"
+
+          echo "Fetching latest master..."
+
+          # Retried: a short network outage between this server and GitHub
+          # once failed a deploy here (git exit code 128).
+          for attempt in 1 2 3 4 5; do
+            if git fetch origin master; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo "::error::git fetch failed 5 times"
+              exit 1
+            fi
+            echo "git fetch failed (attempt $attempt of 5); retrying in $((attempt * 10)) s..."
+            sleep $((attempt * 10))
+          done
+
+          # Force deployment clone onto remote master.
+          # This discards local tracked changes. Untracked and
+          # ignored files (.env files, uploads) are kept.
+
+          git checkout -f -B master origin/master
+
+          git reset --hard origin/master
+
+          echo "-----------------------------------"
+          echo "Deployment branch: $(git branch --show-current)"
+          echo "Deployed commit: $(git rev-parse HEAD)"
+          echo "Triggered commit: $GITHUB_SHA"
+          echo "-----------------------------------"
+
+          git status --short
+
+
+      # ------------------------------------------
+      # 3. Build web app
+      # ------------------------------------------
+
+      - name: Build web app
+        working-directory: ${{ env.DEPLOY_DIR }}/frontend
+        run: |
+          set -euo pipefail
+
+          npm ci
+
+          npm run build
+
+          if [ ! -e dist/index.html ]; then
+            echo "::error::dist/index.html was not generated"
+            exit 1
+          fi
+          echo "Build web app: done."
+
+
+      # ------------------------------------------
+      # 4. Install API dependencies and migrate
+      # ------------------------------------------
+
+      - name: Install API dependencies and migrate
+        working-directory: ${{ env.DEPLOY_DIR }}/backend
+        run: |
+          set -euo pipefail
+
+          .venv/bin/pip install -r requirements.txt
+
+          # Applies only new migrations (the database is at head).
+          .venv/bin/alembic upgrade head
+
+          echo "Install API dependencies and migrate: done."
+
+
+
+      # ------------------------------------------
+      # 5. Restart systemd services
+      # ------------------------------------------
+
+      - name: Restart Marketa API
+        run: |
+          set -euo pipefail
+
+          for unit in $SYSTEMD_UNITS; do
+            old=$(systemctl show -p MainPID --value "$unit")
+
+            if sudo -n systemctl restart "$unit" 2>/dev/null; then
+              echo "$unit restarted with systemctl."
+            else
+              # No sudo rule: the service runs as this user with
+              # Restart=always, so stopping its main process makes systemd
+              # start it again.
+              echo "No sudo rule for $unit; stopping PID $old so systemd restarts it."
+              kill -TERM "$old"
+            fi
+
+            for i in $(seq 1 30); do
+              new=$(systemctl show -p MainPID --value "$unit")
+              if [ "$new" -gt 0 ] && [ "$new" != "$old" ] && systemctl is-active --quiet "$unit"; then
+                echo "$unit is running again (PID $new)."
+                break
+              fi
+              if [ "$i" -eq 30 ]; then
+                echo "::error::$unit did not come back"
+                exit 1
+              fi
+              sleep 1
+            done
+          done
+
+
+      # ------------------------------------------
+      # 6. Verify health
+      # ------------------------------------------
+
+      - name: Health check
+        run: |
+          set -euo pipefail
+
+          # url|mode: "ok" needs a status below 400; "up" accepts anything
+          # below 500 (the app answers, it just has no health route there).
+          for check in "http://127.0.0.1:8081/health|ok"; do
+            url=${check%|*}
+            mode=${check#*|}
+            echo "Checking $url ($mode)..."
+
+            for i in $(seq 1 20); do
+              code=$(curl -s -m 20 -o /dev/null -w "%{http_code}" "$url" || true)
+              limit=400
+              [ "$mode" = up ] && limit=500
+              if [ "$code" -ge 200 ] && [ "$code" -lt "$limit" ]; then
+                echo "$url answered $code."
+                break
+              fi
+
+              if [ "$i" -eq 20 ]; then
+                echo "::error::$url did not become healthy (last status $code)"
+                for unit in $SYSTEMD_UNITS; do
+                  journalctl -u "$unit" -n 50 --no-pager || true
+                done
+                exit 1
+              fi
+
+              sleep 3
+            done
+          done
+
+
+      # ------------------------------------------
+      # 7. Deployment summary
+      # ------------------------------------------
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "=================================="
+          echo "MARKETA DEPLOYMENT SUCCESSFUL"
+          echo "=================================="
+          echo "Commit: $(git -C "$DEPLOY_DIR" rev-parse HEAD)"
+          echo "Branch: master"
+          echo "Runner: $(hostname)"
+          echo "User: $(whoami)"
+          echo "=================================="
